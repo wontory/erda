@@ -1,0 +1,1021 @@
+openapi: 3.0.3
+info:
+  title: 메이플스토리 API 
+  version: 1.0.0
+  contact:
+    name: help_openapi@nexon.co.kr
+  description: |-
+    - 2023년 12월 22일 데이터부터 조회할 수 있습니다.
+    - 오늘의 랭킹 정보는 오전 9시 30분 경부터 조회가 가능합니다. 상황에 따라 시간이 더 소요될 수 있습니다.
+    - 게임 콘텐츠 변경으로 ocid가 변경될 수 있습니다. ocid 기반 서비스 갱신 시 유의해 주시길 바랍니다. 
+    - 해당 API는 메이플스토리 한국의 데이터가 제공됩니다.
+servers:
+  - url: 'https://open.api.nexon.com'
+tags:
+  - name: Ranking
+    description: 랭킹 정보 조회
+paths:
+  /maplestory/v1/ranking/overall:
+    get:
+      tags:
+        - Ranking
+      summary: 종합 랭킹 정보 조회
+      description: 종합 랭킹 정보를 조회합니다.<br>
+        - 종합 랭킹 정보는 최근 2년 데이터만 조회 가능합니다. 
+      operationId: get_overall_ranking
+      parameters:
+        - name: x-nxopen-api-key
+          in: header
+          description: API KEY
+          required: true
+          schema:
+            type: string
+        - name: date
+          in: query
+          description: 조회 기준일 (KST)
+          example: "2023-12-22"
+          required: true
+          schema:
+            type: string
+        - name: world_name
+          in: query
+          description: |
+            월드 명
+            - 2024년 12월 19일 이후 30일간 리부트, 리부트2 입력 시 에오스, 핼리오스로 연결됩니다.<br>리부트, 리부트2로 조회하시던 부분은 30일 이내 에오스, 헬리오스로 갱신 부탁드립니다.    
+          required: false
+          schema:
+            type: string
+            enum:
+              - 스카니아
+              - 베라
+              - 루나
+              - 제니스
+              - 크로아
+              - 유니온
+              - 엘리시움
+              - 이노시스
+              - 레드
+              - 오로라
+              - 아케인
+              - 노바
+              - 에오스
+              - 핼리오스 
+              - 챌린저스
+              - 챌린저스2
+              - 챌린저스3
+              - 챌린저스4
+        - name: world_type
+          in: query
+          description: 월드 타입 (0:일반, 1:에오스,핼리오스) (기본 값은 0이며, world_name 입력 시 미 반영)
+          required: false
+          schema:
+            type: number
+            format: byte
+        - name: class
+          in: query
+          description: 직업 및 전직
+          required: false
+          schema:
+            type: string
+            enum:
+              - 초보자-전체 전직
+              - 전사-전체 전직
+              - 전사-검사
+              - 전사-파이터
+              - 전사-페이지
+              - 전사-스피어맨
+              - 전사-크루세이더
+              - 전사-나이트
+              - 전사-버서커
+              - 전사-히어로
+              - 전사-팔라딘
+              - 전사-다크나이트
+              - 마법사-전체 전직
+              - 마법사-매지션
+              - 마법사-위자드(불,독)
+              - 마법사-위자드(썬,콜)
+              - 마법사-클레릭
+              - 마법사-메이지(불,독)
+              - 마법사-메이지(썬,콜)
+              - 마법사-프리스트
+              - 마법사-아크메이지(불,독)
+              - 마법사-아크메이지(썬,콜)
+              - 마법사-비숍
+              - 궁수-전체 전직
+              - 궁수-아처
+              - 궁수-헌터
+              - 궁수-사수
+              - 궁수-레인저
+              - 궁수-저격수
+              - 궁수-보우마스터
+              - 궁수-신궁
+              - 궁수-아처(패스파인더)
+              - 궁수-에인션트아처
+              - 궁수-체이서
+              - 궁수-패스파인더
+              - 도적-전체 전직
+              - 도적-로그
+              - 도적-어쌔신
+              - 도적-시프
+              - 도적-허밋
+              - 도적-시프마스터
+              - 도적-나이트로드
+              - 도적-섀도어
+              - 도적-세미듀어러
+              - 도적-듀어러
+              - 도적-듀얼마스터
+              - 도적-슬래셔
+              - 도적-듀얼블레이더
+              - 해적-전체 전직
+              - 해적-해적
+              - 해적-인파이터
+              - 해적-건슬링거
+              - 해적-캐논슈터
+              - 해적-버커니어
+              - 해적-발키리
+              - 해적-캐논블래스터
+              - 해적-바이퍼
+              - 해적-캡틴
+              - 해적-캐논마스터
+              - 기사단-전체 전직
+              - 기사단-노블레스
+              - 기사단-소울마스터
+              - 기사단-플레임위자드
+              - 기사단-윈드브레이커
+              - 기사단-나이트워커
+              - 기사단-스트라이커
+              - 기사단-미하일
+              - 아란-전체 전직
+              - 에반-전체 전직
+              - 레지스탕스-전체 전직
+              - 레지스탕스-시티즌
+              - 레지스탕스-배틀메이지
+              - 레지스탕스-와일드헌터
+              - 레지스탕스-메카닉
+              - 레지스탕스-데몬슬레이어
+              - 레지스탕스-데몬어벤져
+              - 레지스탕스-제논
+              - 레지스탕스-블래스터
+              - 메르세데스-전체 전직
+              - 팬텀-전체 전직
+              - 루미너스-전체 전직
+              - 카이저-전체 전직
+              - 엔젤릭버스터-전체 전직
+              - 초월자-전체 전직
+              - 초월자-제로
+              - 은월-전체 전직
+              - 프렌즈 월드-전체 전직
+              - 프렌즈 월드-키네시스
+              - 카데나-전체 전직
+              - 일리움-전체 전직
+              - 아크-전체 전직
+              - 호영-전체 전직
+              - 아델-전체 전직
+              - 카인-전체 전직
+              - 라라-전체 전직
+              - 칼리-전체 전직
+              - 렌-전체 전직
+              - 레테-전체 전직
+        - name: ocid
+          in: query
+          description: 캐릭터 식별자 
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: 페이지 번호
+          required: false
+          schema:
+            type: number
+            format: int32
+      responses:
+        '200':
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OverallRanking'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+  /maplestory/v1/ranking/union:
+    get:
+      tags:
+        - Ranking
+      summary: 유니온 랭킹 정보 조회
+      description: 유니온 랭킹 정보를 조회합니다.<br>
+        - 유니온 랭킹 정보는 최근 2년 데이터만 조회 가능합니다. 
+      operationId: get_union_ranking
+      parameters:
+        - name: x-nxopen-api-key
+          in: header
+          description: API KEY
+          required: true
+          schema:
+            type: string
+        - name: date
+          in: query
+          description: 조회 기준일 (KST)
+          example: "2023-12-22"
+          required: true
+          schema:
+            type: string
+        - name: world_name
+          in: query
+          description: |
+            월드 명
+            - 2024년 12월 19일 이후 30일간 리부트, 리부트2 입력 시 에오스, 핼리오스로 연결됩니다.<br>리부트, 리부트2로 조회하시던 부분은 30일 이내 에오스, 헬리오스로 갱신 부탁드립니다.    
+          required: false
+          schema:
+            type: string
+            enum:
+              - 스카니아
+              - 베라
+              - 루나
+              - 제니스
+              - 크로아
+              - 유니온
+              - 엘리시움
+              - 이노시스
+              - 레드
+              - 오로라
+              - 아케인
+              - 노바
+              - 에오스
+              - 핼리오스
+        - name: ocid
+          in: query
+          description: 캐릭터 식별자 
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: 페이지 번호
+          required: false
+          schema:
+            type: number
+            format: int32
+      responses:
+        '200':
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnionRanking'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+  /maplestory/v1/ranking/guild:
+    get:
+      tags:
+        - Ranking
+      summary: 길드 랭킹 정보 조회
+      description: 길드 랭킹 정보를 조회합니다.<br>
+        - 길드 랭킹 정보는 최근 2년 데이터만 조회 가능합니다. 
+      operationId: get_guild_ranking
+      parameters:
+        - name: x-nxopen-api-key
+          in: header
+          description: API KEY
+          required: true
+          schema:
+            type: string
+        - name: date
+          in: query
+          description: 조회 기준일 (KST)
+          example: "2023-12-22"
+          required: true
+          schema:
+            type: string
+        - name: world_name
+          in: query
+          description: |
+            월드 명
+            - 2024년 12월 19일 이후 30일간 리부트, 리부트2 입력 시 에오스, 핼리오스로 연결됩니다.<br>리부트, 리부트2로 조회하시던 부분은 30일 이내 에오스, 헬리오스로 갱신 부탁드립니다.    
+          required: false
+          schema:
+            type: string
+            enum:
+              - 스카니아
+              - 베라
+              - 루나
+              - 제니스
+              - 크로아
+              - 유니온
+              - 엘리시움
+              - 이노시스
+              - 레드
+              - 오로라
+              - 아케인
+              - 노바
+              - 에오스
+              - 핼리오스
+              - 챌린저스
+              - 챌린저스2
+              - 챌린저스3
+              - 챌린저스4
+        - name: ranking_type
+          in: query
+          description: 랭킹 타입 (0:주간 명성치, 1:플래그 레이스, 2:지하 수로)
+          required: true
+          schema:
+            type: number
+            format: byte
+        - name: guild_name
+          in: query
+          description: 길드 명
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: 페이지 번호
+          required: false
+          schema:
+            type: number
+            format: int32
+      responses:
+        '200':
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuildRanking'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+  /maplestory/v1/ranking/dojang:
+    get:
+      tags:
+        - Ranking
+      summary: 무릉도장 랭킹 정보 조회
+      description: 무릉도장 랭킹 정보를 조회합니다.<br>
+        - 무릉도장 랭킹 정보는 최근 2년 데이터만 조회 가능합니다. 
+      operationId: get_dojang_ranking
+      parameters:
+        - name: x-nxopen-api-key
+          in: header
+          description: API KEY
+          required: true
+          schema:
+            type: string
+        - name: date
+          in: query
+          description: 조회 기준일 (KST)
+          example: "2023-12-22"
+          required: true
+          schema:
+            type: string
+        - name: world_name
+          in: query
+          description: |
+            월드 명
+            - 2024년 12월 19일 이후 30일간 리부트, 리부트2 입력 시 에오스, 핼리오스로 연결됩니다.<br>리부트, 리부트2로 조회하시던 부분은 30일 이내 에오스, 헬리오스로 갱신 부탁드립니다.    
+          required: false
+          schema:
+            type: string
+            enum:
+              - 스카니아
+              - 베라
+              - 루나
+              - 제니스
+              - 크로아
+              - 유니온
+              - 엘리시움
+              - 이노시스
+              - 레드
+              - 오로라
+              - 아케인
+              - 노바
+              - 에오스
+              - 핼리오스
+              - 챌린저스
+              - 챌린저스2
+              - 챌린저스3
+              - 챌린저스4
+        - name: difficulty
+          in: query
+          description: 구간 (0:일반, 1:통달)
+          required: true
+          schema:
+            type: number
+            format: int32
+        - name: class
+          in: query
+          description: 직업 및 전직
+          required: false
+          schema:
+            type: string
+            enum:
+              - 초보자-전체 전직
+              - 전사-전체 전직
+              - 전사-검사
+              - 전사-파이터
+              - 전사-페이지
+              - 전사-스피어맨
+              - 전사-크루세이더
+              - 전사-나이트
+              - 전사-버서커
+              - 전사-히어로
+              - 전사-팔라딘
+              - 전사-다크나이트
+              - 마법사-전체 전직
+              - 마법사-매지션
+              - 마법사-위자드(불,독)
+              - 마법사-위자드(썬,콜)
+              - 마법사-클레릭
+              - 마법사-메이지(불,독)
+              - 마법사-메이지(썬,콜)
+              - 마법사-프리스트
+              - 마법사-아크메이지(불,독)
+              - 마법사-아크메이지(썬,콜)
+              - 마법사-비숍
+              - 궁수-전체 전직
+              - 궁수-아처
+              - 궁수-헌터
+              - 궁수-사수
+              - 궁수-레인저
+              - 궁수-저격수
+              - 궁수-보우마스터
+              - 궁수-신궁
+              - 궁수-아처(패스파인더)
+              - 궁수-에인션트아처
+              - 궁수-체이서
+              - 궁수-패스파인더
+              - 도적-전체 전직
+              - 도적-로그
+              - 도적-어쌔신
+              - 도적-시프
+              - 도적-허밋
+              - 도적-시프마스터
+              - 도적-나이트로드
+              - 도적-섀도어
+              - 도적-세미듀어러
+              - 도적-듀어러
+              - 도적-듀얼마스터
+              - 도적-슬래셔
+              - 도적-듀얼블레이더
+              - 해적-전체 전직
+              - 해적-해적
+              - 해적-인파이터
+              - 해적-건슬링거
+              - 해적-캐논슈터
+              - 해적-버커니어
+              - 해적-발키리
+              - 해적-캐논블래스터
+              - 해적-바이퍼
+              - 해적-캡틴
+              - 해적-캐논마스터
+              - 기사단-전체 전직
+              - 기사단-노블레스
+              - 기사단-소울마스터
+              - 기사단-플레임위자드
+              - 기사단-윈드브레이커
+              - 기사단-나이트워커
+              - 기사단-스트라이커
+              - 기사단-미하일
+              - 아란-전체 전직
+              - 에반-전체 전직
+              - 레지스탕스-전체 전직
+              - 레지스탕스-시티즌
+              - 레지스탕스-배틀메이지
+              - 레지스탕스-와일드헌터
+              - 레지스탕스-메카닉
+              - 레지스탕스-데몬슬레이어
+              - 레지스탕스-데몬어벤져
+              - 레지스탕스-제논
+              - 레지스탕스-블래스터
+              - 메르세데스-전체 전직
+              - 팬텀-전체 전직
+              - 루미너스-전체 전직
+              - 카이저-전체 전직
+              - 엔젤릭버스터-전체 전직
+              - 초월자-전체 전직
+              - 초월자-제로
+              - 은월-전체 전직
+              - 프렌즈 월드-전체 전직
+              - 프렌즈 월드-키네시스
+              - 카데나-전체 전직
+              - 일리움-전체 전직
+              - 아크-전체 전직
+              - 호영-전체 전직
+              - 아델-전체 전직
+              - 카인-전체 전직
+              - 라라-전체 전직
+              - 칼리-전체 전직
+              - 렌-전체 전직
+              - 레테-전체 전직
+        - name: ocid
+          in: query
+          description: 캐릭터 식별자
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: 페이지 번호
+          required: false
+          schema:
+            type: number
+            format: int32
+      responses:
+        '200':
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DojangRanking'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+  /maplestory/v1/ranking/theseed:
+    get:
+      tags:
+        - Ranking
+      summary: 더 시드 랭킹 정보 조회
+      description: 더 시드 랭킹 정보를 조회합니다.<br>
+        - 더 시드 랭킹 정보는 최근 2년 데이터만 조회 가능합니다. 
+      operationId: get_theseed_ranking
+      parameters:
+        - name: x-nxopen-api-key
+          in: header
+          description: API KEY
+          required: true
+          schema:
+            type: string
+        - name: date
+          in: query
+          description: 조회 기준일 (KST)
+          example: "2023-12-22"
+          required: true
+          schema:
+            type: string
+        - name: world_name
+          in: query
+          description: |
+            월드 명
+            - 2024년 12월 19일 이후 30일간 리부트, 리부트2 입력 시 에오스, 핼리오스로 연결됩니다.<br>리부트, 리부트2로 조회하시던 부분은 30일 이내 에오스, 헬리오스로 갱신 부탁드립니다.    
+          required: false
+          schema:
+            type: string
+            enum:
+              - 스카니아
+              - 베라
+              - 루나
+              - 제니스
+              - 크로아
+              - 유니온
+              - 엘리시움
+              - 이노시스
+              - 레드
+              - 오로라
+              - 아케인
+              - 노바
+              - 에오스
+              - 핼리오스
+              - 챌린저스
+              - 챌린저스2
+              - 챌린저스3
+              - 챌린저스4
+        - name: ocid
+          in: query
+          description: 캐릭터 식별자 
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: 페이지 번호
+          required: false
+          schema:
+            type: number
+            format: int32
+      responses:
+        '200':
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TheSeedRanking'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+  /maplestory/v1/ranking/achievement:
+    get:
+      tags:
+        - Ranking
+      summary: 업적 랭킹 정보 조회
+      description: 업적 랭킹 정보를 조회합니다.<br>
+        - 업적 랭킹 정보는 최근 2년 데이터만 조회 가능합니다. 
+      operationId: get_achv_ranking
+      parameters:
+        - name: x-nxopen-api-key
+          in: header
+          description: API KEY
+          required: true
+          schema:
+            type: string
+        - name: date
+          in: query
+          description: 조회 기준일 (KST)
+          example: "2023-12-22"
+          required: true
+          schema:
+            type: string
+        - name: ocid
+          in: query
+          description: 캐릭터 식별자
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: 페이지 번호
+          required: false
+          schema:
+            type: number
+            format: int32
+      responses:
+        '200':
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AchievementRanking'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorMessage'
+
+
+components:
+  schemas:
+    OverallRanking:
+      type: object
+      properties:
+        ranking:
+          type: array
+          description: 종합 랭킹 정보
+          items:
+            properties:
+              date:
+                type: string
+                description: 랭킹 업데이트 일자 (KST)
+                example: "2023-12-22"
+              ranking:
+                type: number
+                format: int32
+                description: 종합 랭킹 순위
+              character_name:
+                type: string
+                description: 캐릭터 명
+              world_name:
+                type: string
+                description: 월드 명
+              class_name:
+                type: string
+                description: 직업 명
+              sub_class_name:
+                type: string
+                description: 전직 직업 명
+              character_level:
+                type: number
+                format: int32
+                description: 캐릭터 레벨
+              character_exp:
+                type: number
+                format: int64
+                description: 캐릭터 경험치
+              character_popularity:
+                type: number
+                format: int32
+                description: 캐릭터 인기도
+              character_guildname:
+                type: string
+                description: 길드 명
+    UnionRanking:
+      type: object
+      properties:
+        ranking:
+          type: array
+          description: 유니온 랭킹 정보
+          items:
+            properties:
+              date:
+                type: string
+                description: 랭킹 업데이트 일자 (KST)
+                example: "2023-12-22"
+              ranking:
+                type: number
+                format: int32
+                description: 유니온 랭킹 순위 
+              character_name:
+                type: string
+                description: 캐릭터 명
+              world_name:
+                type: string
+                description: 월드 명
+              class_name:
+                type: string
+                description: 직업 명
+              sub_class_name:
+                type: string
+                description: 전직 직업 명
+              union_level:
+                type: number
+                format: int32
+                description: 유니온 레벨
+              union_power:
+                type: number
+                format: int64
+                description: 유니온 파워
+    GuildRanking:
+      type: object
+      properties:
+        ranking:
+          type: array
+          description: 길드 랭킹 정보
+          items:
+            properties:
+              date:
+                type: string
+                description: 랭킹 업데이트 일자 (KST)
+                example: "2023-12-22"
+              ranking:
+                type: number
+                format: int32
+                description: 길드 랭킹 순위 
+              guild_name:
+                type: string
+                description: 길드 명
+              world_name:
+                type: string
+                description: 월드 명
+              guild_level:
+                type: number
+                format: int32
+                description: 길드 레벨
+              guild_master_name:
+                type: string
+                description: 길드 마스터 캐릭터 명
+              guild_mark:
+                type: string
+                description: 길드 마크
+              guild_point:
+                type: number
+                format: int64
+                description: 길드 포인트
+    DojangRanking:
+      type: object
+      properties:
+        ranking:
+          type: array
+          description: 무릉도장 랭킹 정보
+          items:
+            properties:
+              date:
+                type: string
+                description: 랭킹 업데이트 일자 (KST)
+                example: "2023-12-22"
+              ranking:
+                type: number
+                format: int32
+                description: 무릉도장 랭킹 순위 
+              character_name:
+                type: string
+                description: 캐릭터 명
+              world_name:
+                type: string
+                description: 월드 명
+              class_name:
+                type: string
+                description: 직업 명
+              sub_class_name:
+                type: string
+                description: 전직 직업 명
+              character_level:
+                type: number
+                format: int32
+                description: 캐릭터 레벨
+              dojang_floor:
+                type: number
+                format: int32
+                description: 무릉도장 구간
+              dojang_time_record:
+                type: number
+                format: int32
+                description: 무릉도장 클리어 시간 기록 (초 단위)
+    TheSeedRanking:
+      type: object
+      properties:
+        ranking:
+          type: array
+          description: 더 시드 랭킹 정보
+          items:
+            properties:
+              date:
+                type: string
+                description: 랭킹 업데이트 일자 (KST)
+                example: "2023-12-22"
+              ranking:
+                type: number
+                format: int32
+                description: 더 시드 랭킹 순위
+              character_name:
+                type: string
+                description: 캐릭터 명
+              world_name:
+                type: string
+                description: 월드 명
+              class_name:
+                type: string
+                description: 직업 명
+              sub_class_name:
+                type: string
+                description: 전직 직업 명
+              character_level:
+                type: number
+                format: int32
+                description: 캐릭터 레벨
+              theseed_floor:
+                type: number
+                format: int32
+                description: 더 시드 도달 층
+              theseed_time_record:
+                type: number
+                format: int32
+                description: 더 시드 클리어 시간 기록 (초 단위)
+    AchievementRanking:
+      type: object
+      properties:
+        ranking:
+          type: array
+          description: 업적 랭킹 정보
+          items:
+            properties:
+              date:
+                type: string
+                description: 랭킹 업데이트 일자 (KST)
+                example: "2023-12-22"
+              ranking:
+                type: number
+                format: int32
+                description: 업적 랭킹 순위 
+              character_name:
+                type: string
+                description: 캐릭터 명
+              world_name:
+                type: string
+                description: 월드 명
+              class_name:
+                type: string
+                description: 직업 명
+              sub_class_name:
+                type: string
+                description: 전직 직업 명
+              trophy_grade:
+                type: string
+                description: 업적 등급
+              trophy_score:
+                type: number
+                format: int32
+                description: 업적 점수
+    ErrorMessage:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            name:
+              type: string
+              description: 에러 명
+            message:
+              type: string
+              description: 에러 설명

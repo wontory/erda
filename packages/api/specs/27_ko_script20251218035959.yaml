@@ -1,0 +1,642 @@
+openapi: 3.0.3
+info:
+  title: 메이플스토리 공지사항
+  version: 1.0.0
+  contact:
+    name: help_openapi@nexon.co.kr
+  description: |-
+    - 공지 정보 API는 데이터 최신화(공지 내용 수정/ 업데이트 고려)를 위해 실시간 조회 또는 최소 일배치 작업을 권장합니다.
+    - 실시간으로 정보를 제공하지 않는 경우, 신규/수정 공지 내용이 반영되지 않을 수 있으니 서비스 이용 유저에게 홈페이지 공지 사항을 확인하라는 가이드를 제공해주세요.
+
+servers:
+  - url: "https://open.api.nexon.com"
+
+tags:
+  - name: Notice
+    description: 공지사항 조회
+
+paths:
+  /maplestory/v1/notice:
+    get:
+      tags:
+        - Notice
+      summary: 공지사항 목록 조회
+      description: 메이플스토리 공지사항에 최근 등록된 게시글 20개를 조회합니다.
+      operationId: maplestory_get_notice
+      parameters:
+        - name: x-nxopen-api-key
+          in: header
+          description: API KEY
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NoticeList"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /maplestory/v1/notice/detail:
+    get:
+      tags:
+        - Notice
+      summary: 공지사항 상세 조회
+      description: 메이플스토리 공지사항 게시글 세부 사항을 조회합니다. 
+      operationId: maplestory_get_notice_detail
+      parameters:
+        - name: x-nxopen-api-key
+          in: header
+          description: API KEY
+          required: true
+          schema:
+            type: string
+        - name: notice_id
+          in: query
+          description: 공지 식별자
+          required: true
+          schema:
+            type: number
+            format: int64      
+
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NoticeDetail"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /maplestory/v1/notice-update:
+    get:
+      tags:
+        - Notice
+      summary: 업데이트 목록 조회
+      description: 메이플스토리 업데이트에 최근 등록된 게시글 20개를 조회합니다.
+      operationId: maplestory_get_update_notice
+      parameters:
+        - name: x-nxopen-api-key
+          in: header
+          description: API KEY
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateNoticeList"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /maplestory/v1/notice-update/detail:
+    get:
+      tags:
+        - Notice
+      summary: 업데이트 상세 조회
+      description: 메이플스토리 업데이트 게시글 세부 사항을 조회합니다. 
+      operationId: maplestory_get_update_notice_detail
+      parameters:
+        - name: x-nxopen-api-key
+          in: header
+          description: API KEY
+          required: true
+          schema:
+            type: string
+        - name: notice_id
+          in: query
+          description: 공지 식별자
+          required: true
+          schema:
+            type: number
+            format: int64     
+
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateNoticeDetail"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /maplestory/v1/notice-event:
+    get:
+      tags:
+        - Notice
+      summary: 진행 중 이벤트 목록 조회
+      description: 메이플스토리 진행 중 이벤트에 최근 등록된 공지사항 20개를 조회합니다.
+      operationId: maplestory_get_event_notice
+      parameters:
+        - name: x-nxopen-api-key
+          in: header
+          description: API KEY
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventNoticeList"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /maplestory/v1/notice-event/detail:
+    get:
+      tags:
+        - Notice
+      summary: 진행 중 이벤트 상세 조회
+      description: 메이플스토리 진행 중 이벤트 게시글 세부 사항을 조회합니다.
+      operationId: maplestory_get_event_notice_detail
+      parameters:
+        - name: x-nxopen-api-key
+          in: header
+          description: API KEY
+          required: true
+          schema:
+            type: string
+        - name: notice_id
+          in: query
+          description: 공지 식별자
+          required: true
+          schema:
+            type: number
+            format: int64     
+
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventNoticeDetail"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /maplestory/v1/notice-cashshop:
+    get:
+      tags:
+        - Notice
+      summary: 캐시샵 공지 목록 조회
+      description: 메이플스토리 캐시샵 공지에 최근 등록된 공지사항 20개를 조회합니다.
+      operationId: maplestory_get_cashshop_notice
+      parameters:
+        - name: x-nxopen-api-key
+          in: header
+          description: API KEY
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CashshopNoticeList"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+  /maplestory/v1/notice-cashshop/detail:
+    get:
+      tags:
+        - Notice
+      summary: 캐시샵 공지 상세 조회
+      description: 메이플스토리 캐시샵 공지 게시글 세부 사항을 조회합니다.
+      operationId: maplestory_get_cashshop_notice_detail
+      parameters:
+        - name: x-nxopen-api-key
+          in: header
+          description: API KEY
+          required: true
+          schema:
+            type: string
+        - name: notice_id
+          in: query
+          description: 공지 식별자
+          required: true
+          schema:
+            type: number
+            format: int64   
+
+      responses:
+        "200":
+          description: SUCCESS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CashshopNoticeDetail"
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "429":
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorMessage"
+
+
+components:
+  schemas:
+    NoticeList:
+      type: object
+      properties:
+        notice:
+          type: array
+          description: 공지 목록
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+                description: 공지 제목
+              url:
+                type: string
+                description: 공지 링크
+              notice_id:
+                type: number
+                format: int64 
+                description: 공지 식별자
+              date:
+                type: string
+                description: 공지 등록일(시) (KST)
+                example: "2023-12-21T00:00+09:00"  
+
+    NoticeDetail:
+      type: object
+      properties:
+        title:
+          type: string
+          description: 공지 제목
+        url:
+          type: string
+          description: 공지 링크
+        contents:
+          type: string
+          description: 공지 본문
+        date:
+          type: string
+          description: 공지 등록일(시) (KST)
+          example: "2023-12-21T00:00+09:00"  
+
+    UpdateNoticeList:
+      type: object
+      properties:
+        update_notice:
+          type: array
+          description: 공지 목록
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+                description: 공지 제목
+              url:
+                type: string
+                description: 공지 링크
+              notice_id:
+                type: number
+                format: int64 
+                description: 공지 식별자
+              date:
+                type: string
+                description: 공지 등록일(시) (KST)
+                example: "2023-12-21T00:00+09:00"  
+
+    UpdateNoticeDetail:
+      type: object
+      properties:
+        title:
+          type: string
+          description: 공지 제목
+        url:
+          type: string
+          description: 공지 링크
+        contents:
+          type: string
+          description: 공지 본문
+        date:
+          type: string
+          description: 공지 등록일(시) (KST)
+          example: "2023-12-21T00:00+09:00"  
+
+    EventNoticeList:
+      type: object
+      properties:
+        event_notice:
+          type: array
+          description: 공지 목록
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+                description: 공지 제목
+              url:
+                type: string
+                description: 공지 링크
+              notice_id:
+                type: number
+                format: int64 
+                description: 공지 식별자
+              date:
+                type: string
+                description: 공지 등록일(시) (KST)
+                example: "2023-12-21T00:00+09:00"
+              date_event_start:
+                type: string
+                description: 이벤트 시작일(시) (KST)
+                example: "2023-12-21T00:00+09:00"                
+              date_event_end:
+                type: string
+                description: 이벤트 종료일(시) (KST)
+                example: "2023-12-21T00:00+09:00"   
+
+    EventNoticeDetail:
+      type: object
+      properties:
+        title:
+          type: string
+          description: 공지 제목
+        url:
+          type: string
+          description: 공지 링크
+        contents:
+          type: string
+          description: 공지 본문
+        date:
+          type: string
+          description: 공지 등록일(시) (KST)
+          example: "2023-12-21T00:00+09:00"  
+        date_event_start:
+          type: string
+          description: 이벤트 시작일(시) (KST)
+          example: "2023-12-21T00:00+09:00"                   
+        date_event_end:
+          type: string
+          description: 이벤트 종료일(시) (KST)
+          example: "2023-12-21T00:00+09:00"  
+
+    CashshopNoticeList:
+      type: object
+      properties:
+        cashshop_notice:
+          type: array
+          description: 공지 목록
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+                description: 공지 제목
+              url:
+                type: string
+                description: 공지 링크
+              notice_id:
+                type: number
+                format: int64 
+                description: 공지 식별자
+              date:
+                type: string
+                description: 공지 등록일(시) (KST)
+                example: "2023-12-21T00:00+09:00"  
+              date_sale_start:
+                type: string
+                description: 판매 시작일(시) (KST)
+                example: "2023-12-21T00:00+09:00"                  
+              date_sale_end:
+                type: string
+                description: 판매 종료일(시) (KST)
+                example: "2023-12-21T00:00+09:00"  
+              ongoing_flag:
+                type: string
+                description: 상시 판매 여부 (true - 상시)
+
+    CashshopNoticeDetail:
+      type: object
+      properties:
+        title:
+          type: string
+          description: 공지 제목
+        url:
+          type: string
+          description: 공지 링크
+        contents:
+          type: string
+          description: 공지 본문
+        date:
+          type: string
+          description: 공지 등록일(시) (KST)
+          example: "2023-12-21T00:00+09:00"  
+        date_sale_start:
+          type: string
+          description: 판매 시작일(시) (KST)
+          example: "2023-12-21T00:00+09:00"                   
+        date_sale_end:
+          type: string
+          description: 판매 종료일(시) (KST)
+          example: "2023-12-21T00:00+09:00"   
+        ongoing_flag:
+          type: string
+          description: 상시 판매 여부 (true - 상시)
+
+    ErrorMessage:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            name:
+              type: string
+              description: 에러 명
+              example: string
+            message:
+              type: string
+              description: 에러 설명
+              example: string
+

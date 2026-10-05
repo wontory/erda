@@ -1,0 +1,33 @@
+{
+  "name": "@erda/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "exports": {
+    "./*": "./src/*.ts",
+    "./generated/*": "./src/generated/*.ts"
+  },
+  "scripts": {
+    "fetch": "tsx scripts/fetch-specs.ts",
+    "merge": "tsx scripts/merge.ts",
+    "generate": "pnpm merge && orval --config orval.config.ts",
+    "generate:watch": "orval --config orval.config.ts --watch ./openapi.yaml",
+    "prepare": "pnpm generate",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.104.1",
+    "@tauri-apps/api": "^2.12.0",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "orval": "^8.40.0",
+    "tsx": "^4.20.0",
+    "typescript": "~6.0.2",
+    "yaml": "^2.8.0"
+  }
+}
