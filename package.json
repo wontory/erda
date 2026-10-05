@@ -1,0 +1,22 @@
+{
+  "name": "erda",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @erda/desktop tauri dev",
+    "build": "pnpm --filter @erda/desktop tauri build",
+    "web": "pnpm --filter @erda/desktop dev",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "lint": "oxlint && cargo clippy --workspace --all-targets -- -D warnings",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt && cargo fmt --all",
+    "format:check": "oxfmt --check && cargo fmt --all --check",
+    "openapi:fetch": "pnpm --filter @erda/api fetch",
+    "openapi:generate": "pnpm --filter @erda/api generate"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.72.0",
+    "oxlint": "^1.87.0",
+    "typescript": "~6.0.2"
+  },
+  "packageManager": "pnpm@12.4.2"
+}
