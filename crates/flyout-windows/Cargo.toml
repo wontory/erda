@@ -1,0 +1,13 @@
+[package]
+name = "flyout-windows"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+flyout = { path = "../flyout" }
+tauri = { workspace = true }
+window-vibrancy = { workspace = true }
+log = { workspace = true }
+
+[target.'cfg(windows)'.dependencies]
+windows = { workspace = true }

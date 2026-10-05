@@ -1,0 +1,14 @@
+[package]
+name = "flyout-macos"
+version = "0.1.0"
+edition = "2021"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+flyout = { path = "../flyout" }
+tauri = { workspace = true }
+tauri-nspanel = { workspace = true }
+objc2-app-kit = { workspace = true }
+objc2-quartz-core = { workspace = true }
+window-vibrancy = { workspace = true }
+anyhow = { workspace = true }
+log = { workspace = true }
