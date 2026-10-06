@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-notices-snapshot"
+description = "Enables the notices_snapshot command without any pre-configured scope."
+commands.allow = ["notices_snapshot"]
+
+[[permission]]
+identifier = "deny-notices-snapshot"
+description = "Denies the notices_snapshot command without any pre-configured scope."
+commands.deny = ["notices_snapshot"]

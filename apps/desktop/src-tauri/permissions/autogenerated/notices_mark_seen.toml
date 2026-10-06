@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-notices-mark-seen"
+description = "Enables the notices_mark_seen command without any pre-configured scope."
+commands.allow = ["notices_mark_seen"]
+
+[[permission]]
+identifier = "deny-notices-mark-seen"
+description = "Denies the notices_mark_seen command without any pre-configured scope."
+commands.deny = ["notices_mark_seen"]

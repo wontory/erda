@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-nexon-request"
+description = "Enables the nexon_request command without any pre-configured scope."
+commands.allow = ["nexon_request"]
+
+[[permission]]
+identifier = "deny-nexon-request"
+description = "Denies the nexon_request command without any pre-configured scope."
+commands.deny = ["nexon_request"]

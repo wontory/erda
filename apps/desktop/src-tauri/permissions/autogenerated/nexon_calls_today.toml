@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-nexon-calls-today"
+description = "Enables the nexon_calls_today command without any pre-configured scope."
+commands.allow = ["nexon_calls_today"]
+
+[[permission]]
+identifier = "deny-nexon-calls-today"
+description = "Denies the nexon_calls_today command without any pre-configured scope."
+commands.deny = ["nexon_calls_today"]

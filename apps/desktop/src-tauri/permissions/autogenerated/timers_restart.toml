@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-timers-restart"
+description = "Enables the timers_restart command without any pre-configured scope."
+commands.allow = ["timers_restart"]
+
+[[permission]]
+identifier = "deny-timers-restart"
+description = "Denies the timers_restart command without any pre-configured scope."
+commands.deny = ["timers_restart"]

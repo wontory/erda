@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-timers-dismiss-completed"
+description = "Enables the timers_dismiss_completed command without any pre-configured scope."
+commands.allow = ["timers_dismiss_completed"]
+
+[[permission]]
+identifier = "deny-timers-dismiss-completed"
+description = "Denies the timers_dismiss_completed command without any pre-configured scope."
+commands.deny = ["timers_dismiss_completed"]

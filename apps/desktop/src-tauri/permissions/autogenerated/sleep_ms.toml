@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-sleep-ms"
+description = "Enables the sleep_ms command without any pre-configured scope."
+commands.allow = ["sleep_ms"]
+
+[[permission]]
+identifier = "deny-sleep-ms"
+description = "Denies the sleep_ms command without any pre-configured scope."
+commands.deny = ["sleep_ms"]

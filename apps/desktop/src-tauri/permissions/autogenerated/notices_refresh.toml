@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-notices-refresh"
+description = "Enables the notices_refresh command without any pre-configured scope."
+commands.allow = ["notices_refresh"]
+
+[[permission]]
+identifier = "deny-notices-refresh"
+description = "Denies the notices_refresh command without any pre-configured scope."
+commands.deny = ["notices_refresh"]

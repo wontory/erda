@@ -1,0 +1,41 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "main",
+  "description": "flyout panel",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-hide",
+    "core:window:allow-show",
+    "core:window:allow-is-visible",
+    "store:default",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [{ "url": "https://maplestory.nexon.com/*" }, { "url": "https://openapi.nexon.com/*" }]
+    },
+    "os:default",
+    "log:default",
+    "allow-open-settings",
+    "allow-hide-panel-cmd",
+    "allow-inspector-show",
+    "allow-inspector-hide",
+    "allow-nexon-request",
+    "allow-nexon-calls-today",
+    "allow-timers-start",
+    "allow-timers-start-group",
+    "allow-timers-cancel",
+    "allow-timers-cancel-all",
+    "allow-timers-set-repeat",
+    "allow-timers-restart",
+    "allow-timers-dismiss-completed",
+    "allow-timers-dismiss-all-completed",
+    "allow-timers-snapshot",
+    "allow-notices-snapshot",
+    "allow-notices-refresh",
+    "allow-notices-mark-seen",
+    "allow-notices-mark-all-seen",
+    "allow-history-load",
+    "allow-history-save",
+    "allow-sleep-ms"
+  ]
+}

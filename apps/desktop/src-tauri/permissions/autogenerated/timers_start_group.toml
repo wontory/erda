@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-timers-start-group"
+description = "Enables the timers_start_group command without any pre-configured scope."
+commands.allow = ["timers_start_group"]
+
+[[permission]]
+identifier = "deny-timers-start-group"
+description = "Denies the timers_start_group command without any pre-configured scope."
+commands.deny = ["timers_start_group"]

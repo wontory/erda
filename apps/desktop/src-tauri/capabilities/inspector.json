@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "inspector",
+  "description": "side inspector window",
+  "windows": ["inspector"],
+  "permissions": ["core:event:default", "log:default"]
+}

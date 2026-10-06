@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-inspector-hide"
+description = "Enables the inspector_hide command without any pre-configured scope."
+commands.allow = ["inspector_hide"]
+
+[[permission]]
+identifier = "deny-inspector-hide"
+description = "Denies the inspector_hide command without any pre-configured scope."
+commands.deny = ["inspector_hide"]

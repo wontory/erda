@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-inspector-show"
+description = "Enables the inspector_show command without any pre-configured scope."
+commands.allow = ["inspector_show"]
+
+[[permission]]
+identifier = "deny-inspector-show"
+description = "Denies the inspector_show command without any pre-configured scope."
+commands.deny = ["inspector_show"]
