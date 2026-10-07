@@ -55,6 +55,16 @@ fn set_taskbar_title(text: &str) {
 fn set_taskbar_title(_text: &str) {}
 
 #[cfg(windows)]
+fn taskbar_button_is_foreground() -> bool {
+    taskbar::is_foreground()
+}
+
+#[cfg(not(windows))]
+fn taskbar_button_is_foreground() -> bool {
+    false
+}
+
+#[cfg(windows)]
 fn taskbar_position() -> Option<(Edge, i32)> {
     taskbar::position()
 }
@@ -80,6 +90,18 @@ fn anchor_to_taskbar(app: &AppHandle) {
     };
     if let Some(slot) = flyout::taskbar_slot(cursor, flyout::monitor_rect_of(&monitor), edge, thickness) {
         flyout::remember_anchor(app, slot);
+    }
+}
+
+fn refocus_panel(app: &AppHandle) {
+    let handle = app.clone();
+    let result = app.run_on_main_thread(move || {
+        if let Some(window) = window(&handle, PANEL_LABEL, "refocus") {
+            warn_on_err(window.set_focus(), "refocus set_focus");
+        }
+    });
+    if let Err(e) = result {
+        log::warn!("flyout-windows: refocus: run_on_main_thread failed: {e}");
     }
 }
 
@@ -119,6 +141,9 @@ impl Flyout for WindowsFlyout {
         let guard = self.guard.clone();
         window.on_window_event(move |event| {
             if let WindowEvent::Focused(false) = event {
+                if taskbar_button_is_foreground() {
+                    return refocus_panel(&handle);
+                }
                 guard.note_blur();
                 on_dismiss(&handle);
             }

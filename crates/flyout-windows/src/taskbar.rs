@@ -104,6 +104,11 @@ pub fn set_title(text: &str) {
     }
 }
 
+pub fn is_foreground() -> bool {
+    let raw = HANDLE.load(Ordering::Relaxed);
+    raw != 0 && unsafe { GetForegroundWindow() }.0 as isize == raw
+}
+
 pub fn position() -> Option<(Edge, i32)> {
     let mut data = APPBARDATA {
         cbSize: size_of::<APPBARDATA>() as u32,
