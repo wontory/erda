@@ -1,3 +1,4 @@
+import { ScrollArea } from "@erda/ui/components/ui/scroll-area";
 import { useState } from "react";
 
 import { ItemDetail } from "#/app/pages/character/inspector/item-detail.tsx";
@@ -21,12 +22,14 @@ export function InspectorApp() {
   const [payload, setPayload] = useState<InspectorPayload | null>(null);
   useTauriEvent("inspector:content", inspectorPayloadSchema, setPayload);
   return (
-    <div className="h-screen w-screen overflow-hidden rounded-[var(--panel-radius)] bg-panel-scrim p-3 text-[12px]">
-      {payload ? (
-        <div className="animate-in duration-150 ease-out fade-in">
-          <InspectorDetail payload={payload} />
-        </div>
-      ) : null}
+    <div className="h-screen w-screen overflow-hidden rounded-[var(--panel-radius)] bg-panel-scrim text-[12px]">
+      <ScrollArea className="h-full">
+        {payload ? (
+          <div className="animate-in p-3 duration-150 ease-out fade-in">
+            <InspectorDetail payload={payload} />
+          </div>
+        ) : null}
+      </ScrollArea>
     </div>
   );
 }

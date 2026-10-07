@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@erda/ui/components/ui/dropdown-menu";
 import { Input } from "@erda/ui/components/ui/input";
+import { ScrollArea } from "@erda/ui/components/ui/scroll-area";
 import { Separator } from "@erda/ui/components/ui/separator";
 import { listItem } from "@erda/ui/lib/motion";
 import { AnimatePresence, m } from "motion/react";
@@ -33,21 +34,23 @@ function AccountPicker({ onPick }: { onPick: (name: string) => void }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger render={<Button variant="outline" size="sm" />}>내 계정에서 고르기</DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="max-h-80 overflow-y-auto">
-        {byWorld.map((g, i) => (
-          <DropdownMenuGroup key={g.world}>
-            {i > 0 ? <DropdownMenuSeparator /> : null}
-            <DropdownMenuLabel>{g.world}</DropdownMenuLabel>
-            {g.characters.map((c) => (
-              <DropdownMenuItem key={c.ocid} onClick={() => onPick(c.name)}>
-                {c.name}{" "}
-                <span className="ml-auto pl-3 text-[11px] text-muted-foreground">
-                  Lv.{c.level} · {c.job}
-                </span>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuGroup>
-        ))}
+      <DropdownMenuContent align="end" className="p-0">
+        <ScrollArea viewportClassName="max-h-80 p-1">
+          {byWorld.map((g, i) => (
+            <DropdownMenuGroup key={g.world}>
+              {i > 0 ? <DropdownMenuSeparator /> : null}
+              <DropdownMenuLabel>{g.world}</DropdownMenuLabel>
+              {g.characters.map((c) => (
+                <DropdownMenuItem key={c.ocid} onClick={() => onPick(c.name)}>
+                  {c.name}{" "}
+                  <span className="ml-auto pl-3 text-[11px] text-muted-foreground">
+                    Lv.{c.level} · {c.job}
+                  </span>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
+          ))}
+        </ScrollArea>
       </DropdownMenuContent>
     </DropdownMenu>
   );

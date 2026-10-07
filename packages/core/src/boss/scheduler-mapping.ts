@@ -106,15 +106,29 @@ function isHomeworkDone(content: SchedulerHomeworkContent, now: number, max: num
   return max > 0 ? now >= max : now > 0;
 }
 
+const HOMEWORK_UNITS: Record<string, string> = {
+  "[길드] 지하 수로": "점",
+  "[길드] 플래그 레이스": "점",
+  무릉도장: "층",
+};
+
+const homeworkUnit = (name: string): string => HOMEWORK_UNITS[name] ?? "회";
+const EPIC_DUNGEON_STAGES = 5;
+const isEpicDungeon = (name: string): boolean => name.startsWith("에픽 던전");
+
 function homeworkProgress(content: SchedulerHomeworkContent, now: number, max: number): string {
-  if (content.quest_state === QUEST_IN_PROGRESS) return "진행 중";
-  return max > 0 ? `${now}/${max}` : `${now}회`;
+  if (content.type === "quest") {
+    if (content.quest_state === QUEST_COMPLETED) return "완료";
+    return content.quest_state === QUEST_IN_PROGRESS ? "진행 중" : "";
+  }
+  if (isEpicDungeon(content.content_name ?? "")) return `스테이지 ${now}/${max}`;
+  return max > 0 ? `${now}/${max}` : `${now.toLocaleString("en-US")}${homeworkUnit(content.content_name ?? "")}`;
 }
 
 function toHomeworkItem(content: SchedulerHomeworkContent): HomeworkItem {
   const name = content.content_name ?? "";
   const now = content.now_count ?? 0;
-  const max = content.max_count ?? 0;
+  const max = isEpicDungeon(name) ? EPIC_DUNGEON_STAGES : (content.max_count ?? 0);
   return {
     key: name,
     name,
@@ -124,8 +138,14 @@ function toHomeworkItem(content: SchedulerHomeworkContent): HomeworkItem {
   };
 }
 
+const isEpic = (c: SchedulerHomeworkContent) => isEpicDungeon(c.content_name ?? "");
+
+const isClearedEpic = (c: SchedulerHomeworkContent) => isEpic(c) && (c.now_count ?? 0) >= EPIC_DUNGEON_STAGES;
+
 export function homeworkOf(snapshot: SchedulerSnapshot, cycle: BossCycle): HomeworkItem[] {
-  return (homeworkListOf(snapshot, cycle) ?? []).filter((c) => isFlagSet(c.registration_flag)).map(toHomeworkItem);
+  return (homeworkListOf(snapshot, cycle) ?? [])
+    .filter((c) => isFlagSet(c.registration_flag) || isClearedEpic(c))
+    .map(toHomeworkItem);
 }
 
 export function weeklyBossLimit(snapshot: SchedulerSnapshot): { count: number; limit: number } | null {

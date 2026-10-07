@@ -33,3 +33,5 @@ export * from "#/insights/sync-engine.ts";
 export * from "#/insights/ranking-cards.ts";
 export * from "#/insights/achievements.ts";
 export * from "#/insights/battle.ts";
+export * from "#/calculators/catalog.ts";
+export * from "#/calculators/boss-split.ts";
