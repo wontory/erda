@@ -1,4 +1,5 @@
 import { IconTile } from "@erda/ui/components/icon-tile";
+import { ScrollArea } from "@erda/ui/components/ui/scroll-area";
 import { Info, Settings2, Timer, User, type LucideIcon } from "lucide-react";
 import { useState, type ComponentType } from "react";
 import { z } from "zod";
@@ -45,11 +46,13 @@ export function SettingsApp() {
           </button>
         ))}
       </nav>
-      <main className="flex-1 overflow-y-auto px-6 py-4">
-        <div key={page} className="animate-in duration-150 fade-in">
-          <h1 className="mb-3 text-[17px] font-semibold">{current.title}</h1>
-          <current.Page />
-        </div>
+      <main className="min-w-0 flex-1">
+        <ScrollArea className="h-full">
+          <div key={page} className="animate-in px-6 py-4 duration-150 fade-in">
+            <h1 className="mb-3 text-[17px] font-semibold">{current.title}</h1>
+            <current.Page />
+          </div>
+        </ScrollArea>
       </main>
     </div>
   );
