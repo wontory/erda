@@ -6,7 +6,7 @@ import { Module } from "@erda/ui/components/module";
 import { RefreshButton } from "@erda/ui/components/refresh-button";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
 import { Button } from "@erda/ui/components/ui/button";
-import { Star, UserCheck } from "lucide-react";
+import { Star } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { useNav } from "#/app/nav/context.ts";
@@ -15,7 +15,6 @@ import { useRefreshing } from "#/app/pages/shared/use-refreshing.ts";
 import { useCharacterSummary, useRefreshSummary } from "#/features/character/use-character-summary.ts";
 import { useFavorites } from "#/features/character/use-favorites.ts";
 import { useRecent } from "#/features/character/use-recent.ts";
-import { useSetting } from "#/features/settings/use-settings.ts";
 import { runAction } from "#/lib/action.ts";
 import { openSettingsAction } from "#/lib/tauri.ts";
 
@@ -56,7 +55,6 @@ export function ViewingPage({ ocid, name }: { ocid: string; name: string }) {
   const summary = useCharacterSummary(ocid);
   const refreshSummary = useRefreshSummary();
   const { isFavorite, toggle } = useFavorites();
-  const [mainName, setMainName, mainLoaded] = useSetting("settings.mainCharacterName");
   const { refreshing, refresh } = useRefreshing(() => runAction(() => refreshSummary(ocid), "새로 고치지 못했어요"));
   const s = summary.data;
   useRecordRecent(s);
@@ -65,7 +63,6 @@ export function ViewingPage({ ocid, name }: { ocid: string; name: string }) {
     setPopped(true);
     return runAction(() => toggle(target), "즐겨찾기를 바꾸지 못했어요");
   };
-  const canSetMain = s && mainLoaded && mainName.trim() !== s.name;
   return (
     <>
       <ScreenHeader
@@ -77,17 +74,6 @@ export function ViewingPage({ ocid, name }: { ocid: string; name: string }) {
           <>
             {s ? (
               <FavoriteButton summary={s} favorite={isFavorite(ocid)} popped={popped} onToggle={toggleFavorite} />
-            ) : null}
-            {canSetMain ? (
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label="본캐로 지정"
-                title="본캐로 지정"
-                onClick={() => runAction(() => setMainName(s.name), "본캐를 바꾸지 못했어요")}
-              >
-                <UserCheck />
-              </Button>
             ) : null}
             <RefreshButton onClick={refresh} loading={refreshing} />
           </>

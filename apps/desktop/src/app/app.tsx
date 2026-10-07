@@ -128,7 +128,7 @@ function Screens({ viewportRef }: { viewportRef: RefObject<HTMLDivElement | null
 }
 
 const PANEL_CLASS =
-  "flex h-screen w-screen origin-top flex-col overflow-hidden rounded-[var(--panel-radius)] transition-[opacity,translate,scale] motion-reduce:translate-y-0 motion-reduce:scale-100 motion-reduce:transition-opacity";
+  "flex h-screen w-screen origin-top flex-col overflow-hidden rounded-[var(--panel-radius)] bg-panel-scrim transition-[opacity,translate,scale] motion-reduce:translate-y-0 motion-reduce:scale-100 motion-reduce:transition-opacity";
 const PANEL_SHOWN = "translate-y-0 scale-100 opacity-100 duration-160 ease-snappy";
 const PANEL_HIDDEN = "-translate-y-1 scale-[0.98] opacity-0 duration-120 ease-in";
 
