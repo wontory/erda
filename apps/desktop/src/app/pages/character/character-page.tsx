@@ -8,7 +8,6 @@ import { Button } from "@erda/ui/components/ui/button";
 import { User } from "lucide-react";
 
 import { useNav } from "#/app/nav/context.ts";
-import { AccountMenu } from "#/app/pages/character/parts/account-menu.tsx";
 import { CharacterBody } from "#/app/pages/character/parts/character-body.tsx";
 import { EmptyState } from "#/app/pages/shared/empty-state.tsx";
 import { useRefreshing } from "#/app/pages/shared/use-refreshing.ts";
@@ -34,15 +33,7 @@ export function CharacterPage() {
         subtitle={s ? `${s.world} · ${s.job}` : undefined}
         onBack={pop}
         onSettings={() => openSettingsAction()}
-        trailing={
-          <>
-            <AccountMenu
-              currentName={main.name}
-              onPick={(n) => runAction(() => main.setMain(n), "본캐를 바꾸지 못했어요")}
-            />
-            <RefreshButton onClick={refresh} loading={refreshing} disabled={!main.name} />
-          </>
-        }
+        trailing={<RefreshButton onClick={refresh} loading={refreshing} disabled={!main.name} />}
       />
       <div className="flex flex-col gap-2.5 px-3 pb-3">
         {!main.nameLoaded ? loadingMain : null}
