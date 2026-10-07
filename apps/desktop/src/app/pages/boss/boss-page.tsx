@@ -1,4 +1,4 @@
-import { CYCLES, CYCLE_META, type BossCycle } from "@erda/core";
+import { CYCLES, CYCLE_META, bossById, bossesOf, type BossCycle, type BossEntry, type BossRow } from "@erda/core";
 import { RefreshButton } from "@erda/ui/components/refresh-button";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
 import { Button } from "@erda/ui/components/ui/button";
@@ -41,11 +41,17 @@ function CycleTabs({ value, onChange }: { value: BossCycle; onChange: (cycle: Bo
   );
 }
 
+const catalogEntries = (rows: BossRow[]): BossEntry[] =>
+  rows.flatMap((r) => {
+    const entry = r.catalogId ? bossById(r.catalogId) : undefined;
+    return entry ? [entry] : [];
+  });
+
 export function BossPage() {
   const { pop } = useNav();
   const [cycle, setCycle] = useState<BossCycle>("weekly");
-  const [editingFor, setEditingFor] = useState<"manual" | null>(null);
   const view = useBossView(cycle);
+  const [editingFor, setEditingFor] = useState<typeof view.mode | null>(null);
   const main = useMainCharacter();
   const { boss } = view;
   const [lastMode, setLastMode] = useState(view.mode);
@@ -54,19 +60,26 @@ export function BossPage() {
     setEditingFor(null);
   }
   const scheduler = view.mode === "scheduler";
-  const editing = editingFor === view.mode;
-  const setEditing = (on: boolean) => setEditingFor(on ? "manual" : null);
+  const editable = !scheduler || view.status === "ready";
+  const editing = editable && editingFor === view.mode;
+  const setEditing = (on: boolean) => setEditingFor(on ? view.mode : null);
   const save = (fn: () => Promise<unknown>) => void runAction(fn, "보스 기록을 저장하지 못했어요");
   const refresh = () => void runAction(() => view.refresh(), "스케줄러를 갱신하지 못했어요");
   const changeUseScheduler = (on: boolean) => {
     setEditing(false);
     void runAction(() => view.setUseScheduler(on), "설정을 저장하지 못했어요");
   };
+  const editToggle = <EditToggle editing={editing} onToggle={() => setEditing(!editing)} />;
   const trailing = scheduler ? (
-    <RefreshButton onClick={refresh} loading={view.refreshing} />
+    <>
+      <RefreshButton onClick={refresh} loading={view.refreshing} />
+      {editable ? editToggle : null}
+    </>
   ) : (
-    <EditToggle editing={editing} onToggle={() => setEditing(!editing)} />
+    editToggle
   );
+  const onParty = (id: string, n: number) => save(() => boss.setParty(id, n));
+  const onPrice = (id: string, n: number) => save(() => boss.setPrice(id, n));
   return (
     <>
       <ScreenHeader
@@ -79,7 +92,15 @@ export function BossPage() {
       <div className="flex flex-col gap-2.5 px-3 pb-3">
         <CycleTabs value={cycle} onChange={setCycle} />
         <BossSummaryModule view={view} cycle={cycle} now={view.now} />
-        {scheduler ? (
+        {scheduler && editing ? (
+          <EditList
+            entries={catalogEntries(view.rows)}
+            state={boss.state}
+            emptyMessage="이 주기에 등록한 보스 중 가격표에 있는 보스가 없어요"
+            onParty={onParty}
+            onPrice={onPrice}
+          />
+        ) : scheduler ? (
           <>
             <SchedulerSection
               status={view.status}
@@ -93,11 +114,11 @@ export function BossPage() {
           </>
         ) : editing ? (
           <EditList
-            cycle={cycle}
+            entries={bossesOf(cycle)}
             state={boss.state}
             onToggleSelected={(id) => save(() => boss.toggleSelected(id))}
-            onParty={(id, n) => save(() => boss.setParty(id, n))}
-            onPrice={(id, n) => save(() => boss.setPrice(id, n))}
+            onParty={onParty}
+            onPrice={onPrice}
           />
         ) : (
           <ManualList
