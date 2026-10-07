@@ -21,7 +21,7 @@ function symbolStats(s: SymbolData) {
 export function SymbolDetail({ payload }: { payload: SymbolPayload }) {
   const s = payload.symbol;
   return (
-    <div className="h-full overflow-y-auto">
+    <div>
       <div className="font-semibold">{s.symbol_name}</div>
       <div className="text-muted-foreground">
         Lv.{payload.level} · 포스 {s.symbol_force}

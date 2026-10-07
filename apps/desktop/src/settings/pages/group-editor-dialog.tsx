@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from "@erda/ui/components/ui/dropdown-menu";
 import { Input } from "@erda/ui/components/ui/input";
+import { ScrollArea } from "@erda/ui/components/ui/scroll-area";
 import { Toggle } from "@erda/ui/components/ui/toggle";
 import { listItem } from "@erda/ui/lib/motion";
 import { ArrowDown, ArrowUp, Repeat, X } from "lucide-react";
@@ -138,14 +139,16 @@ function AddTimerMenu({ onAdd }: { onAdd: (entry: TimerGroupEntry) => void }) {
       <DropdownMenuTrigger render={<Button type="button" variant="outline" size="sm" />}>
         타이머 추가
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="max-h-72 overflow-y-auto">
-        {TIMER_PRESETS.map((p) => (
-          <DropdownMenuItem key={p.id} onClick={() => onAdd(entryFromPreset(p, makeEntryId))}>
-            {p.name}
-          </DropdownMenuItem>
-        ))}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => onAdd(customEntry(makeEntryId))}>직접 만들기 (10분)</DropdownMenuItem>
+      <DropdownMenuContent align="start" className="p-0">
+        <ScrollArea viewportClassName="max-h-72 p-1">
+          {TIMER_PRESETS.map((p) => (
+            <DropdownMenuItem key={p.id} onClick={() => onAdd(entryFromPreset(p, makeEntryId))}>
+              {p.name}
+            </DropdownMenuItem>
+          ))}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => onAdd(customEntry(makeEntryId))}>직접 만들기 (10분)</DropdownMenuItem>
+        </ScrollArea>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -191,7 +194,7 @@ function Editor({ initial, onClose, onSave }: GroupHandlers & { initial: TimerGr
           spellCheck={false}
           onKeyDown={guardIme}
         />
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto">
+        <ScrollArea className="min-h-0 flex-1">
           {entries.length === 0 ? (
             <div className="py-6 text-center text-[12px] text-muted-foreground">
               아래 "타이머 추가"로 항목을 넣어 주세요
@@ -211,7 +214,7 @@ function Editor({ initial, onClose, onSave }: GroupHandlers & { initial: TimerGr
               </m.div>
             ))}
           </AnimatePresence>
-        </div>
+        </ScrollArea>
         {error ? (
           <p role="alert" className="text-[12px] text-destructive">
             {error}

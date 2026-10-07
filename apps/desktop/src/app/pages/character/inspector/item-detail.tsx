@@ -59,7 +59,7 @@ export function ItemDetail({ item }: { item: Item }) {
     Boolean,
   );
   return (
-    <div className="h-full overflow-y-auto">
+    <div>
       <div className="flex items-center gap-2">
         <GameIcon src={item.item_icon} size={48} alt={item.item_name ?? ""} />
         <div className="min-w-0">
