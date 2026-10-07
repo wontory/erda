@@ -8,7 +8,7 @@ use std::{
     time::Duration,
 };
 
-use flyout::{BlurGuard, Dismiss, Flyout, HUD_LABEL, INSPECTOR_LABEL, PANEL_LABEL, TRAY_ID};
+use flyout::{BlurGuard, Dismiss, Flyout, Toggle, HUD_LABEL, INSPECTOR_LABEL, PANEL_LABEL, TRAY_ID};
 use objc2_app_kit::NSView;
 use tauri::{AppHandle, Manager};
 use tauri_nspanel::{CollectionBehavior, ManagerExt, PanelHandle, PanelLevel, StyleMask, WebviewWindowExt};
@@ -212,7 +212,7 @@ fn with_panel(app: &AppHandle, label: &str, context: &str, f: impl FnOnce(&Panel
 }
 
 impl Flyout for MacFlyout {
-    fn setup(&self, app: &AppHandle, on_dismiss: Dismiss) -> tauri::Result<()> {
+    fn setup(&self, app: &AppHandle, on_dismiss: Dismiss, _on_toggle: Toggle) -> tauri::Result<()> {
         let window = app
             .get_webview_window(PANEL_LABEL)
             .ok_or(tauri::Error::WindowNotFound)?;
@@ -272,8 +272,8 @@ impl Flyout for MacFlyout {
         }
     }
 
-    fn tray_icon(&self) -> (&'static [u8], bool) {
-        (TRAY_ICON, true)
+    fn tray_icon(&self) -> Option<(&'static [u8], bool)> {
+        Some((TRAY_ICON, true))
     }
 
     fn setup_inspector(&self, app: &AppHandle) -> tauri::Result<()> {

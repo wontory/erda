@@ -43,6 +43,7 @@
   --color-foreground: var(--foreground);
   --color-background: var(--background);
   --color-glass-card: var(--glass-card);
+  --color-panel-scrim: var(--panel-scrim);
   --color-glass-card-hover: var(--glass-card-hover);
   --color-success: var(--success);
   --color-warning: var(--warning);
@@ -101,6 +102,7 @@
   --sidebar-ring: oklch(0.708 0 0);
   --glass-card: oklch(1 0 0 / 55%);
   --glass-card-hover: oklch(1 0 0 / 70%);
+  --panel-scrim: oklch(0.985 0 0 / 62%);
   --panel-radius: 24px;
   --success: oklch(0.527 0.154 150.069);
   --warning: oklch(0.555 0.163 48.998);
@@ -146,6 +148,7 @@
   --sidebar-ring: oklch(0.556 0 0);
   --glass-card: oklch(1 0 0 / 7%);
   --glass-card-hover: oklch(1 0 0 / 11%);
+  --panel-scrim: oklch(0.145 0 0 / 58%);
   --success: oklch(0.792 0.209 151.711);
   --warning: oklch(0.828 0.189 84.429);
   --danger: oklch(0.704 0.191 22.216);

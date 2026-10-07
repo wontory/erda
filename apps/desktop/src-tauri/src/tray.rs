@@ -10,11 +10,13 @@ const MENU_SETTINGS: &str = "settings";
 const MENU_QUIT: &str = "quit";
 
 pub fn setup(app: &AppHandle) -> tauri::Result<()> {
+    let Some((bytes, template)) = windows::flyout(app).tray_icon() else {
+        return Ok(());
+    };
     let settings = MenuItem::with_id(app, MENU_SETTINGS, "설정…", true, Some("CmdOrCtrl+,"))?;
     let quit = MenuItem::with_id(app, MENU_QUIT, "Erda 종료", true, Some("CmdOrCtrl+Q"))?;
     let menu = Menu::with_items(app, &[&settings, &PredefinedMenuItem::separator(app)?, &quit])?;
 
-    let (bytes, template) = windows::flyout(app).tray_icon();
     let icon = tauri::image::Image::from_bytes(bytes)?;
     TrayIconBuilder::with_id(flyout::TRAY_ID)
         .icon(icon)
