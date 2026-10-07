@@ -11,7 +11,7 @@ const pageSchema = z.discriminatedUnion("kind", [
   fixedPage("home"),
   fixedPage("character"),
   fixedPage("timers"),
-  fixedPage("boss"),
+  fixedPage("scheduler"),
   fixedPage("news"),
   z.object({ kind: z.literal("calculator"), id: z.string(), calculator: z.enum(CALCULATOR_IDS) }),
   fixedPage("account"),

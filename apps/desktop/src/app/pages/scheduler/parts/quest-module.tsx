@@ -7,10 +7,10 @@ import { ListChecks } from "lucide-react";
 
 import { ItemValue } from "#/app/pages/shared/item-value.tsx";
 
-export function HomeworkModule({ cycle, items }: { cycle: BossCycle; items: HomeworkItem[] }) {
+export function QuestModule({ cycle, items }: { cycle: BossCycle; items: HomeworkItem[] }) {
   if (cycle === "monthly" || items.length === 0) return null;
   return (
-    <Module title={`${CYCLE_META[cycle].title} 숙제`} icon={ListChecks}>
+    <Module title={`${CYCLE_META[cycle].title} 퀘스트`} icon={ListChecks}>
       {items.map((h) => (
         <Item key={h.key} size="row">
           <ItemMedia>

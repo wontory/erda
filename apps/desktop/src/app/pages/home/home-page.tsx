@@ -11,11 +11,11 @@ import { useSetting } from "#/features/settings/use-settings.ts";
 import { openSettingsAction } from "#/lib/tauri.ts";
 
 import { AccountModule } from "./account-module.tsx";
-import { BossModule } from "./boss-module.tsx";
 import { CalculatorsModule } from "./calculators-module.tsx";
 import { CharacterModule } from "./character-module.tsx";
 import { NewsModule } from "./news-module.tsx";
 import { OnboardingModule } from "./onboarding-module.tsx";
+import { SchedulerModule } from "./scheduler-module.tsx";
 import { TimerModule } from "./timer-module.tsx";
 
 function HomeSearch() {
@@ -66,7 +66,7 @@ export function HomePage() {
         )}
         <div className="grid grid-cols-2 gap-2.5">
           <TimerModule onOpen={() => push(pages.timers())} />
-          <BossModule onOpen={() => push(pages.boss())} />
+          <SchedulerModule onOpen={() => push(pages.scheduler())} />
         </div>
         <CalculatorsModule onOpen={(id) => push(pages.calculator(id))} />
         <NewsModule onOpen={() => push(pages.news())} />

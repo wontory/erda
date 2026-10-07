@@ -16,7 +16,6 @@ import { NavProvider } from "#/app/nav/nav-provider.tsx";
 import { clearLastPage } from "#/app/nav/persist.ts";
 import { HOME, type Page } from "#/app/nav/stack.ts";
 import { useScreenMemory } from "#/app/nav/use-screen-memory.ts";
-import { BossPage } from "#/app/pages/boss/boss-page.tsx";
 import { CalculatorPage } from "#/app/pages/calculators/calculator-page.tsx";
 import { CharacterPage } from "#/app/pages/character/character-page.tsx";
 import { GuildPage } from "#/app/pages/character/guild-page.tsx";
@@ -28,6 +27,7 @@ import { AccountPage } from "#/app/pages/insights/account-page.tsx";
 import { AchievementsPage } from "#/app/pages/insights/achievements-page.tsx";
 import { HistoryPage } from "#/app/pages/insights/history-page.tsx";
 import { NewsPage } from "#/app/pages/news/news-page.tsx";
+import { SchedulerPage } from "#/app/pages/scheduler/scheduler-page.tsx";
 import { TimersPage } from "#/app/pages/timers/timers-page.tsx";
 import { MainCharacterProvider } from "#/features/character/main-character-provider.tsx";
 import { useHistorySettings } from "#/features/insights/use-history-settings.ts";
@@ -44,8 +44,8 @@ function Screen({ page }: { page: Page }) {
       return <CharacterPage />;
     case "timers":
       return <TimersPage />;
-    case "boss":
-      return <BossPage />;
+    case "scheduler":
+      return <SchedulerPage />;
     case "news":
       return <NewsPage />;
     case "calculator":

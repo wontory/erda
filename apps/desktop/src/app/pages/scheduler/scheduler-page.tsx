@@ -7,12 +7,12 @@ import { Check, Pencil } from "lucide-react";
 import { useState } from "react";
 
 import { useNav } from "#/app/nav/context.ts";
-import { BossSummaryModule } from "#/app/pages/boss/parts/boss-summary-module.tsx";
-import { EditList } from "#/app/pages/boss/parts/edit-list.tsx";
-import { HomeworkModule } from "#/app/pages/boss/parts/homework-module.tsx";
-import { ManualList } from "#/app/pages/boss/parts/manual-list.tsx";
-import { SchedulerSection } from "#/app/pages/boss/parts/scheduler-section.tsx";
-import { SettingsModule } from "#/app/pages/boss/parts/settings-module.tsx";
+import { BossSummaryModule } from "#/app/pages/scheduler/parts/boss-summary-module.tsx";
+import { EditList } from "#/app/pages/scheduler/parts/edit-list.tsx";
+import { ManualList } from "#/app/pages/scheduler/parts/manual-list.tsx";
+import { QuestModule } from "#/app/pages/scheduler/parts/quest-module.tsx";
+import { SchedulerSection } from "#/app/pages/scheduler/parts/scheduler-section.tsx";
+import { SettingsModule } from "#/app/pages/scheduler/parts/settings-module.tsx";
 import { useBossView } from "#/features/boss/use-boss-view.ts";
 import { useMainCharacter } from "#/features/character/use-main-character.ts";
 import { runAction } from "#/lib/action.ts";
@@ -47,7 +47,7 @@ const catalogEntries = (rows: BossRow[]): BossEntry[] =>
     return entry ? [entry] : [];
   });
 
-export function BossPage() {
+export function SchedulerPage() {
   const { pop } = useNav();
   const [cycle, setCycle] = useState<BossCycle>("weekly");
   const view = useBossView(cycle);
@@ -83,7 +83,7 @@ export function BossPage() {
   return (
     <>
       <ScreenHeader
-        title="보스"
+        title="스케줄러"
         subtitle={main.name ? `본캐: ${main.name}` : undefined}
         onBack={pop}
         trailing={trailing}
@@ -110,7 +110,7 @@ export function BossPage() {
               unregistered={view.unregistered}
               onRetry={refresh}
             />
-            <HomeworkModule cycle={cycle} items={view.homework} />
+            <QuestModule cycle={cycle} items={view.homework} />
           </>
         ) : editing ? (
           <EditList

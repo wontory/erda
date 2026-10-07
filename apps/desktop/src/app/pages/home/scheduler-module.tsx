@@ -1,9 +1,9 @@
 import { KoreanNumber } from "@erda/core";
 import { Module } from "@erda/ui/components/module";
 import { Progress } from "@erda/ui/components/ui/progress";
-import { Crown } from "lucide-react";
+import { CalendarCheck } from "lucide-react";
 
-import { RollingValue } from "#/app/pages/boss/parts/rolling-value.tsx";
+import { RollingValue } from "#/app/pages/scheduler/parts/rolling-value.tsx";
 import { TrailingText } from "#/app/pages/shared/trailing-text.tsx";
 import { useBossView } from "#/features/boss/use-boss-view.ts";
 import type { BossView } from "#/features/boss/view.ts";
@@ -14,13 +14,13 @@ function statusText(view: BossView) {
   return "스케줄러 데이터 없음";
 }
 
-export function BossModule({ onOpen }: { onOpen: () => void }) {
+export function SchedulerModule({ onOpen }: { onOpen: () => void }) {
   const view = useBossView("weekly");
   const { summary } = view;
   return (
     <Module
-      title="보스"
-      icon={Crown}
+      title="스케줄러"
+      icon={CalendarCheck}
       onOpen={onOpen}
       trailing={<TrailingText>{view.mode === "scheduler" ? "연동" : "직접"}</TrailingText>}
     >
