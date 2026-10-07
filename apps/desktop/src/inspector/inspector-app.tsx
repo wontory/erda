@@ -21,7 +21,7 @@ export function InspectorApp() {
   const [payload, setPayload] = useState<InspectorPayload | null>(null);
   useTauriEvent("inspector:content", inspectorPayloadSchema, setPayload);
   return (
-    <div className="h-screen w-screen overflow-hidden rounded-[var(--panel-radius)] p-3 text-[12px]">
+    <div className="h-screen w-screen overflow-hidden rounded-[var(--panel-radius)] bg-panel-scrim p-3 text-[12px]">
       {payload ? (
         <div className="animate-in duration-150 ease-out fade-in">
           <InspectorDetail payload={payload} />
