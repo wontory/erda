@@ -17,6 +17,7 @@ import { clearLastPage } from "#/app/nav/persist.ts";
 import { HOME, type Page } from "#/app/nav/stack.ts";
 import { useScreenMemory } from "#/app/nav/use-screen-memory.ts";
 import { BossPage } from "#/app/pages/boss/boss-page.tsx";
+import { CalculatorPage } from "#/app/pages/calculators/calculator-page.tsx";
 import { CharacterPage } from "#/app/pages/character/character-page.tsx";
 import { GuildPage } from "#/app/pages/character/guild-page.tsx";
 import { ResultsPage } from "#/app/pages/character/results-page.tsx";
@@ -47,6 +48,8 @@ function Screen({ page }: { page: Page }) {
       return <BossPage />;
     case "news":
       return <NewsPage />;
+    case "calculator":
+      return <CalculatorPage calculator={page.calculator} />;
     case "account":
       return <AccountPage />;
     case "history":

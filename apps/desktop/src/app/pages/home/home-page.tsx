@@ -12,6 +12,7 @@ import { openSettingsAction } from "#/lib/tauri.ts";
 
 import { AccountModule } from "./account-module.tsx";
 import { BossModule } from "./boss-module.tsx";
+import { CalculatorsModule } from "./calculators-module.tsx";
 import { CharacterModule } from "./character-module.tsx";
 import { NewsModule } from "./news-module.tsx";
 import { OnboardingModule } from "./onboarding-module.tsx";
@@ -67,6 +68,7 @@ export function HomePage() {
           <TimerModule onOpen={() => push(pages.timers())} />
           <BossModule onOpen={() => push(pages.boss())} />
         </div>
+        <CalculatorsModule onOpen={(id) => push(pages.calculator(id))} />
         <NewsModule onOpen={() => push(pages.news())} />
         <AccountModule onOpen={() => push(pages.account())} />
       </div>

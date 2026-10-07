@@ -1,4 +1,4 @@
-import { DETAIL_PAGES, HISTORY_KINDS } from "@erda/core";
+import { CALCULATOR_IDS, DETAIL_PAGES, HISTORY_KINDS } from "@erda/core";
 import { z } from "zod";
 
 import { DATA_KEYS, getDataStore } from "#/features/data/store.ts";
@@ -13,6 +13,7 @@ const pageSchema = z.discriminatedUnion("kind", [
   fixedPage("timers"),
   fixedPage("boss"),
   fixedPage("news"),
+  z.object({ kind: z.literal("calculator"), id: z.string(), calculator: z.enum(CALCULATOR_IDS) }),
   fixedPage("account"),
   z.object({ kind: z.literal("history"), id: z.string(), history: z.enum(HISTORY_KINDS) }),
   fixedPage("achievements"),
