@@ -6,14 +6,17 @@ use std::{
     },
 };
 
-use flyout::Toggle;
+use flyout::{Edge, Toggle};
 use tauri::AppHandle;
 use windows::{
     core::{w, HSTRING, PCWSTR},
     Win32::{
         Foundation::{GetLastError, COLORREF, HINSTANCE, HWND, LPARAM, LRESULT, WPARAM},
         System::LibraryLoader::GetModuleHandleW,
-        UI::WindowsAndMessaging::*,
+        UI::{
+            Shell::{SHAppBarMessage, ABE_BOTTOM, ABE_LEFT, ABE_RIGHT, ABE_TOP, ABM_GETTASKBARPOS, APPBARDATA},
+            WindowsAndMessaging::*,
+        },
     },
 };
 
@@ -98,6 +101,24 @@ pub fn set_title(text: &str) {
     let title = HSTRING::from(if text.is_empty() { "Erda" } else { text });
     if let Err(e) = unsafe { SetWindowTextW(HWND(raw as *mut c_void), &title) } {
         log::warn!("flyout-windows: taskbar SetWindowTextW failed: {e}");
+    }
+}
+
+pub fn position() -> Option<(Edge, i32)> {
+    let mut data = APPBARDATA {
+        cbSize: size_of::<APPBARDATA>() as u32,
+        ..Default::default()
+    };
+    if unsafe { SHAppBarMessage(ABM_GETTASKBARPOS, &mut data) } == 0 {
+        return None;
+    }
+    let (w, h) = (data.rc.right - data.rc.left, data.rc.bottom - data.rc.top);
+    match data.uEdge {
+        ABE_LEFT => Some((Edge::Left, w)),
+        ABE_TOP => Some((Edge::Top, h)),
+        ABE_RIGHT => Some((Edge::Right, w)),
+        ABE_BOTTOM => Some((Edge::Bottom, h)),
+        _ => None,
     }
 }
 

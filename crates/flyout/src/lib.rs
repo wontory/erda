@@ -154,26 +154,32 @@ pub fn anchor_beside(main: Rect, panel: Size, monitor: Rect, gap: i32, margin: i
     Point { x, y }
 }
 
-pub fn taskbar_slot(cursor: Point, monitor: Rect, work: Rect) -> Option<Rect> {
-    let monitor_bottom = monitor.y + monitor.h;
-    let work_bottom = work.y + work.h;
-    let monitor_right = monitor.x + monitor.w;
-    let work_right = work.x + work.w;
-    let (band, slot) = if work.y > monitor.y {
-        let band = Rect::new(monitor.x, monitor.y, monitor.w, work.y - monitor.y);
-        (band, Rect::new(cursor.x, band.y, 1, band.h))
-    } else if work.x > monitor.x {
-        let band = Rect::new(monitor.x, monitor.y, work.x - monitor.x, monitor.h);
-        (band, Rect::new(band.x, cursor.y, band.w, 1))
-    } else if work_right < monitor_right {
-        let band = Rect::new(work_right, monitor.y, monitor_right - work_right, monitor.h);
-        (band, Rect::new(band.x, cursor.y, band.w, 1))
-    } else if work_bottom < monitor_bottom {
-        let band = Rect::new(monitor.x, work_bottom, monitor.w, monitor_bottom - work_bottom);
-        (band, Rect::new(cursor.x, band.y, 1, band.h))
-    } else {
-        let x = cursor.x.clamp(monitor.x, monitor_right - 1);
-        return Some(Rect::new(x, monitor_bottom, 1, 0));
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Edge {
+    Left,
+    Top,
+    Right,
+    Bottom,
+}
+
+pub fn taskbar_slot(cursor: Point, monitor: Rect, edge: Edge, thickness: i32) -> Option<Rect> {
+    let (band, slot) = match edge {
+        Edge::Left => {
+            let band = Rect::new(monitor.x, monitor.y, thickness, monitor.h);
+            (band, Rect::new(band.x, cursor.y, band.w, 1))
+        }
+        Edge::Top => {
+            let band = Rect::new(monitor.x, monitor.y, monitor.w, thickness);
+            (band, Rect::new(cursor.x, band.y, 1, band.h))
+        }
+        Edge::Right => {
+            let band = Rect::new(monitor.x + monitor.w - thickness, monitor.y, thickness, monitor.h);
+            (band, Rect::new(band.x, cursor.y, band.w, 1))
+        }
+        Edge::Bottom => {
+            let band = Rect::new(monitor.x, monitor.y + monitor.h - thickness, monitor.w, thickness);
+            (band, Rect::new(cursor.x, band.y, 1, band.h))
+        }
     };
     band.contains(cursor).then_some(slot)
 }
@@ -310,8 +316,7 @@ mod tests {
 
     #[test]
     fn slot_sits_in_a_bottom_taskbar_under_the_cursor() {
-        let work = Rect::new(0, 0, 1920, 1032);
-        let slot = taskbar_slot(Point { x: 700, y: 1060 }, MONITOR, work);
+        let slot = taskbar_slot(Point { x: 700, y: 1060 }, MONITOR, Edge::Bottom, 48);
         assert_eq!(slot, Some(Rect::new(700, 1032, 1, 48)));
         let panel = Size { w: 400, h: 640 };
         let p = anchor_panel(slot.unwrap(), panel, MONITOR, 12, 8);
@@ -320,20 +325,20 @@ mod tests {
 
     #[test]
     fn slot_follows_a_top_taskbar() {
-        let work = Rect::new(0, 48, 1920, 1032);
-        let slot = taskbar_slot(Point { x: 300, y: 20 }, MONITOR, work);
+        let slot = taskbar_slot(Point { x: 300, y: 20 }, MONITOR, Edge::Top, 48);
         assert_eq!(slot, Some(Rect::new(300, 0, 1, 48)));
     }
 
     #[test]
     fn no_slot_when_the_cursor_is_off_the_taskbar() {
-        let work = Rect::new(0, 0, 1920, 1032);
-        assert_eq!(taskbar_slot(Point { x: 700, y: 500 }, MONITOR, work), None);
+        let slot = taskbar_slot(Point { x: 700, y: 500 }, MONITOR, Edge::Bottom, 48);
+        assert_eq!(slot, None);
     }
 
     #[test]
-    fn auto_hidden_taskbar_anchors_to_the_bottom_edge() {
-        let slot = taskbar_slot(Point { x: 5000, y: 10 }, MONITOR, MONITOR);
-        assert_eq!(slot, Some(Rect::new(1919, 1080, 1, 0)));
+    fn slot_uses_the_taskbar_on_a_second_monitor() {
+        let second = Rect::new(1920, 5, 1920, 1080);
+        let slot = taskbar_slot(Point { x: 2500, y: 1070 }, second, Edge::Bottom, 48);
+        assert_eq!(slot, Some(Rect::new(2500, 1037, 1, 48)));
     }
 }

@@ -1,6 +1,6 @@
 use std::{sync::Arc, time::Duration};
 
-use flyout::{BlurGuard, Dismiss, Flyout, Point, Toggle, HUD_LABEL, INSPECTOR_LABEL, PANEL_LABEL};
+use flyout::{BlurGuard, Dismiss, Edge, Flyout, Point, Toggle, HUD_LABEL, INSPECTOR_LABEL, PANEL_LABEL};
 use tauri::{AppHandle, Manager, WindowEvent};
 use window_vibrancy::{apply_acrylic, apply_blur};
 
@@ -54,6 +54,16 @@ fn set_taskbar_title(text: &str) {
 #[cfg(not(windows))]
 fn set_taskbar_title(_text: &str) {}
 
+#[cfg(windows)]
+fn taskbar_position() -> Option<(Edge, i32)> {
+    taskbar::position()
+}
+
+#[cfg(not(windows))]
+fn taskbar_position() -> Option<(Edge, i32)> {
+    None
+}
+
 fn anchor_to_taskbar(app: &AppHandle) {
     let cursor = match app.cursor_position() {
         Ok(p) => Point {
@@ -65,8 +75,10 @@ fn anchor_to_taskbar(app: &AppHandle) {
     let Some(monitor) = flyout::monitor_under_cursor(app) else {
         return log::warn!("flyout-windows: no monitor under the cursor; panel keeps its last anchor");
     };
-    let (bounds, work) = (flyout::monitor_rect_of(&monitor), flyout::work_area_rect(&monitor));
-    if let Some(slot) = flyout::taskbar_slot(cursor, bounds, work) {
+    let Some((edge, thickness)) = taskbar_position() else {
+        return log::warn!("flyout-windows: taskbar position unknown; panel keeps its last anchor");
+    };
+    if let Some(slot) = flyout::taskbar_slot(cursor, flyout::monitor_rect_of(&monitor), edge, thickness) {
         flyout::remember_anchor(app, slot);
     }
 }
