@@ -16,7 +16,8 @@ pub struct FlyoutState(pub Box<dyn Flyout>);
 
 pub fn setup(app: &AppHandle, flyout: Box<dyn Flyout>) -> tauri::Result<()> {
     let dismiss: flyout::Dismiss = Arc::new(|app: &AppHandle| hide_panel(app));
-    flyout.setup(app, dismiss)?;
+    let toggle: flyout::Toggle = Arc::new(|app: &AppHandle| toggle_panel(app));
+    flyout.setup(app, dismiss, toggle)?;
     flyout.setup_inspector(app)?;
     flyout.setup_hud(app)?;
     app.manage(FlyoutState(flyout));

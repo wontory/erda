@@ -29,6 +29,12 @@ fn log_plugin<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
         .build()
 }
 
+const AUTOSTART_ARG: &str = "--autostart";
+
+fn opened_by_user() -> bool {
+    !std::env::args().any(|a| a == AUTOSTART_ARG)
+}
+
 fn dev_flag(name: &str) -> bool {
     cfg!(debug_assertions) && std::env::var(name).as_deref() == Ok("1")
 }
@@ -54,7 +60,7 @@ pub fn run() {
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
-            None,
+            Some(vec![AUTOSTART_ARG]),
         ));
     platform::register(builder)
         .invoke_handler(tauri::generate_handler![
@@ -97,6 +103,8 @@ pub fn run() {
             notices::setup(&handle)?;
             if dev_flag("ERDA_DEV_SHOW_PANEL") {
                 windows::show_panel_after_launch(&handle);
+            } else if cfg!(all(windows, not(debug_assertions))) && opened_by_user() {
+                windows::show_panel(&handle);
             }
             if dev_flag("ERDA_DEV_INSPECTOR") {
                 windows::show_inspector_after_launch(&handle);

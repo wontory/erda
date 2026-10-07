@@ -1,12 +1,14 @@
 use std::{sync::Arc, time::Duration};
 
-use flyout::{BlurGuard, Dismiss, Flyout, HUD_LABEL, INSPECTOR_LABEL, PANEL_LABEL, TRAY_ID};
+use flyout::{BlurGuard, Dismiss, Flyout, Point, Toggle, HUD_LABEL, INSPECTOR_LABEL, PANEL_LABEL};
 use tauri::{AppHandle, Manager, WindowEvent};
 use window_vibrancy::{apply_acrylic, apply_blur};
 
+#[cfg(windows)]
+mod taskbar;
+
 const PANEL_GAP: f64 = 12.0;
 const BLUR_GUARD: Duration = Duration::from_millis(250);
-const TRAY_ICON: &[u8] = include_bytes!("../../../apps/desktop/src-tauri/icons/32x32.png");
 
 fn apply_backdrop(window: &tauri::WebviewWindow) {
     if let Err(acrylic_err) = apply_acrylic(window, Some((0, 0, 0, 40))) {
@@ -33,6 +35,39 @@ fn set_shown_without_activation(window: &tauri::WebviewWindow, shown: bool) {
     let result = if shown { window.show() } else { window.hide() };
     if let Err(e) = result {
         log::warn!("flyout-windows: window show({shown}) failed: {e}");
+    }
+}
+
+#[cfg(windows)]
+fn add_taskbar_button(app: &AppHandle, on_click: Toggle) {
+    taskbar::create(app, on_click);
+}
+
+#[cfg(not(windows))]
+fn add_taskbar_button(_app: &AppHandle, _on_click: Toggle) {}
+
+#[cfg(windows)]
+fn set_taskbar_title(text: &str) {
+    taskbar::set_title(text);
+}
+
+#[cfg(not(windows))]
+fn set_taskbar_title(_text: &str) {}
+
+fn anchor_to_taskbar(app: &AppHandle) {
+    let cursor = match app.cursor_position() {
+        Ok(p) => Point {
+            x: p.x.round() as i32,
+            y: p.y.round() as i32,
+        },
+        Err(e) => return log::warn!("flyout-windows: cursor_position failed: {e}; panel keeps its last anchor"),
+    };
+    let Some(monitor) = flyout::monitor_under_cursor(app) else {
+        return log::warn!("flyout-windows: no monitor under the cursor; panel keeps its last anchor");
+    };
+    let (bounds, work) = (flyout::monitor_rect_of(&monitor), flyout::work_area_rect(&monitor));
+    if let Some(slot) = flyout::taskbar_slot(cursor, bounds, work) {
+        flyout::remember_anchor(app, slot);
     }
 }
 
@@ -63,7 +98,7 @@ fn warn_on_err(result: tauri::Result<()>, what: &str) {
 }
 
 impl Flyout for WindowsFlyout {
-    fn setup(&self, app: &AppHandle, on_dismiss: Dismiss) -> tauri::Result<()> {
+    fn setup(&self, app: &AppHandle, on_dismiss: Dismiss, on_toggle: Toggle) -> tauri::Result<()> {
         let window = app
             .get_webview_window(PANEL_LABEL)
             .ok_or(tauri::Error::WindowNotFound)?;
@@ -76,6 +111,7 @@ impl Flyout for WindowsFlyout {
                 on_dismiss(&handle);
             }
         });
+        add_taskbar_button(app, on_toggle);
         Ok(())
     }
 
@@ -83,6 +119,7 @@ impl Flyout for WindowsFlyout {
         let Some(window) = window(app, PANEL_LABEL, "show") else {
             return;
         };
+        anchor_to_taskbar(app);
         flyout::place_panel(app, &window, PANEL_GAP);
         warn_on_err(window.show(), "show");
         warn_on_err(window.set_focus(), "set_focus");
@@ -104,20 +141,14 @@ impl Flyout for WindowsFlyout {
         self.guard.allows_toggle()
     }
 
-    fn set_tray_text(&self, app: &AppHandle, text: &str) {
-        let Some(tray) = app.tray_by_id(TRAY_ID) else {
-            return log::warn!("flyout-windows: set_tray_text: no `{TRAY_ID}` tray");
-        };
-        warn_on_err(
-            tray.set_tooltip(Some(if text.is_empty() { "Erda" } else { text })),
-            "tray set_tooltip",
-        );
+    fn set_tray_text(&self, _app: &AppHandle, text: &str) {
+        set_taskbar_title(text);
     }
 
     fn set_settings_mode(&self, _app: &AppHandle, _on: bool) {}
 
-    fn tray_icon(&self) -> (&'static [u8], bool) {
-        (TRAY_ICON, false)
+    fn tray_icon(&self) -> Option<(&'static [u8], bool)> {
+        None
     }
 
     fn setup_inspector(&self, app: &AppHandle) -> tauri::Result<()> {

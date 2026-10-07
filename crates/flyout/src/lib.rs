@@ -25,6 +25,10 @@ pub struct Rect {
 }
 
 impl Rect {
+    pub const fn new(x: i32, y: i32, w: i32, h: i32) -> Self {
+        Rect { x, y, w, h }
+    }
+
     pub fn from_physical(pos: PhysicalPosition<i32>, size: PhysicalSize<u32>) -> Self {
         Rect {
             x: pos.x,
@@ -150,15 +154,45 @@ pub fn anchor_beside(main: Rect, panel: Size, monitor: Rect, gap: i32, margin: i
     Point { x, y }
 }
 
+pub fn taskbar_slot(cursor: Point, monitor: Rect, work: Rect) -> Option<Rect> {
+    let monitor_bottom = monitor.y + monitor.h;
+    let work_bottom = work.y + work.h;
+    let monitor_right = monitor.x + monitor.w;
+    let work_right = work.x + work.w;
+    let (band, slot) = if work.y > monitor.y {
+        let band = Rect::new(monitor.x, monitor.y, monitor.w, work.y - monitor.y);
+        (band, Rect::new(cursor.x, band.y, 1, band.h))
+    } else if work.x > monitor.x {
+        let band = Rect::new(monitor.x, monitor.y, work.x - monitor.x, monitor.h);
+        (band, Rect::new(band.x, cursor.y, band.w, 1))
+    } else if work_right < monitor_right {
+        let band = Rect::new(work_right, monitor.y, monitor_right - work_right, monitor.h);
+        (band, Rect::new(band.x, cursor.y, band.w, 1))
+    } else if work_bottom < monitor_bottom {
+        let band = Rect::new(monitor.x, work_bottom, monitor.w, monitor_bottom - work_bottom);
+        (band, Rect::new(cursor.x, band.y, 1, band.h))
+    } else {
+        let x = cursor.x.clamp(monitor.x, monitor_right - 1);
+        return Some(Rect::new(x, monitor_bottom, 1, 0));
+    };
+    band.contains(cursor).then_some(slot)
+}
+
 pub fn remember_tray_rect(app: &AppHandle, rect: &tauri::Rect) {
     let pos = rect.position.to_physical::<f64>(1.0);
     let size = rect.size.to_physical::<f64>(1.0);
-    let rect = Rect {
-        x: pos.x.round() as i32,
-        y: pos.y.round() as i32,
-        w: size.width.round() as i32,
-        h: size.height.round() as i32,
-    };
+    remember_anchor(
+        app,
+        Rect {
+            x: pos.x.round() as i32,
+            y: pos.y.round() as i32,
+            w: size.width.round() as i32,
+            h: size.height.round() as i32,
+        },
+    );
+}
+
+pub fn remember_anchor(app: &AppHandle, rect: Rect) {
     if let Some(state) = app.try_state::<TrayRect>() {
         if let Ok(mut slot) = state.0.lock() {
             *slot = Some(rect);
@@ -220,16 +254,17 @@ pub fn place_panel(app: &AppHandle, window: &WebviewWindow, gap_pt: f64) {
 }
 
 pub type Dismiss = Arc<dyn Fn(&AppHandle) + Send + Sync>;
+pub type Toggle = Arc<dyn Fn(&AppHandle) + Send + Sync>;
 
 pub trait Flyout: Send + Sync {
-    fn setup(&self, app: &AppHandle, on_dismiss: Dismiss) -> tauri::Result<()>;
+    fn setup(&self, app: &AppHandle, on_dismiss: Dismiss, on_toggle: Toggle) -> tauri::Result<()>;
     fn show(&self, app: &AppHandle);
     fn hide(&self, app: &AppHandle);
     fn is_visible(&self, app: &AppHandle) -> bool;
     fn should_toggle_on_tray_click(&self) -> bool;
     fn set_tray_text(&self, app: &AppHandle, text: &str);
     fn set_settings_mode(&self, app: &AppHandle, on: bool);
-    fn tray_icon(&self) -> (&'static [u8], bool);
+    fn tray_icon(&self) -> Option<(&'static [u8], bool)>;
     fn setup_inspector(&self, app: &AppHandle) -> tauri::Result<()>;
     fn show_inspector(&self, app: &AppHandle);
     fn hide_inspector(&self, app: &AppHandle);
@@ -264,5 +299,41 @@ impl BlurGuard {
     pub fn allows_toggle(&self) -> bool {
         let last = self.last_blur_ms.load(Ordering::Relaxed);
         last == 0 || self.now_ms().saturating_sub(last) > self.window.as_millis() as u64
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const MONITOR: Rect = Rect::new(0, 0, 1920, 1080);
+
+    #[test]
+    fn slot_sits_in_a_bottom_taskbar_under_the_cursor() {
+        let work = Rect::new(0, 0, 1920, 1032);
+        let slot = taskbar_slot(Point { x: 700, y: 1060 }, MONITOR, work);
+        assert_eq!(slot, Some(Rect::new(700, 1032, 1, 48)));
+        let panel = Size { w: 400, h: 640 };
+        let p = anchor_panel(slot.unwrap(), panel, MONITOR, 12, 8);
+        assert_eq!((p.x, p.y), (500, 1032 - 640 - 12));
+    }
+
+    #[test]
+    fn slot_follows_a_top_taskbar() {
+        let work = Rect::new(0, 48, 1920, 1032);
+        let slot = taskbar_slot(Point { x: 300, y: 20 }, MONITOR, work);
+        assert_eq!(slot, Some(Rect::new(300, 0, 1, 48)));
+    }
+
+    #[test]
+    fn no_slot_when_the_cursor_is_off_the_taskbar() {
+        let work = Rect::new(0, 0, 1920, 1032);
+        assert_eq!(taskbar_slot(Point { x: 700, y: 500 }, MONITOR, work), None);
+    }
+
+    #[test]
+    fn auto_hidden_taskbar_anchors_to_the_bottom_edge() {
+        let slot = taskbar_slot(Point { x: 5000, y: 10 }, MONITOR, MONITOR);
+        assert_eq!(slot, Some(Rect::new(1919, 1080, 1, 0)));
     }
 }

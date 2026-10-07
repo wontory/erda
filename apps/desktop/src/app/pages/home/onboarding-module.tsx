@@ -63,7 +63,7 @@ export function OnboardingModule() {
           수 있어요.
         </p>
         <p className="mt-2 text-[11px] text-muted-foreground">
-          데이터는 게임 플레이 후 평균 15분 뒤에 반영돼요. 설정은 트레이 아이콘을 우클릭하면 열려요.
+          데이터는 게임 플레이 후 평균 15분 뒤에 반영돼요. 설정은 오른쪽 위 톱니바퀴 버튼으로 열 수 있어요.
         </p>
       </Module>
     </>
