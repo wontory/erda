@@ -23,7 +23,7 @@ export function HomeworkModule({ cycle, items }: { cycle: BossCycle; items: Home
               </span>
             </ItemTitle>
           </ItemContent>
-          <ItemValue>{h.progress}</ItemValue>
+          {h.progress ? <ItemValue>{h.progress}</ItemValue> : null}
         </Item>
       ))}
     </Module>
