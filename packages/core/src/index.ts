@@ -24,7 +24,7 @@ export * from "#/boss/scheduler-mapping.ts";
 export * from "#/news/categories.ts";
 export * from "#/news/maintenance.ts";
 export * from "#/news/feed.ts";
-export * from "#/news/html-to-text.ts";
+export * from "#/news/sunday-maple.ts";
 export * from "#/insights/history-mapping.ts";
 export * from "#/insights/archive.ts";
 export * from "#/insights/aggregates.ts";

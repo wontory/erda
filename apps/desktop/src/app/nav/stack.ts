@@ -6,6 +6,7 @@ export type Page =
   | { id: "timers"; kind: "timers" }
   | { id: "scheduler"; kind: "scheduler" }
   | { id: "news"; kind: "news" }
+  | { id: string; kind: "article"; entryId: string }
   | { id: string; kind: "calculator"; calculator: CalculatorId }
   | { id: "account"; kind: "account" }
   | { id: string; kind: "history"; history: HistoryKind }
@@ -28,6 +29,7 @@ export const pages = {
   timers: (): Page => ({ id: "timers", kind: "timers" }),
   scheduler: (): Page => ({ id: "scheduler", kind: "scheduler" }),
   news: (): Page => ({ id: "news", kind: "news" }),
+  article: (entryId: string): Page => ({ id: `article|${entryId}`, kind: "article", entryId }),
   calculator: (calculator: CalculatorId): Page => ({ id: `calculator|${calculator}`, kind: "calculator", calculator }),
   account: (): Page => ({ id: "account", kind: "account" }),
   history: (history: HistoryKind): Page => ({ id: `history|${history}`, kind: "history", history }),

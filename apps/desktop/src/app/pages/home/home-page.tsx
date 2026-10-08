@@ -69,7 +69,7 @@ export function HomePage() {
           <SchedulerModule onOpen={() => push(pages.scheduler())} />
         </div>
         <CalculatorsModule onOpen={(id) => push(pages.calculator(id))} />
-        <NewsModule onOpen={() => push(pages.news())} />
+        <NewsModule onOpen={() => push(pages.news())} onOpenEntry={(id) => push(pages.article(id))} />
         <AccountModule onOpen={() => push(pages.account())} />
       </div>
     </>

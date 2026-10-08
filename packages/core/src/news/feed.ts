@@ -9,8 +9,12 @@ export const byDateDesc = (a: NewsEntry, b: NewsEntry) => compareDesc(a.date, b.
 
 const inFilter = (e: NewsEntry, filter: NewsFilter) => filter === "all" || e.category === filter;
 
-export function feedEntries(entries: NewsEntry[], filter: NewsFilter, banner: NewsEntry | null): NewsEntry[] {
-  return entries.filter((e) => inFilter(e, filter) && e.id !== banner?.id).toSorted(byDateDesc);
+type Pinned = readonly (NewsEntry | null)[];
+
+const isPinned = (e: NewsEntry, pinned: Pinned) => pinned.some((p) => p?.id === e.id);
+
+export function feedEntries(entries: NewsEntry[], filter: NewsFilter, pinned: Pinned): NewsEntry[] {
+  return entries.filter((e) => inFilter(e, filter) && !isPinned(e, pinned)).toSorted(byDateDesc);
 }
 
 export function unreadCount(entries: NewsEntry[], seen: ReadonlySet<string>, filter: NewsFilter = "all"): number {
@@ -34,9 +38,9 @@ export function isOngoing(e: NewsEntry, now: Date): boolean {
   return Number.isFinite(start) && Number.isFinite(end) && start <= t && t <= end;
 }
 
-export function latest(entries: NewsEntry[], n: number, exclude: NewsEntry | null = null): NewsEntry[] {
+export function latest(entries: NewsEntry[], n: number, pinned: Pinned = []): NewsEntry[] {
   return entries
-    .filter((e) => e.id !== exclude?.id)
+    .filter((e) => !isPinned(e, pinned))
     .toSorted(byDateDesc)
     .slice(0, n);
 }
