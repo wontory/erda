@@ -1,8 +1,8 @@
-import { latest, maintenanceBanner, periodCaption, type NewsEntry } from "@erda/core";
+import { latest, maintenanceBanner, periodCaption, sundayMaple, type NewsEntry } from "@erda/core";
 import { ErrorRow } from "@erda/ui/components/error-row";
 import { Module } from "@erda/ui/components/module";
 import { cn } from "@erda/ui/lib/utils";
-import { Newspaper } from "lucide-react";
+import { Newspaper, Sun } from "lucide-react";
 
 import { NewsTile } from "#/app/pages/news/parts/news-tile.tsx";
 import { TrailingText } from "#/app/pages/shared/trailing-text.tsx";
@@ -17,6 +17,16 @@ function MaintenanceBanner({ title }: { title: string }) {
     <div className="flex items-center gap-2 rounded-lg bg-warning/10 px-2 py-1.5 text-[12px]">
       <MaintenanceIcon size={14} aria-hidden className="shrink-0 text-warning" />
       <span className="truncate font-medium">{title}</span>
+    </div>
+  );
+}
+
+function SundayMapleBanner({ entry }: { entry: NewsEntry }) {
+  return (
+    <div className="flex items-center gap-2 rounded-lg bg-primary/10 px-2 py-1.5 text-[12px]">
+      <Sun size={14} aria-hidden className="shrink-0 text-primary" />
+      <span className="truncate font-medium">{entry.title}</span>
+      <span className="ml-auto shrink-0 text-[11px] text-muted-foreground">{periodCaption(entry)}</span>
     </div>
   );
 }
@@ -55,7 +65,8 @@ export function NewsModule({ onOpen }: { onOpen: () => void }) {
   const news = useNotices();
   const now = useNow();
   const banner = maintenanceBanner(news.entries, now);
-  const top = latest(news.entries, 2, banner);
+  const sunday = sundayMaple(news.entries, now);
+  const top = latest(news.entries, 2, [banner, sunday]);
   return (
     <Module
       title="소식"
@@ -68,6 +79,7 @@ export function NewsModule({ onOpen }: { onOpen: () => void }) {
       ) : (
         <div className="flex flex-col gap-1.5">
           {banner ? <MaintenanceBanner title={banner.title} /> : null}
+          {sunday ? <SundayMapleBanner entry={sunday} /> : null}
           {top.length === 0 ? (
             <NoPreview news={news} />
           ) : (
