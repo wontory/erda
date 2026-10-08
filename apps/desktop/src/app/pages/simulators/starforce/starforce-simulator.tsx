@@ -73,7 +73,7 @@ function StarforceScreen({
                 ) : last ? (
                   <m.span
                     key={last.id}
-                    className={`pointer-events-none absolute inset-0 rounded-xl ${
+                    className={`pointer-events-none absolute inset-0 rounded-[calc(var(--radius-xl)-1px)] ${
                       last.outcome === "success"
                         ? "bg-(--sf-gold)/50"
                         : last.outcome === "destroyed"

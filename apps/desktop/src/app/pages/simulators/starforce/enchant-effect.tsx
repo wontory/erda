@@ -1,5 +1,5 @@
 import type { EnhanceOutcome } from "@erda/core";
-import { Shield } from "lucide-react";
+import { Check, Flame, Shield, X, type LucideIcon } from "lucide-react";
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useEffect, useRef } from "react";
 
@@ -8,18 +8,11 @@ import type { LastResult, Phase } from "./use-starforce-session.ts";
 
 const EASE_OUT_EXPO = [0.19, 1, 0.22, 1] as const;
 
-const LABEL: Record<EnhanceOutcome, string> = {
-  success: "Success",
-  fail: "Fail",
-  protected: "Protected",
-  destroyed: "Destroyed",
-};
-
-const BADGE: Record<EnhanceOutcome, string> = {
-  success: "bg-(--sf-gold) text-background shadow-[0_0_18px_color-mix(in_oklab,var(--sf-gold)_55%,transparent)]",
-  fail: "bg-foreground/85 text-background",
-  protected: "bg-primary text-primary-foreground",
-  destroyed: "bg-(--sf-danger) text-white shadow-[0_0_18px_color-mix(in_oklab,var(--sf-danger)_50%,transparent)]",
+const RESULT: Record<EnhanceOutcome, { label: string; icon: LucideIcon; tone: string }> = {
+  success: { label: "성공", icon: Check, tone: "var(--success)" },
+  fail: { label: "실패", icon: X, tone: "var(--muted-foreground)" },
+  protected: { label: "파괴 방지", icon: Shield, tone: "var(--primary)" },
+  destroyed: { label: "파괴", icon: Flame, tone: "var(--destructive)" },
 };
 
 // Soft light rays turning behind the item while it charges and when it succeeds.
@@ -46,7 +39,7 @@ function Rays({ strength }: { strength: number }) {
 function Charging() {
   return (
     <m.span
-      className="absolute -inset-2 rounded-xl border-2 border-(--sf-gold)"
+      className="absolute -inset-2 rounded-[calc(var(--radius-xl)+7px)] border-2 border-(--sf-gold)"
       initial={{ scale: 1.3, opacity: 0 }}
       animate={{ scale: 1, opacity: [0, 0.9, 0.55] }}
       exit={{ opacity: 0, transition: { duration: 0.1 } }}
@@ -66,7 +59,7 @@ function Burst({ outcome }: { outcome: EnhanceOutcome }) {
           transition={{ duration: 0.55, ease: EASE_OUT_EXPO }}
         />
         <m.span
-          className="absolute inset-0 rounded-md border-2 border-(--sf-gold)"
+          className="absolute inset-0 rounded-[calc(var(--radius-xl)-1px)] border-2 border-(--sf-gold)"
           initial={{ scale: 1, opacity: 0.9 }}
           animate={{ scale: 1.8, opacity: 0 }}
           transition={{ duration: 0.65, ease: EASE_OUT_EXPO }}
@@ -103,18 +96,16 @@ function Burst({ outcome }: { outcome: EnhanceOutcome }) {
   if (outcome === "protected") {
     return (
       <m.span
-        className="absolute inset-0 grid place-items-center text-primary"
-        initial={{ scale: 0.7, opacity: 0 }}
-        animate={{ scale: [0.7, 1.12, 1], opacity: [0, 0.9, 0] }}
-        transition={{ duration: 0.6, ease: EASE_OUT_EXPO }}
-      >
-        <Shield size={46} strokeWidth={2} fill="currentColor" fillOpacity={0.15} />
-      </m.span>
+        className="absolute inset-0 rounded-[calc(var(--radius-xl)-1px)] bg-primary/20"
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      />
     );
   }
   return (
     <m.span
-      className="absolute inset-0 rounded-md bg-foreground/20"
+      className="absolute inset-0 rounded-[calc(var(--radius-xl)-1px)] bg-foreground/20"
       initial={{ opacity: 1 }}
       animate={{ opacity: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
@@ -122,17 +113,24 @@ function Burst({ outcome }: { outcome: EnhanceOutcome }) {
   );
 }
 
+// Opaque so it reads over the item; the tone tints both fill and outline.
 function ResultBadge({ outcome }: { outcome: EnhanceOutcome }) {
+  const { label, icon: Icon, tone } = RESULT[outcome];
   return (
     <m.span
-      className={`absolute -bottom-2.5 left-1/2 z-20 flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-[0.16em] whitespace-nowrap uppercase ${BADGE[outcome]}`}
-      initial={{ x: "-50%", y: 6, scale: 0.92, opacity: 0, filter: "blur(4px)" }}
-      animate={{ x: "-50%", y: 0, scale: 1, opacity: 1, filter: "blur(0px)" }}
-      exit={{ opacity: 0, y: -3, transition: { duration: 0.15, ease: "easeOut" } }}
-      transition={{ type: "spring", duration: 0.4, bounce: outcome === "success" ? 0.3 : 0 }}
+      className="absolute top-1/2 left-1/2 z-20 inline-flex h-5 items-center gap-1 rounded-full border px-2 text-[11px] font-semibold whitespace-nowrap shadow-sm"
+      style={{
+        color: tone,
+        borderColor: `color-mix(in oklab, ${tone} 35%, var(--border))`,
+        background: `color-mix(in oklab, ${tone} 12%, var(--background))`,
+      }}
+      initial={{ x: "-50%", y: "-50%", scale: 0.9, opacity: 0 }}
+      animate={{ x: "-50%", y: "-50%", scale: 1, opacity: 1 }}
+      exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.15, ease: "easeOut" } }}
+      transition={{ duration: 0.3, ease: EASE_OUT_EXPO }}
     >
-      {outcome === "protected" ? <Shield size={10} strokeWidth={3} /> : null}
-      {LABEL[outcome]}
+      <Icon className="size-3" strokeWidth={2.5} aria-hidden />
+      {label}
     </m.span>
   );
 }
