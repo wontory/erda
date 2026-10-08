@@ -1,4 +1,5 @@
 import { BASE_RESTORE_STAR, KoreanNumber, restoreCost, type RestoreMode, type StarforceOptions } from "@erda/core";
+import { m } from "motion/react";
 
 import { SfBox, SfButton } from "./sf-parts.tsx";
 
@@ -27,22 +28,28 @@ export function RestorePanel({
   const full = restoreCost(level, trace, options);
   const spareNote = (n: number) => (sparePrice > 0 ? ` + ${KoreanNumber.format(n * sparePrice)}` : "");
   return (
-    <SfBox title="TRACE TRANSFER" className="border-(--sf-danger)/50">
-      <p className="m-0 mb-2 text-center text-[12px]">
-        장비가 파괴됐어요. <span className="font-bold text-(--sf-gold)">★{trace}</span> 흔적이 남았어요.
-      </p>
-      <div className="flex gap-2">
-        <Choice
-          title={`★${trace} 확정 복구`}
-          detail={`스페어 ${full.spares}개 · ${KoreanNumber.format(full.meso)}${full.estimated ? "(추정)" : ""}${spareNote(full.spares)}`}
-          onClick={() => onRestore("full")}
-        />
-        <Choice
-          title={`★${BASE_RESTORE_STAR} 복구`}
-          detail={`스페어 1개 · 0 메소${spareNote(1)}`}
-          onClick={() => onRestore("base")}
-        />
-      </div>
-    </SfBox>
+    <m.div
+      initial={{ opacity: 0, y: 8, filter: "blur(2px)" }}
+      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      transition={{ duration: 0.28, ease: [0.19, 1, 0.22, 1] }}
+    >
+      <SfBox title="TRACE TRANSFER" className="border-(--sf-danger)/50">
+        <p className="m-0 mb-2 text-center text-[12px]">
+          장비가 파괴됐어요. <span className="font-bold text-(--sf-gold)">★{trace}</span> 흔적이 남았어요.
+        </p>
+        <div className="flex gap-2">
+          <Choice
+            title={`★${trace} 확정 복구`}
+            detail={`스페어 ${full.spares}개 · ${KoreanNumber.format(full.meso)}${full.estimated ? "(추정)" : ""}${spareNote(full.spares)}`}
+            onClick={() => onRestore("full")}
+          />
+          <Choice
+            title={`★${BASE_RESTORE_STAR} 복구`}
+            detail={`스페어 1개 · 0 메소${spareNote(1)}`}
+            onClick={() => onRestore("base")}
+          />
+        </div>
+      </SfBox>
+    </m.div>
   );
 }

@@ -1,6 +1,9 @@
 import { formatMeso, ledgerTotal, type StarforceLedger } from "@erda/core";
 import { ChevronDown, RotateCcw } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 import { useState } from "react";
+
+import { RollingValue } from "#/app/pages/shared/rolling-value.tsx";
 
 import { SF_PANEL, SF_TITLE } from "./theme.ts";
 
@@ -40,7 +43,7 @@ export function LedgerBox({
             <span
               className={`text-[13px] font-semibold ${label === "파괴" && Number(value) > 0 ? "text-(--sf-danger)" : ""}`}
             >
-              {value}
+              <RollingValue value={String(value)} />
             </span>
           </div>
         ))}
@@ -54,7 +57,7 @@ export function LedgerBox({
         <span className="text-(--sf-muted)">총 사용 메소</span>
         <span className="flex items-center gap-1.5">
           <span className="font-semibold text-(--sf-gold) tabular-nums">
-            {formatMeso(ledgerTotal(ledger, sparePrice))}
+            <RollingValue value={formatMeso(ledgerTotal(ledger, sparePrice))} />
           </span>
           <ChevronDown
             size={14}
@@ -62,16 +65,27 @@ export function LedgerBox({
           />
         </span>
       </button>
-      {open ? (
-        <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 px-3 text-[11px] text-(--sf-muted) tabular-nums">
-          <dt>강화</dt>
-          <dd className="m-0 text-right">{formatMeso(ledger.enhanceMeso)}</dd>
-          <dt>복구 메소</dt>
-          <dd className="m-0 text-right">{formatMeso(ledger.restoreMeso)}</dd>
-          <dt>스페어 {ledger.spares}개</dt>
-          <dd className="m-0 text-right">{sparePrice > 0 ? formatMeso(spareMeso) : "가격 미입력"}</dd>
-        </dl>
-      ) : null}
+      <AnimatePresence initial={false}>
+        {open ? (
+          <m.div
+            key="breakdown"
+            className="overflow-hidden"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.25, 1, 0.5, 1] }}
+          >
+            <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 px-3 text-[11px] text-(--sf-muted) tabular-nums">
+              <dt>강화</dt>
+              <dd className="m-0 text-right">{formatMeso(ledger.enhanceMeso)}</dd>
+              <dt>복구 메소</dt>
+              <dd className="m-0 text-right">{formatMeso(ledger.restoreMeso)}</dd>
+              <dt>스페어 {ledger.spares}개</dt>
+              <dd className="m-0 text-right">{sparePrice > 0 ? formatMeso(spareMeso) : "가격 미입력"}</dd>
+            </dl>
+          </m.div>
+        ) : null}
+      </AnimatePresence>
     </section>
   );
 }

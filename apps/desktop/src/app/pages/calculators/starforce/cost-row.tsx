@@ -1,5 +1,7 @@
 import { KoreanNumber, type AttemptCost } from "@erda/core";
 
+import { RollingValue } from "#/app/pages/shared/rolling-value.tsx";
+
 import { SfSwitchRow } from "./sf-parts.tsx";
 
 export function CostRow({
@@ -22,7 +24,9 @@ export function CostRow({
           {cost.before !== cost.total ? (
             <s className="text-[11px] text-(--sf-muted)">{KoreanNumber.format(cost.before)}</s>
           ) : null}
-          <span className="font-bold">{KoreanNumber.format(cost.total)}</span>
+          <span className="font-bold">
+            <RollingValue value={KoreanNumber.format(cost.total)} />
+          </span>
           <span className="text-(--sf-muted)">메소</span>
         </span>
       </div>

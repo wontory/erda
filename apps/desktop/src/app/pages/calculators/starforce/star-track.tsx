@@ -1,5 +1,7 @@
 import { m } from "motion/react";
 
+import { RollingValue } from "#/app/pages/shared/rolling-value.tsx";
+
 import { SF_PILL } from "./theme.ts";
 
 const pad2 = (n: number) => String(n).padStart(2, "0");
@@ -47,13 +49,17 @@ export function StarTrack({
         ))}
       </div>
       <div className={`${SF_PILL} flex items-center justify-center gap-4 text-[15px] font-extrabold tabular-nums`}>
-        <span className="text-(--sf-gold)">★ {pad2(star)}</span>
+        <span className="text-(--sf-gold)">
+          ★ <RollingValue value={pad2(star)} />
+        </span>
         {next === null ? (
           <span className="text-[12px] font-bold text-(--sf-muted)">최대 단계</span>
         ) : (
           <>
             <span className="text-[11px] tracking-[-0.15em] text-(--sf-text)">&gt;&gt;&gt;</span>
-            <span className="text-(--sf-text)">★ {pad2(next)}</span>
+            <span className="text-(--sf-text)">
+              ★ <RollingValue value={pad2(next)} />
+            </span>
           </>
         )}
       </div>

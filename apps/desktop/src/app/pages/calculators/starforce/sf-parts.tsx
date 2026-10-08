@@ -45,7 +45,7 @@ export function SfButton({ className = "", ...props }: ButtonHTMLAttributes<HTML
   return (
     <button
       type="button"
-      className={`rounded-lg bg-primary font-semibold text-primary-foreground transition-[filter,translate] duration-100 ease-out outline-none hover:brightness-110 focus-visible:ring-3 focus-visible:ring-ring/50 active:translate-y-px disabled:pointer-events-none disabled:opacity-50 ${className}`}
+      className={`rounded-lg bg-primary font-semibold text-primary-foreground transition-[filter,scale] duration-150 ease-out outline-none hover:brightness-110 focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 ${className}`}
       {...props}
     />
   );

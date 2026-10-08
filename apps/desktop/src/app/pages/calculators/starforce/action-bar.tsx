@@ -29,14 +29,14 @@ export function ActionBar({
         <button
           type="button"
           aria-label="규칙 안내"
-          className="grid size-7 place-items-center rounded-md bg-(--sf-pill) text-[12px] font-semibold text-(--sf-text) outline-none hover:bg-foreground/15 focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="grid size-7 place-items-center rounded-md bg-(--sf-pill) text-[12px] font-semibold text-(--sf-text) transition-[background-color,scale] duration-150 ease-out outline-none hover:bg-foreground/15 focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.95]"
           onClick={onOpenInfo}
         >
           ?
         </button>
         <button
           type="button"
-          className="h-7 rounded-md bg-(--sf-pill) px-2.5 text-[11px] font-medium text-(--sf-text) outline-none hover:bg-foreground/15 focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="h-7 rounded-md bg-(--sf-pill) px-2.5 text-[11px] font-medium text-(--sf-text) transition-[background-color,scale] duration-150 ease-out outline-none hover:bg-foreground/15 focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.95]"
           onClick={onOpenOptions}
         >
           이벤트·할인

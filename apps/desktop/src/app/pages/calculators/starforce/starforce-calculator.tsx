@@ -58,8 +58,10 @@ function StarforceScreen({
           level={state.level}
           destroyed={state.trace !== null}
           charging={session.phase === "charging"}
-          shakeKey={
-            settings.effects && last && last.outcome !== "success" && session.phase === "result" ? last.id : null
+          pulse={
+            settings.effects && !session.auto && last && session.phase === "result"
+              ? { id: last.id, kind: last.outcome === "success" ? "pop" : "shake" }
+              : null
           }
           overlay={
             settings.effects && !session.auto ? (
