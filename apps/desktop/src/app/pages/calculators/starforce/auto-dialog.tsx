@@ -28,16 +28,7 @@ export function AutoDialog({
   const toggle = (s: number, on: boolean) =>
     setDraftProtect((list) => (on ? [...list.filter((x) => x !== s), s] : list.filter((x) => x !== s)));
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(next) => {
-        if (next) {
-          setDraftTarget(target);
-          setDraftProtect(protectStars);
-        }
-        onOpenChange(next);
-      }}
-    >
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent style={SF_THEME} className="gap-2 sm:max-w-xs">
         <DialogTitle>자동 강화</DialogTitle>
         <SfBox>

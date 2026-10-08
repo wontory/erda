@@ -30,16 +30,7 @@ export function ItemDialog({
   const [draftStar, setDraftStar] = useState(startStar);
   const cap = maxStar(clampLevel(draftLevel));
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(next) => {
-        if (next) {
-          setDraftLevel(level);
-          setDraftStar(startStar);
-        }
-        onOpenChange(next);
-      }}
-    >
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-xs">
         <DialogHeader>
           <DialogTitle>장비 설정</DialogTitle>

@@ -5,7 +5,7 @@ import { DATA_KEYS } from "#/features/data/store.ts";
 import { useDataValue } from "#/features/data/use-data-value.ts";
 
 export function useStarforceSettings() {
-  const [settings, , , update] = useDataValue<StarforceSettings>(
+  const [settings, , loaded, update] = useDataValue<StarforceSettings>(
     DATA_KEYS.starforceSettings,
     starforceSettingsSchema,
     DEFAULT_STARFORCE_SETTINGS,
@@ -14,5 +14,5 @@ export function useStarforceSettings() {
     (p: Partial<StarforceSettings>) => void update((current) => ({ ...current, ...p })),
     [update],
   );
-  return { settings, patch };
+  return { settings, loaded, patch };
 }

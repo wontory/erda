@@ -36,13 +36,14 @@ interface Session {
   state: StarforceState;
   last: LastResult | null;
   autoTarget: number | null;
+  autoProtect: readonly number[];
 }
 
 type Action =
   | { type: "enhance"; options: StarforceOptions; protect: boolean; roll: number }
   | { type: "restore"; mode: RestoreMode; options: StarforceOptions }
   | { type: "reset"; level: number; star: number }
-  | { type: "auto"; target: number | null };
+  | { type: "auto"; target: number | null; protect?: readonly number[] };
 
 // Auto stops in the same update that reaches the target or destroys the item.
 const keepAuto = (state: StarforceState, target: number | null): number | null =>
@@ -54,6 +55,7 @@ function reducer(session: Session, action: Action): Session {
       const r = enhance(session.state, action.options, action.protect, action.roll);
       if (!r) return session;
       return {
+        ...session,
         state: r.state,
         last: { outcome: r.outcome, from: r.from, to: r.to, id: (session.last?.id ?? 0) + 1 },
         autoTarget: keepAuto(r.state, session.autoTarget),
@@ -62,9 +64,13 @@ function reducer(session: Session, action: Action): Session {
     case "restore":
       return { ...session, state: restore(session.state, action.mode, action.options) };
     case "reset":
-      return { state: initialStarforceState(action.level, action.star), last: null, autoTarget: null };
+      return { state: initialStarforceState(action.level, action.star), last: null, autoTarget: null, autoProtect: [] };
     case "auto":
-      return { ...session, autoTarget: keepAuto(session.state, action.target) };
+      return {
+        ...session,
+        autoTarget: keepAuto(session.state, action.target),
+        autoProtect: action.protect ?? session.autoProtect,
+      };
   }
 }
 
@@ -73,6 +79,7 @@ export function useStarforceSession(settings: StarforceSettings) {
     state: initialStarforceState(s.level, s.startStar),
     last: null,
     autoTarget: null,
+    autoProtect: [],
   }));
   const [protect, setProtect] = useState(false);
   const { options } = settings;
@@ -113,7 +120,10 @@ export function useStarforceSession(settings: StarforceSettings) {
   const restoreWith = useCallback((mode: RestoreMode) => dispatch({ type: "restore", mode, options }), [options]);
 
   const reset = useCallback((level: number, star: number) => dispatch({ type: "reset", level, star }), []);
-  const startAuto = useCallback((target: number) => dispatch({ type: "auto", target }), []);
+  const startAuto = useCallback(
+    (target: number, protect: readonly number[]) => dispatch({ type: "auto", target, protect }),
+    [],
+  );
   const stopAuto = useCallback(() => dispatch({ type: "auto", target: null }), []);
 
   const auto = session.autoTarget !== null;
@@ -123,18 +133,19 @@ export function useStarforceSession(settings: StarforceSettings) {
       dispatch({
         type: "enhance",
         options: settings.options,
-        protect: settings.autoProtect.includes(session.state.star),
+        protect: session.autoProtect.includes(session.state.star),
         roll: randomRoll(),
       });
     }, AUTO_INTERVAL_MS);
     return () => clearTimeout(id);
-  }, [auto, session.state, settings.autoProtect, settings.options]);
+  }, [auto, session.state, session.autoProtect, settings.options]);
 
   return {
     state: session.state,
     last: session.last,
     phase,
     auto,
+    autoProtect: session.autoProtect,
     protect,
     setProtect,
     attempt,

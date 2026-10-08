@@ -1,4 +1,13 @@
-import { PLUS_ONE_MAX_STAR, attemptCost, canEnhance, chances, isGuaranteed, isProtectable, maxStar } from "@erda/core";
+import {
+  PLUS_ONE_MAX_STAR,
+  attemptCost,
+  canEnhance,
+  chances,
+  isGuaranteed,
+  isProtectable,
+  maxStar,
+  type StarforceSettings,
+} from "@erda/core";
 import { m } from "motion/react";
 import { useState } from "react";
 
@@ -19,7 +28,18 @@ import { useStarforceSession } from "./use-starforce-session.ts";
 import { useStarforceSettings } from "./use-starforce-settings.ts";
 
 export function StarforceCalculator() {
-  const { settings, patch } = useStarforceSettings();
+  const { settings, loaded, patch } = useStarforceSettings();
+  // The session seeds from the saved item once, so wait for the store read.
+  return loaded ? <StarforceScreen settings={settings} patch={patch} /> : null;
+}
+
+function StarforceScreen({
+  settings,
+  patch,
+}: {
+  settings: StarforceSettings;
+  patch: (p: Partial<StarforceSettings>) => void;
+}) {
   const [dialog, setDialog] = useState<"item" | "options" | "info" | "auto" | null>(null);
   const session = useStarforceSession(settings);
   const { state, last, protect } = session;
@@ -28,6 +48,7 @@ export function StarforceCalculator() {
   const step = options.plusOne && state.star <= PLUS_ONE_MAX_STAR ? 2 : 1;
   const next = state.star < cap ? Math.min(state.star + step, cap) : null;
   const protectable = isProtectable(state.star) && !isGuaranteed(state.star, options) && !session.auto;
+  const effectiveProtect = session.auto ? session.autoProtect.includes(state.star) : protect && protectable;
   const popFrom = settings.effects && last?.outcome === "success" ? last.from : null;
 
   return (
@@ -72,9 +93,9 @@ export function StarforceCalculator() {
           />
         ) : next !== null ? (
           <>
-            <ChanceBox chances={chances(state.star, options, protect && protectable)} />
+            <ChanceBox chances={chances(state.star, options, effectiveProtect)} />
             <CostRow
-              cost={attemptCost(state.level, state.star, options, protect && protectable)}
+              cost={attemptCost(state.level, state.star, options, effectiveProtect)}
               protect={protect}
               protectable={protectable}
               onProtect={session.setProtect}
@@ -99,16 +120,18 @@ export function StarforceCalculator() {
         sparePrice={settings.sparePrice}
         onReset={() => session.reset(settings.level, settings.startStar)}
       />
-      <ItemDialog
-        open={dialog === "item"}
-        level={settings.level}
-        startStar={settings.startStar}
-        onOpenChange={(open) => setDialog(open ? "item" : null)}
-        onApply={(level, startStar) => {
-          patch({ level, startStar });
-          session.reset(level, startStar);
-        }}
-      />
+      {dialog === "item" ? (
+        <ItemDialog
+          open={dialog === "item"}
+          level={settings.level}
+          startStar={settings.startStar}
+          onOpenChange={(open) => setDialog(open ? "item" : null)}
+          onApply={(level, startStar) => {
+            patch({ level, startStar });
+            session.reset(level, startStar);
+          }}
+        />
+      ) : null}
       <OptionsDialog
         open={dialog === "options"}
         options={options}
@@ -118,18 +141,20 @@ export function StarforceCalculator() {
         onSparePrice={(sparePrice) => patch({ sparePrice })}
       />
       <InfoDialog open={dialog === "info"} onOpenChange={(open) => setDialog(open ? "info" : null)} />
-      <AutoDialog
-        open={dialog === "auto"}
-        star={state.star}
-        cap={cap}
-        target={settings.autoTarget}
-        protectStars={settings.autoProtect}
-        onOpenChange={(open) => setDialog(open ? "auto" : null)}
-        onStart={(autoTarget, autoProtect) => {
-          patch({ autoTarget, autoProtect });
-          session.startAuto(autoTarget);
-        }}
-      />
+      {dialog === "auto" ? (
+        <AutoDialog
+          open={dialog === "auto"}
+          star={state.star}
+          cap={cap}
+          target={settings.autoTarget}
+          protectStars={settings.autoProtect}
+          onOpenChange={(open) => setDialog(open ? "auto" : null)}
+          onStart={(autoTarget, autoProtect) => {
+            patch({ autoTarget, autoProtect });
+            session.startAuto(autoTarget, autoProtect);
+          }}
+        />
+      ) : null}
     </div>
   );
 }
