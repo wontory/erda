@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@erda/ui/compo
 import { Switch } from "@erda/ui/components/ui/switch";
 import { useId } from "react";
 
-import { MesoField } from "../shared/meso-field.tsx";
+import { MesoField } from "#/app/pages/calculators/shared/meso-field.tsx";
 
 type Flag = Exclude<keyof StarforceOptions, "mvp">;
 

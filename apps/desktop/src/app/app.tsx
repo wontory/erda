@@ -29,6 +29,7 @@ import { HistoryPage } from "#/app/pages/insights/history-page.tsx";
 import { ArticlePage } from "#/app/pages/news/article-page.tsx";
 import { NewsPage } from "#/app/pages/news/news-page.tsx";
 import { SchedulerPage } from "#/app/pages/scheduler/scheduler-page.tsx";
+import { SimulatorPage } from "#/app/pages/simulators/simulator-page.tsx";
 import { TimersPage } from "#/app/pages/timers/timers-page.tsx";
 import { MainCharacterProvider } from "#/features/character/main-character-provider.tsx";
 import { useHistorySettings } from "#/features/insights/use-history-settings.ts";
@@ -53,6 +54,8 @@ function Screen({ page }: { page: Page }) {
       return <ArticlePage key={page.entryId} entryId={page.entryId} />;
     case "calculator":
       return <CalculatorPage calculator={page.calculator} />;
+    case "simulator":
+      return <SimulatorPage simulator={page.simulator} />;
     case "account":
       return <AccountPage />;
     case "history":

@@ -14,5 +14,5 @@ export const DATA_KEYS = {
   recentPresets: "timers.recentPresets",
   bossState: "boss.state",
   bossUseScheduler: "boss.useScheduler",
-  starforceSettings: "calculators.starforce",
+  starforceSettings: "simulators.starforce",
 } as const;

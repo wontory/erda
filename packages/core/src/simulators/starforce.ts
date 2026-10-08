@@ -19,7 +19,7 @@ import {
   RESTORE_MESO,
   STARFORCE_MAX_LEVEL,
   restoreSpares,
-} from "#/calculators/data/starforce-rules.ts";
+} from "#/simulators/data/starforce-rules.ts";
 
 export const PPM = 1_000_000;
 
