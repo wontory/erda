@@ -18,6 +18,7 @@ import { OnboardingModule } from "./onboarding-module.tsx";
 import { SchedulerModule } from "./scheduler-module.tsx";
 import { SimulatorsModule } from "./simulators-module.tsx";
 import { TimerModule } from "./timer-module.tsx";
+import { UpdateBanner } from "./update-banner.tsx";
 
 function HomeSearch() {
   const { push } = useNav();
@@ -56,6 +57,7 @@ export function HomePage() {
     <>
       {header}
       <div className="flex flex-col gap-2.5 px-3 pb-3">
+        <UpdateBanner />
         {hasApiKey(apiKey) ? (
           <>
             <HomeSearch />

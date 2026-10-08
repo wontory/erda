@@ -12,6 +12,8 @@
       "allow": [{ "url": "https://maplestory.nexon.com/*" }, { "url": "https://openapi.nexon.com/*" }]
     },
     "os:default",
+    "updater:default",
+    "process:allow-restart",
     "autostart:default",
     "process:allow-exit",
     "log:default",
