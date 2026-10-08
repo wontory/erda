@@ -69,10 +69,10 @@ export function HomePage() {
           <TimerModule onOpen={() => push(pages.timers())} />
           <SchedulerModule onOpen={() => push(pages.scheduler())} />
         </div>
-        <CalculatorsModule onOpen={(id) => push(pages.calculator(id))} />
-        <SimulatorsModule onOpen={(id) => push(pages.simulator(id))} />
         <NewsModule onOpen={() => push(pages.news())} onOpenEntry={(id) => push(pages.article(id))} />
         <AccountModule onOpen={() => push(pages.account())} />
+        <CalculatorsModule onOpen={(id) => push(pages.calculator(id))} />
+        <SimulatorsModule onOpen={(id) => push(pages.simulator(id))} />
       </div>
     </>
   );
