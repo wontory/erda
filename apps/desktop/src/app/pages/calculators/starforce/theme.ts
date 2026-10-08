@@ -1,24 +1,21 @@
 import type { CSSProperties } from "react";
 
-// Colors sampled from the in-game STARFORCE window. Fixed regardless of the app theme.
+// The in-game STARFORCE layout, drawn in the app's own tokens so it follows light and dark mode.
 export const SF_THEME = {
-  "--sf-window": "linear-gradient(180deg, #4d5a67 0%, #37424d 40%, #2a333c 100%)",
-  "--sf-edge": "#71808e",
-  "--sf-box": "rgba(14, 19, 25, 0.55)",
-  "--sf-box-edge": "rgba(255, 255, 255, 0.08)",
-  "--sf-pill": "rgba(10, 14, 19, 0.72)",
-  "--sf-title": "#c8f04a",
-  "--sf-text": "#f3f5f7",
-  "--sf-muted": "#9aa5b0",
-  "--sf-gold": "#ffcc33",
-  "--sf-danger": "#ff6b5b",
-  "--sf-button": "linear-gradient(180deg, #5a7f8b 0%, #35535e 100%)",
-  "--sf-button-edge": "#a4c8d2",
+  "--sf-edge": "var(--border)",
+  "--sf-box": "color-mix(in oklab, var(--foreground) 4%, transparent)",
+  "--sf-box-edge": "var(--border)",
+  "--sf-pill": "color-mix(in oklab, var(--foreground) 7%, transparent)",
+  "--sf-title": "var(--primary)",
+  "--sf-text": "var(--foreground)",
+  "--sf-muted": "var(--muted-foreground)",
+  "--sf-gold": "var(--warning)",
+  "--sf-danger": "var(--destructive)",
 } as CSSProperties;
 
 export const SF_PANEL =
-  "rounded-lg border border-(--sf-edge) bg-(image:--sf-window) p-2 text-(--sf-text) shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]";
+  "rounded-2xl border border-(--sf-edge) bg-glass-card p-2 text-(--sf-text) shadow-[inset_0_1px_0_oklch(1_0_0/6%)]";
 
-export const SF_TITLE = "m-0 text-[12px] font-extrabold tracking-wide text-(--sf-title)";
+export const SF_TITLE = "m-0 px-1 text-[13px] font-semibold text-(--sf-text)";
 
 export const SF_PILL = "rounded-full bg-(--sf-pill) px-3 py-1 text-center";

@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogTitle } from "@erda/ui/components/ui/dialo
 import { useState } from "react";
 
 import { SfBox, SfButton, SfSwitchRow } from "./sf-parts.tsx";
-import { SF_PANEL, SF_PILL, SF_THEME, SF_TITLE } from "./theme.ts";
+import { SF_PILL, SF_THEME } from "./theme.ts";
 
 export function AutoDialog({
   open,
@@ -38,15 +38,15 @@ export function AutoDialog({
         onOpenChange(next);
       }}
     >
-      <DialogContent style={SF_THEME} showCloseButton={false} className={`${SF_PANEL} gap-2 sm:max-w-xs`}>
-        <DialogTitle className={SF_TITLE}>AUTO ENCHANT</DialogTitle>
+      <DialogContent style={SF_THEME} className="gap-2 sm:max-w-xs">
+        <DialogTitle>자동 강화</DialogTitle>
         <SfBox>
           <div className="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1.5 text-[12px]">
             <span className="text-(--sf-muted)">현재 단계</span>
             <span className={`${SF_PILL} font-bold tabular-nums`}>★ {star}</span>
             <span className="text-(--sf-muted)">목표 단계</span>
             <div className="flex items-center gap-1">
-              <span className="flex-1 rounded-sm bg-white px-2 py-0.5 text-right font-bold text-black tabular-nums">
+              <span className="flex-1 rounded-md border border-(--sf-box-edge) bg-(--sf-box) px-2 py-0.5 text-right font-bold tabular-nums">
                 {clamped}
               </span>
               <SfButton

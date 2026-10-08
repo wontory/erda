@@ -55,10 +55,10 @@ export function ItemPanel({
           key={shakeKey ?? "still"}
           animate={shakeKey === null ? undefined : { x: [0, -5, 5, -3, 3, 0] }}
           transition={{ duration: 0.35 }}
-          className={`relative grid size-20 place-items-center rounded-md border-2 border-dashed bg-black/30 transition-[border-color,box-shadow] duration-300 ${
+          className={`relative grid size-20 place-items-center rounded-md border-2 border-dashed bg-(--sf-box) transition-[border-color,box-shadow] duration-300 ${
             charging
-              ? "border-(--sf-gold) shadow-[0_0_18px_rgba(255,204,51,0.65)]"
-              : "border-white/75 shadow-[0_0_8px_rgba(255,255,255,0.15)]"
+              ? "border-(--sf-gold) shadow-[0_0_18px_color-mix(in_oklab,var(--sf-gold)_65%,transparent)]"
+              : "border-(--sf-text)/40"
           }`}
         >
           <ItemGlyph destroyed={destroyed} />
@@ -67,7 +67,7 @@ export function ItemPanel({
         <button
           type="button"
           onClick={onEditItem}
-          className={`${SF_PILL} w-4/5 text-[13px] font-bold outline-none hover:brightness-125 focus-visible:ring-2 focus-visible:ring-(--sf-title)`}
+          className={`${SF_PILL} w-4/5 text-[13px] font-bold outline-none hover:bg-foreground/10 focus-visible:ring-3 focus-visible:ring-ring/50`}
         >
           {destroyed ? `Lv.${level} 장비의 흔적` : `Lv.${level} 장비`}
         </button>

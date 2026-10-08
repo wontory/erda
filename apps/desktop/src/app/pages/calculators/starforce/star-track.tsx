@@ -11,7 +11,7 @@ function Star({ filled, pop }: { filled: boolean; pop: boolean }) {
       initial={pop ? { scale: 2, opacity: 0 } : false}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ type: "spring", stiffness: 520, damping: 18 }}
-      className={`inline-block text-[11px] leading-none ${filled ? "text-(--sf-gold) drop-shadow-[0_0_3px_rgba(255,204,51,0.8)]" : "text-white/25"}`}
+      className={`inline-block text-[11px] leading-none ${filled ? "text-(--sf-gold)" : "text-(--sf-text)/20"}`}
     >
       ★
     </m.span>

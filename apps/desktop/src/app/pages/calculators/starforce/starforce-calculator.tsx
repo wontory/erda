@@ -1,10 +1,12 @@
 import { PLUS_ONE_MAX_STAR, attemptCost, canEnhance, chances, isGuaranteed, isProtectable, maxStar } from "@erda/core";
+import { m } from "motion/react";
 import { useState } from "react";
 
 import { ActionBar } from "./action-bar.tsx";
 import { AutoDialog } from "./auto-dialog.tsx";
 import { ChanceBox } from "./chance-box.tsx";
 import { CostRow } from "./cost-row.tsx";
+import { EnchantEffect } from "./enchant-effect.tsx";
 import { InfoDialog } from "./info-dialog.tsx";
 import { ItemDialog } from "./item-dialog.tsx";
 import { ItemPanel } from "./item-panel.tsx";
@@ -34,7 +36,26 @@ export function StarforceCalculator() {
         level={state.level}
         destroyed={state.trace !== null}
         charging={session.phase === "charging"}
-        shakeKey={null}
+        shakeKey={settings.effects && last && last.outcome !== "success" && session.phase === "result" ? last.id : null}
+        overlay={
+          settings.effects && !session.auto ? (
+            <EnchantEffect phase={session.phase} last={last} />
+          ) : last ? (
+            <m.span
+              key={last.id}
+              className={`pointer-events-none absolute inset-0 rounded-md ${
+                last.outcome === "success"
+                  ? "bg-(--sf-gold)/50"
+                  : last.outcome === "destroyed"
+                    ? "bg-(--sf-danger)/50"
+                    : "bg-(--sf-text)/15"
+              }`}
+              initial={{ opacity: 1 }}
+              animate={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            />
+          ) : null
+        }
         onEditItem={() => setDialog("item")}
       />
       <section className={`${SF_PANEL} flex flex-col gap-2`}>

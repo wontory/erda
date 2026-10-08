@@ -9,11 +9,19 @@ import {
   type StarforceState,
   shouldStopAuto,
 } from "@erda/core";
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { useReducedMotion } from "motion/react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 
 import { randomRoll } from "./random-roll.ts";
 
 const AUTO_INTERVAL_MS = 80;
+const CHARGE_MS = 800;
+export const RESULT_MS: Record<EnhanceOutcome, number> = {
+  success: 900,
+  fail: 600,
+  protected: 600,
+  destroyed: 1200,
+};
 
 export type Phase = "idle" | "charging" | "result";
 
@@ -68,10 +76,39 @@ export function useStarforceSession(settings: StarforceSettings) {
   }));
   const [protect, setProtect] = useState(false);
   const { options } = settings;
+  const reduced = useReducedMotion() ?? false;
+  const [phase, setPhase] = useState<Phase>("idle");
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const later = useCallback((fn: () => void, ms: number) => {
+    timers.current.push(setTimeout(fn, ms));
+  }, []);
+  useEffect(() => {
+    const pending = timers.current;
+    return () => pending.forEach(clearTimeout);
+  }, []);
+
+  useEffect(() => {
+    if (phase !== "result" || !session.last) return;
+    const id = setTimeout(() => setPhase("idle"), reduced ? 400 : RESULT_MS[session.last.outcome]);
+    return () => clearTimeout(id);
+  }, [phase, session.last, reduced]);
 
   const attempt = useCallback(() => {
-    dispatch({ type: "enhance", options, protect, roll: randomRoll() });
-  }, [options, protect]);
+    if (phase !== "idle") return;
+    const roll = randomRoll();
+    if (!settings.effects) {
+      dispatch({ type: "enhance", options, protect, roll });
+      return;
+    }
+    setPhase("charging");
+    later(
+      () => {
+        dispatch({ type: "enhance", options, protect, roll });
+        setPhase("result");
+      },
+      reduced ? 0 : CHARGE_MS,
+    );
+  }, [phase, settings.effects, options, protect, reduced, later]);
 
   const restoreWith = useCallback((mode: RestoreMode) => dispatch({ type: "restore", mode, options }), [options]);
 
@@ -96,7 +133,7 @@ export function useStarforceSession(settings: StarforceSettings) {
   return {
     state: session.state,
     last: session.last,
-    phase: "idle" as Phase,
+    phase,
     auto,
     protect,
     setProtect,
