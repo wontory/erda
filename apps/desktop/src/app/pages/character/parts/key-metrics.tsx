@@ -5,7 +5,7 @@ import { cn } from "@erda/ui/lib/utils";
 export function KeyMetrics({ summary, className }: { summary: CharacterSummary; className?: string }) {
   const k = keyStats(summary);
   return (
-    <div className={cn(className, "grid grid-cols-3 gap-3")}>
+    <div className={cn(className, "grid grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)] gap-3")}>
       <Metric title="전투력" value={k.power} tint="text-primary" help={k.powerFull} />
       <Metric title="보스 데미지" value={k.boss} />
       <Metric title="방어율 무시" value={k.ignoreDefense} />
