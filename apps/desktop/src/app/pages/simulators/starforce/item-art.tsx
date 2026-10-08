@@ -1,7 +1,6 @@
-import { m } from "motion/react";
 import { useId } from "react";
 
-// A game-icon style sword: dark outline, layered gradients, a gem in the guard and a periodic glint.
+// A game-icon style sword: dark outline, layered gradients and a gem in the guard.
 export function ItemArt({ destroyed }: { destroyed: boolean }) {
   const id = useId().replace(/:/g, "");
   const blade = `${id}-blade`;
@@ -9,8 +8,6 @@ export function ItemArt({ destroyed }: { destroyed: boolean }) {
   const gold = `${id}-gold`;
   const gem = `${id}-gem`;
   const grip = `${id}-grip`;
-  const glint = `${id}-glint`;
-  const clip = `${id}-clip`;
   const bladePath = destroyed
     ? "M28.5 30 L31.5 27 L33.5 29.5 L35.5 26 L37.5 28.5 L39 30 L39 41 L28.5 41 Z"
     : "M33.75 4 L39 12 L39 41 L28.5 41 L28.5 12 Z";
@@ -47,35 +44,12 @@ export function ItemArt({ destroyed }: { destroyed: boolean }) {
           <stop offset="0.5" stopColor="#6a4fa3" />
           <stop offset="1" stopColor="#2c1f47" />
         </linearGradient>
-        <linearGradient id={glint} x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0" stopColor="#ffffff" stopOpacity="0" />
-          <stop offset="0.5" stopColor="#ffffff" stopOpacity="0.95" />
-          <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
-        </linearGradient>
-        <clipPath id={clip}>
-          <path d={bladePath} />
-        </clipPath>
       </defs>
 
       <g transform="rotate(-38 34 34)" stroke="#141a2a" strokeWidth="1.6" strokeLinejoin="round">
         {/* blade */}
         <path d={bladePath} fill={`url(#${blade})`} />
         {destroyed ? null : <path d="M33.75 6.5 L33.75 39" stroke={`url(#${edge})`} strokeWidth="1" />}
-        {destroyed ? null : (
-          <g clipPath={`url(#${clip})`} stroke="none">
-            <m.rect
-              x="20"
-              width="9"
-              height="60"
-              y="-4"
-              fill={`url(#${glint})`}
-              transform="skewX(-20)"
-              initial={{ x: -8 }}
-              animate={{ x: [-8, 34] }}
-              transition={{ duration: 0.9, repeat: Infinity, repeatDelay: 3.2, ease: [0.65, 0, 0.35, 1] }}
-            />
-          </g>
-        )}
         {/* guard */}
         <path
           d="M20 41.5 Q25 38.5 33.75 40 Q42.5 38.5 47.5 41.5 Q44 45.5 39 45 L28.5 45 Q23.5 45.5 20 41.5 Z"
