@@ -2,6 +2,7 @@ import { PLUS_ONE_MAX_STAR, attemptCost, canEnhance, chances, isGuaranteed, isPr
 import { useState } from "react";
 
 import { ActionBar } from "./action-bar.tsx";
+import { AutoDialog } from "./auto-dialog.tsx";
 import { ChanceBox } from "./chance-box.tsx";
 import { CostRow } from "./cost-row.tsx";
 import { InfoDialog } from "./info-dialog.tsx";
@@ -17,7 +18,7 @@ import { useStarforceSettings } from "./use-starforce-settings.ts";
 
 export function StarforceCalculator() {
   const { settings, patch } = useStarforceSettings();
-  const [dialog, setDialog] = useState<"item" | "options" | "info" | null>(null);
+  const [dialog, setDialog] = useState<"item" | "options" | "info" | "auto" | null>(null);
   const session = useStarforceSession(settings);
   const { state, last, protect } = session;
   const { options } = settings;
@@ -69,7 +70,7 @@ export function StarforceCalculator() {
           effects={settings.effects}
           onEnhance={session.attempt}
           onStopAuto={session.stopAuto}
-          onOpenAuto={() => {}}
+          onOpenAuto={() => setDialog("auto")}
           onEffects={(effects) => patch({ effects })}
           onOpenInfo={() => setDialog("info")}
           onOpenOptions={() => setDialog("options")}
@@ -94,6 +95,18 @@ export function StarforceCalculator() {
         onSparePrice={(sparePrice) => patch({ sparePrice })}
       />
       <InfoDialog open={dialog === "info"} onOpenChange={(open) => setDialog(open ? "info" : null)} />
+      <AutoDialog
+        open={dialog === "auto"}
+        star={state.star}
+        cap={cap}
+        target={settings.autoTarget}
+        protectStars={settings.autoProtect}
+        onOpenChange={(open) => setDialog(open ? "auto" : null)}
+        onStart={(autoTarget, autoProtect) => {
+          patch({ autoTarget, autoProtect });
+          session.startAuto(autoTarget);
+        }}
+      />
     </div>
   );
 }
