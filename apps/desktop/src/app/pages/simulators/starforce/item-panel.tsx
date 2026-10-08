@@ -1,6 +1,7 @@
 import { m, type TargetAndTransition } from "motion/react";
 import type { ReactNode } from "react";
 
+import { ItemArt } from "./item-art.tsx";
 import { SF_PILL } from "./theme.ts";
 
 export type SlotPulse = { id: number; kind: "pop" | "shake" } | null;
@@ -13,16 +14,6 @@ const PARTICLES = [
   { left: "80%", top: "58%", delay: 1.2 },
   { left: "88%", top: "42%", delay: 2 },
 ];
-
-function ItemGlyph({ destroyed }: { destroyed: boolean }) {
-  return (
-    <svg viewBox="0 0 48 48" className={`size-12 ${destroyed ? "opacity-35 grayscale" : ""}`} aria-hidden>
-      <path d="M24 5 L33 18 L29 40 L19 40 L15 18 Z" fill="#8fb7ff" stroke="#dbe8ff" strokeWidth="2" />
-      <path d="M24 9 L29 18 L24 36 L19 18 Z" fill="#c7dbff" />
-      <rect x="17" y="38" width="14" height="5" rx="2" fill="#ffcc33" />
-    </svg>
-  );
-}
 
 // Wind up while charging, then pop on success or shake on a miss.
 function slotMotion(charging: boolean, pulse: SlotPulse): TargetAndTransition {
@@ -70,7 +61,7 @@ export function ItemPanel({
             : "border-(--sf-text)/40"
         }`}
       >
-        <ItemGlyph destroyed={destroyed} />
+        <ItemArt destroyed={destroyed} />
         {overlay}
       </m.div>
       <button
