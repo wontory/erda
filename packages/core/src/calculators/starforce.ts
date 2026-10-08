@@ -2,12 +2,19 @@ import { z } from "zod";
 
 import {
   BASE_RATES,
+  COST_DIVISORS,
   DESTROY_REDUCTION_MAX_STAR,
   GUARANTEE_STARS,
   LEVEL_STAR_CAPS,
+  MEMBER_DISCOUNT_MAX_STAR,
+  MVP_DISCOUNT_PERCENT,
   MVP_GRADES,
+  PC_ROOM_DISCOUNT_PERCENT,
   PROTECTABLE_STARS,
+  RESTORE_COEFFICIENTS,
+  RESTORE_MESO,
   STARFORCE_MAX_LEVEL,
+  restoreSpares,
 } from "#/calculators/data/starforce-rules.ts";
 
 export const PPM = 1_000_000;
@@ -78,3 +85,50 @@ export function chances(star: number, options: StarforceOptions, protect: boolea
 }
 
 export const formatChance = (ppm: number): string => `${(ppm / 10_000).toFixed(2)}%`;
+
+export function baseCost(level: number, star: number): number {
+  const exponent = star < 10 ? 1 : 2.7;
+  return Math.round((1000 + (level ** 3 * (star + 1) ** exponent) / COST_DIVISORS[star]) / 100) * 100;
+}
+
+export const memberDiscountPercent = (star: number, options: StarforceOptions): number =>
+  star <= MEMBER_DISCOUNT_MAX_STAR
+    ? MVP_DISCOUNT_PERCENT[options.mvp] + (options.pcRoom ? PC_ROOM_DISCOUNT_PERCENT : 0)
+    : 0;
+
+export interface AttemptCost {
+  base: number;
+  discounted: number;
+  protection: number;
+  before: number;
+  total: number;
+}
+
+export function attemptCost(level: number, star: number, options: StarforceOptions, protect: boolean): AttemptCost {
+  const base = baseCost(level, star);
+  const keep = (100 - memberDiscountPercent(star, options)) * (options.discount30 ? 70 : 100);
+  const discounted = Math.floor((base * keep) / 10_000);
+  const protection = protectionApplies(star, options, protect) ? base * 2 : 0;
+  return { base, discounted, protection, before: base + protection, total: discounted + protection };
+}
+
+const roundSignificant = (value: number, digits: number): number => {
+  const scale = 10 ** (Math.floor(Math.log10(value)) - digits + 1);
+  return Math.round(value / scale) * scale;
+};
+
+export interface RestoreCost {
+  meso: number;
+  spares: number;
+  estimated: boolean;
+}
+
+export function restoreCost(level: number, traceStar: number, options: StarforceOptions): RestoreCost {
+  const listed = RESTORE_MESO[level]?.[traceStar];
+  const meso = listed ?? roundSignificant(RESTORE_COEFFICIENTS[traceStar] * level ** 3, 3);
+  return {
+    meso: options.restoreDiscount ? Math.floor((meso * 8) / 10) : meso,
+    spares: restoreSpares(traceStar),
+    estimated: listed === undefined,
+  };
+}

@@ -1,7 +1,17 @@
 import { describe, expect, it } from "vitest";
 
 import { BASE_RATES } from "./data/starforce-rules.ts";
-import { DEFAULT_STARFORCE_OPTIONS, PPM, chances, formatChance, maxStar, type StarforceOptions } from "./starforce.ts";
+import {
+  DEFAULT_STARFORCE_OPTIONS,
+  PPM,
+  attemptCost,
+  baseCost,
+  chances,
+  formatChance,
+  maxStar,
+  restoreCost,
+  type StarforceOptions,
+} from "./starforce.ts";
 
 const opts = (patch: Partial<StarforceOptions> = {}): StarforceOptions => ({ ...DEFAULT_STARFORCE_OPTIONS, ...patch });
 
@@ -60,5 +70,64 @@ describe("formatChance", () => {
   it("prints two decimals like the game", () => {
     expect(formatChance(997_500)).toBe("99.75%");
     expect(formatChance(20_550)).toBe("2.06%");
+  });
+});
+
+describe("baseCost", () => {
+  it("matches the official screenshots", () => {
+    expect(baseCost(140, 0)).toBe(77_200);
+    expect(baseCost(200, 0)).toBe(223_200);
+  });
+
+  it("uses the 2.7 exponent from 10 stars", () => {
+    expect(baseCost(200, 15)).toBe(71_316_500);
+    expect(baseCost(250, 29)).toBe(760_357_800);
+  });
+});
+
+describe("attemptCost", () => {
+  it("takes 5% off for the PC room without rounding to 100", () => {
+    expect(attemptCost(140, 0, opts({ pcRoom: true }), false).total).toBe(73_340);
+    expect(attemptCost(200, 0, opts({ pcRoom: true }), false).total).toBe(212_040);
+  });
+
+  it("adds MVP and PC room, then multiplies the 30% event", () => {
+    const c = attemptCost(200, 0, opts({ mvp: "black", pcRoom: true, discount30: true }), false);
+    expect(c.discounted).toBe(Math.floor((223_200 * 85 * 70) / 10_000));
+  });
+
+  it("stops member discounts after 16 stars", () => {
+    expect(attemptCost(200, 16, opts({ mvp: "diamond" }), false).total).toBe(Math.floor(baseCost(200, 16) * 0.9));
+    expect(attemptCost(200, 17, opts({ mvp: "diamond" }), false).total).toBe(baseCost(200, 17));
+  });
+
+  it("charges protection at twice the undiscounted base", () => {
+    const c = attemptCost(200, 17, opts({ discount30: true }), true);
+    expect(c.protection).toBe(baseCost(200, 17) * 2);
+    expect(c.total).toBe(c.discounted + c.protection);
+    expect(c.before).toBe(c.base + c.protection);
+  });
+
+  it("does not charge protection on a guaranteed 15", () => {
+    expect(attemptCost(200, 15, opts({ guarantee51015: true }), true).protection).toBe(0);
+  });
+});
+
+describe("restoreCost", () => {
+  it("uses the listed table when the level is listed", () => {
+    expect(restoreCost(200, 18, opts())).toEqual({ meso: 4_010_000_000, spares: 1, estimated: false });
+    expect(restoreCost(250, 22, opts())).toEqual({ meso: 47_300_000_000, spares: 4, estimated: false });
+  });
+
+  it("scales by L³ for unlisted levels", () => {
+    expect(restoreCost(145, 15, opts())).toEqual({ meso: 165_000_000, spares: 1, estimated: true });
+  });
+
+  it("discounts meso only", () => {
+    expect(restoreCost(200, 21, opts({ restoreDiscount: true }))).toEqual({
+      meso: 11_840_000_000,
+      spares: 3,
+      estimated: false,
+    });
   });
 });
