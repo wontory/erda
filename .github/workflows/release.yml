@@ -1,0 +1,46 @@
+name: release
+
+# Push a tag like v0.2.0 (matching the version in tauri.conf.json) to publish installers and the updater
+# feed to the public wontory/erda-releases repo, which the app checks for updates.
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  publish:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            target: aarch64-apple-darwin
+          - os: macos-latest
+            target: x86_64-apple-darwin
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: pnpm }
+      - uses: dtolnay/rust-toolchain@stable
+        with: { targets: "${{ matrix.target }}" }
+      - run: pnpm install --frozen-lockfile
+      - uses: tauri-apps/tauri-action@v1
+        env:
+          # A token that can write releases on wontory/erda-releases; the default token only reaches this repo.
+          GITHUB_TOKEN: ${{ secrets.RELEASES_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          projectPath: apps/desktop
+          tauriScript: pnpm tauri
+          args: --target ${{ matrix.target }}
+          owner: wontory
+          repo: erda-releases
+          tagName: ${{ github.ref_name }}
+          releaseName: Erda ${{ github.ref_name }}
+          releaseBody: See the assets below to install. The app updates itself from here.
+          releaseDraft: false
+          includeUpdaterJson: true

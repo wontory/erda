@@ -70,9 +70,17 @@
   },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "targets": "all",
     "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
     "macOS": { "minimumSystemVersion": "13.0", "signingIdentity": "-" },
     "windows": { "webviewInstallMode": { "type": "embedBootstrapper" } }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEVBNDVGRDE0RkZFMjg0OEEKUldTS2hPTC9GUDFGNnV2N1lQNnd4YU9KSWNyLzJwNjZqcjZkMHJjc3F5VDBLb3JINDNYOVA1c0QK",
+      "endpoints": ["https://github.com/wontory/erda-releases/releases/latest/download/latest.json"],
+      "windows": { "installMode": "passive" }
+    }
   }
 }
