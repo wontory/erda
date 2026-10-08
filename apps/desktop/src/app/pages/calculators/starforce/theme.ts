@@ -14,7 +14,7 @@ export const SF_THEME = {
 } as CSSProperties;
 
 export const SF_PANEL =
-  "rounded-2xl border border-(--sf-edge) bg-glass-card p-2 text-(--sf-text) shadow-[inset_0_1px_0_oklch(1_0_0/6%)]";
+  "rounded-2xl border border-(--sf-edge) bg-glass-card p-3 text-(--sf-text) shadow-[inset_0_1px_0_oklch(1_0_0/6%)]";
 
 export const SF_TITLE = "m-0 px-1 text-[13px] font-semibold text-(--sf-text)";
 

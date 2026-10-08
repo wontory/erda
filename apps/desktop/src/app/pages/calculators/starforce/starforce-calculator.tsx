@@ -31,40 +31,37 @@ export function StarforceCalculator() {
   const popFrom = settings.effects && last?.outcome === "success" ? last.from : null;
 
   return (
-    <div style={SF_THEME} className="flex flex-col gap-2">
-      <ItemPanel
-        level={state.level}
-        destroyed={state.trace !== null}
-        charging={session.phase === "charging"}
-        shakeKey={settings.effects && last && last.outcome !== "success" && session.phase === "result" ? last.id : null}
-        overlay={
-          settings.effects && !session.auto ? (
-            <EnchantEffect phase={session.phase} last={last} />
-          ) : last ? (
-            <m.span
-              key={last.id}
-              className={`pointer-events-none absolute inset-0 rounded-md ${
-                last.outcome === "success"
-                  ? "bg-(--sf-gold)/50"
-                  : last.outcome === "destroyed"
-                    ? "bg-(--sf-danger)/50"
-                    : "bg-(--sf-text)/15"
-              }`}
-              initial={{ opacity: 1 }}
-              animate={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            />
-          ) : null
-        }
-        onEditItem={() => setDialog("item")}
-      />
-      <section className={`${SF_PANEL} flex flex-col gap-2`}>
-        <StarTrack star={state.star} cap={cap} next={next} popFrom={popFrom} />
-        <LedgerBox
-          ledger={state.ledger}
-          sparePrice={settings.sparePrice}
-          onReset={() => session.reset(settings.level, settings.startStar)}
+    <div style={SF_THEME} className="flex flex-col gap-2.5">
+      <section className={`${SF_PANEL} flex flex-col gap-3`}>
+        <ItemPanel
+          level={state.level}
+          destroyed={state.trace !== null}
+          charging={session.phase === "charging"}
+          shakeKey={
+            settings.effects && last && last.outcome !== "success" && session.phase === "result" ? last.id : null
+          }
+          overlay={
+            settings.effects && !session.auto ? (
+              <EnchantEffect phase={session.phase} last={last} />
+            ) : last ? (
+              <m.span
+                key={last.id}
+                className={`pointer-events-none absolute inset-0 rounded-md ${
+                  last.outcome === "success"
+                    ? "bg-(--sf-gold)/50"
+                    : last.outcome === "destroyed"
+                      ? "bg-(--sf-danger)/50"
+                      : "bg-(--sf-text)/15"
+                }`}
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              />
+            ) : null
+          }
+          onEditItem={() => setDialog("item")}
         />
+        <StarTrack star={state.star} cap={cap} next={next} popFrom={popFrom} />
         {state.trace !== null ? (
           <RestorePanel
             level={state.level}
@@ -97,6 +94,11 @@ export function StarforceCalculator() {
           onOpenOptions={() => setDialog("options")}
         />
       </section>
+      <LedgerBox
+        ledger={state.ledger}
+        sparePrice={settings.sparePrice}
+        onReset={() => session.reset(settings.level, settings.startStar)}
+      />
       <ItemDialog
         open={dialog === "item"}
         level={settings.level}

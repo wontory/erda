@@ -1,7 +1,7 @@
 import { m } from "motion/react";
 import type { ReactNode } from "react";
 
-import { SF_PANEL, SF_PILL, SF_TITLE } from "./theme.ts";
+import { SF_PILL } from "./theme.ts";
 
 const PARTICLES = [
   { left: "14%", top: "38%", delay: 0 },
@@ -38,40 +38,37 @@ export function ItemPanel({
   onEditItem: () => void;
 }) {
   return (
-    <section className={SF_PANEL}>
-      <h2 className={SF_TITLE}>STARFORCE</h2>
-      <div className="relative mt-1.5 flex flex-col items-center gap-2 rounded-md border border-(--sf-box-edge) bg-(--sf-box) px-3 pt-3 pb-2.5">
-        {PARTICLES.map((p) => (
-          <m.span
-            key={`${p.left}-${p.top}`}
-            aria-hidden
-            className="absolute size-1 rounded-full bg-(--sf-gold) shadow-[0_0_6px_var(--sf-gold)]"
-            style={{ left: p.left, top: p.top }}
-            animate={{ opacity: [0.2, 1, 0.2], y: [0, -6, 0] }}
-            transition={{ duration: 2.4, delay: p.delay, repeat: Infinity, ease: "easeInOut" }}
-          />
-        ))}
-        <m.div
-          key={shakeKey ?? "still"}
-          animate={shakeKey === null ? undefined : { x: [0, -5, 5, -3, 3, 0] }}
-          transition={{ duration: 0.35 }}
-          className={`relative grid size-20 place-items-center rounded-md border-2 border-dashed bg-(--sf-box) transition-[border-color,box-shadow] duration-300 ${
-            charging
-              ? "border-(--sf-gold) shadow-[0_0_18px_color-mix(in_oklab,var(--sf-gold)_65%,transparent)]"
-              : "border-(--sf-text)/40"
-          }`}
-        >
-          <ItemGlyph destroyed={destroyed} />
-          {overlay}
-        </m.div>
-        <button
-          type="button"
-          onClick={onEditItem}
-          className={`${SF_PILL} w-4/5 text-[13px] font-bold outline-none hover:bg-foreground/10 focus-visible:ring-3 focus-visible:ring-ring/50`}
-        >
-          {destroyed ? `Lv.${level} 장비의 흔적` : `Lv.${level} 장비`}
-        </button>
-      </div>
-    </section>
+    <div className="relative flex flex-col items-center gap-2.5 rounded-xl bg-(--sf-box) px-3 pt-4 pb-3">
+      {PARTICLES.map((p) => (
+        <m.span
+          key={`${p.left}-${p.top}`}
+          aria-hidden
+          className="absolute size-1 rounded-full bg-(--sf-gold) shadow-[0_0_6px_var(--sf-gold)]"
+          style={{ left: p.left, top: p.top }}
+          animate={{ opacity: [0.2, 1, 0.2], y: [0, -6, 0] }}
+          transition={{ duration: 2.4, delay: p.delay, repeat: Infinity, ease: "easeInOut" }}
+        />
+      ))}
+      <m.div
+        key={shakeKey ?? "still"}
+        animate={shakeKey === null ? undefined : { x: [0, -5, 5, -3, 3, 0] }}
+        transition={{ duration: 0.35 }}
+        className={`relative grid size-20 place-items-center rounded-md border-2 border-dashed bg-(--sf-box) transition-[border-color,box-shadow] duration-300 ${
+          charging
+            ? "border-(--sf-gold) shadow-[0_0_18px_color-mix(in_oklab,var(--sf-gold)_65%,transparent)]"
+            : "border-(--sf-text)/40"
+        }`}
+      >
+        <ItemGlyph destroyed={destroyed} />
+        {overlay}
+      </m.div>
+      <button
+        type="button"
+        onClick={onEditItem}
+        className={`${SF_PILL} w-3/4 text-[13px] font-semibold outline-none hover:bg-foreground/10 focus-visible:ring-3 focus-visible:ring-ring/50`}
+      >
+        {destroyed ? `Lv.${level} 장비의 흔적` : `Lv.${level} 장비`}
+      </button>
+    </div>
   );
 }

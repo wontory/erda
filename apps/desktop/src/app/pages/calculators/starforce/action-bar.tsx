@@ -26,12 +26,21 @@ export function ActionBar({
   return (
     <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
       <div className="flex items-center gap-1">
-        <SfButton aria-label="규칙 안내" className="size-6 text-[12px]" onClick={onOpenInfo}>
+        <button
+          type="button"
+          aria-label="규칙 안내"
+          className="grid size-7 place-items-center rounded-md bg-(--sf-pill) text-[12px] font-semibold text-(--sf-text) outline-none hover:bg-foreground/15 focus-visible:ring-3 focus-visible:ring-ring/50"
+          onClick={onOpenInfo}
+        >
           ?
-        </SfButton>
-        <SfButton className="h-6 px-2 text-[11px]" onClick={onOpenOptions}>
+        </button>
+        <button
+          type="button"
+          className="h-7 rounded-md bg-(--sf-pill) px-2.5 text-[11px] font-medium text-(--sf-text) outline-none hover:bg-foreground/15 focus-visible:ring-3 focus-visible:ring-ring/50"
+          onClick={onOpenOptions}
+        >
           이벤트·할인
-        </SfButton>
+        </button>
       </div>
       {auto ? (
         <SfButton className="h-9 w-28 text-[14px]" onClick={onStopAuto}>

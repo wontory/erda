@@ -79,6 +79,7 @@ describe("formatChance", () => {
   it("prints two decimals like the game", () => {
     expect(formatChance(997_500)).toBe("99.75%");
     expect(formatChance(20_550)).toBe("2.06%");
+    expect(formatChance(664_450)).toBe("66.45%");
   });
 });
 

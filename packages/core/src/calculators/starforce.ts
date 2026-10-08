@@ -88,7 +88,8 @@ export function chances(star: number, options: StarforceOptions, protect: boolea
   return { success: base.success, fail: PPM - base.success - destroy, destroy };
 }
 
-export const formatChance = (ppm: number): string => `${(ppm / 10_000).toFixed(2)}%`;
+// Round in integer hundredths of a percent; toFixed on 66.445 gives 66.44 from float error.
+export const formatChance = (ppm: number): string => `${(Math.round(ppm / 100) / 100).toFixed(2)}%`;
 
 export function baseCost(level: number, star: number): number {
   const exponent = star < 10 ? 1 : 2.7;
