@@ -1,4 +1,4 @@
-import type { CalculatorId, DetailPage, HistoryKind } from "@erda/core";
+import type { CalculatorId, DetailPage, HistoryKind, SimulatorId } from "@erda/core";
 
 export type Page =
   | { id: "home"; kind: "home" }
@@ -8,6 +8,7 @@ export type Page =
   | { id: "news"; kind: "news" }
   | { id: string; kind: "article"; entryId: string }
   | { id: string; kind: "calculator"; calculator: CalculatorId }
+  | { id: string; kind: "simulator"; simulator: SimulatorId }
   | { id: "account"; kind: "account" }
   | { id: string; kind: "history"; history: HistoryKind }
   | { id: "achievements"; kind: "achievements" }
@@ -31,6 +32,7 @@ export const pages = {
   news: (): Page => ({ id: "news", kind: "news" }),
   article: (entryId: string): Page => ({ id: `article|${entryId}`, kind: "article", entryId }),
   calculator: (calculator: CalculatorId): Page => ({ id: `calculator|${calculator}`, kind: "calculator", calculator }),
+  simulator: (simulator: SimulatorId): Page => ({ id: `simulator|${simulator}`, kind: "simulator", simulator }),
   account: (): Page => ({ id: "account", kind: "account" }),
   history: (history: HistoryKind): Page => ({ id: `history|${history}`, kind: "history", history }),
   achievements: (): Page => ({ id: "achievements", kind: "achievements" }),

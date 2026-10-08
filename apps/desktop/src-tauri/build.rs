@@ -4,6 +4,7 @@ const COMMANDS: &[&str] = &[
     "inspector_show",
     "inspector_hide",
     "nexon_request",
+    "nexon_character_look",
     "nexon_calls_today",
     "nexon_cache_size",
     "nexon_cache_clear",

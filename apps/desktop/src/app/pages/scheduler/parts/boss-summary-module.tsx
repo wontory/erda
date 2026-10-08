@@ -4,9 +4,8 @@ import { Module } from "@erda/ui/components/module";
 import { Progress } from "@erda/ui/components/ui/progress";
 import { Coins } from "lucide-react";
 
+import { RollingValue } from "#/app/pages/shared/rolling-value.tsx";
 import type { BossView } from "#/features/boss/view.ts";
-
-import { RollingValue } from "./rolling-value.tsx";
 
 const PLACEHOLDER = "—";
 

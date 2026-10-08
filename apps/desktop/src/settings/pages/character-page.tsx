@@ -1,4 +1,6 @@
 import { describeError } from "@erda/api/errors";
+import { CHARACTER_POSES, type CharacterPoseCode } from "@erda/core";
+import { Sprite } from "@erda/ui/components/sprite";
 import { Button } from "@erda/ui/components/ui/button";
 import {
   DropdownMenu,
@@ -11,12 +13,14 @@ import {
 } from "@erda/ui/components/ui/dropdown-menu";
 import { Input } from "@erda/ui/components/ui/input";
 import { ScrollArea } from "@erda/ui/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@erda/ui/components/ui/select";
 import { Separator } from "@erda/ui/components/ui/separator";
 import { listItem } from "@erda/ui/lib/motion";
 import { AnimatePresence, m } from "motion/react";
 import { useId, useState } from "react";
 
 import { useAccountCharacters } from "#/features/character/use-account-characters.ts";
+import { useCharacterLook } from "#/features/character/use-character-look.ts";
 import { useFavorites } from "#/features/character/use-favorites.ts";
 import { useMainCharacter } from "#/features/character/use-main-character.ts";
 import { useRecent } from "#/features/character/use-recent.ts";
@@ -24,10 +28,12 @@ import { useSetting } from "#/features/settings/use-settings.ts";
 import { runAction, useAction } from "#/lib/action.ts";
 import { isCommitEnter } from "#/lib/keys.ts";
 import { ConfirmDialog } from "#/settings/confirm-dialog.tsx";
-import { SettingNumber, SettingRow } from "#/settings/setting-row.tsx";
+import { SettingNumber, SettingRow, SettingSwitch } from "#/settings/setting-row.tsx";
 
 const SET_MAIN_FAILED = "본캐를 바꾸지 못했어요";
 const SAVE_GROWTH_FAILED = "성장치를 저장하지 못했어요";
+const SAVE_LOOK_FAILED = "캐릭터 이미지 설정을 저장하지 못했어요";
+const POSE_ITEMS = CHARACTER_POSES.map((p) => ({ value: p.code, label: p.label }));
 
 function AccountPicker({ onPick }: { onPick: (name: string) => void }) {
   const { byWorld } = useAccountCharacters();
@@ -200,6 +206,60 @@ function SymbolGrowthRows() {
   );
 }
 
+function PosePreview({ image }: { image: string }) {
+  const look = useCharacterLook(image, { animated: true });
+  return <Sprite {...look} size={40} alt="" />;
+}
+
+function CharacterLookRows() {
+  const id = useId();
+  const main = useMainCharacter();
+  const [pose, setPose, poseLoaded] = useSetting("settings.characterPose");
+  const [animate, setAnimate, animateLoaded] = useSetting("settings.characterAnimate");
+  return (
+    <>
+      <h2 className="pt-3 pb-1 text-[12px] font-semibold text-muted-foreground">캐릭터 이미지</h2>
+      <SettingRow label="자세" description="홈과 캐릭터 정보에 보이는 캐릭터의 자세">
+        <div className="flex shrink-0 items-center gap-2">
+          {main.summary ? <PosePreview image={main.summary.image} /> : null}
+          <Select
+            items={POSE_ITEMS}
+            value={pose}
+            disabled={!poseLoaded}
+            onValueChange={(v) => {
+              if (v) void runAction(() => setPose(v as CharacterPoseCode), SAVE_LOOK_FAILED);
+            }}
+          >
+            <SelectTrigger className="h-7 w-32" aria-label="자세">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {POSE_ITEMS.map((p) => (
+                <SelectItem key={p.value} value={p.value}>
+                  {p.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </SettingRow>
+      <SettingRow
+        label="움직이기"
+        labelId={`${id}-animate-label`}
+        htmlFor={`${id}-animate`}
+        description="홈 화면의 본캐를 움직여요. 동작 줄이기를 켜 두면 멈춰 있어요"
+      >
+        <SettingSwitch
+          id={`${id}-animate`}
+          labelId={`${id}-animate-label`}
+          checked={animateLoaded ? animate : null}
+          onCheckedChange={(v) => void runAction(() => setAnimate(v), SAVE_LOOK_FAILED)}
+        />
+      </SettingRow>
+    </>
+  );
+}
+
 export function CharacterPage() {
   return (
     <div>
@@ -208,6 +268,8 @@ export function CharacterPage() {
       <FavoritesRow />
       <Separator />
       <RecentRow />
+      <Separator />
+      <CharacterLookRows />
       <Separator />
       <SymbolGrowthRows />
     </div>

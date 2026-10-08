@@ -4,7 +4,7 @@ import { Progress } from "@erda/ui/components/ui/progress";
 import { Separator } from "@erda/ui/components/ui/separator";
 import { CalendarCheck } from "lucide-react";
 
-import { RollingValue } from "#/app/pages/scheduler/parts/rolling-value.tsx";
+import { RollingValue } from "#/app/pages/shared/rolling-value.tsx";
 import { TrailingText } from "#/app/pages/shared/trailing-text.tsx";
 import { useBossView } from "#/features/boss/use-boss-view.ts";
 import type { BossView } from "#/features/boss/view.ts";

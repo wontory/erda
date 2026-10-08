@@ -27,6 +27,7 @@ const NOT_FOUND_TTL: Duration = Duration::from_secs(3600);
 const NOT_FOUND_CODE: &str = "OPENAPI00004";
 const HTTP_OK: u16 = 200;
 const HTTP_TOO_MANY_REQUESTS: u16 = 429;
+const LOOK_PATH: &str = "/static/maplestory/character/look/";
 
 fn network_error(e: reqwest::Error) -> NexonError {
     log::warn!("nexon: request failed: {}", e.without_url());
@@ -135,6 +136,23 @@ impl Gateway {
     async fn cache_remove(&self, key: &str) {
         let key = key.to_string();
         self.blocking_cache(move |c| c.remove(&key)).await;
+    }
+
+    /// Fetches a character look image. The webview can't do this itself: it always advertises `br`, and
+    /// Nexon's CDN keeps some of those variants cached as a redirect to a blank placeholder.
+    pub async fn character_look(&self, url: &str) -> Result<Vec<u8>, NexonError> {
+        let target = reqwest::Url::parse(url).map_err(|_| NexonError::invalid_parameter(url))?;
+        let base = reqwest::Url::parse(&self.base_url).map_err(|_| NexonError::invalid_parameter(url))?;
+        if target.origin() != base.origin() || !target.path().starts_with(LOOK_PATH) {
+            return Err(NexonError::invalid_parameter(url));
+        }
+        let res = self.client.get(target).send().await.map_err(network_error)?;
+        let status = res.status().as_u16();
+        // A redirect away from the look path lands on the placeholder, which is no image at all.
+        if status != HTTP_OK || !res.url().path().starts_with(LOOK_PATH) {
+            return Err(NexonError::unexpected_status(status));
+        }
+        Ok(res.bytes().await.map_err(network_error)?.to_vec())
     }
 
     pub async fn request(
@@ -292,5 +310,26 @@ fn spawn_eviction(cache: Arc<DiskCache>) {
                 log::warn!("nexon cache: eviction thread failed to start: {e}");
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn character_look_only_fetches_nexon_look_images() {
+        let dir = std::env::temp_dir().join(format!("nexon-look-test-{}", std::process::id()));
+        let gateway = Gateway::new(dir.join("cache"), dir.join("data")).unwrap();
+        for url in [
+            "https://example.com/static/maplestory/character/look/ABC",
+            "http://open.api.nexon.com/static/maplestory/character/look/ABC",
+            "https://open.api.nexon.com/maplestory/v1/id?character_name=x",
+            "not a url",
+        ] {
+            let err = gateway.character_look(url).await.unwrap_err();
+            assert_eq!(err.kind, Kind::InvalidParameter, "{url}");
+        }
+        let _ = std::fs::remove_dir_all(dir);
     }
 }

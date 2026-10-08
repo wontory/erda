@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-nexon-character-look"
+description = "Enables the nexon_character_look command without any pre-configured scope."
+commands.allow = ["nexon_character_look"]
+
+[[permission]]
+identifier = "deny-nexon-character-look"
+description = "Denies the nexon_character_look command without any pre-configured scope."
+commands.deny = ["nexon_character_look"]

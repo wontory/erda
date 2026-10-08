@@ -3,7 +3,7 @@ import { Module } from "@erda/ui/components/module";
 import { Tabs, TabsList, TabsTrigger } from "@erda/ui/components/ui/tabs";
 import { Coins } from "lucide-react";
 
-import { MesoField } from "./meso-field.tsx";
+import { MesoField } from "../shared/meso-field.tsx";
 
 export function AmountModule({
   fee,
