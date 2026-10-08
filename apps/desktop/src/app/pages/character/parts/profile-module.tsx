@@ -5,8 +5,6 @@ import { Progress } from "@erda/ui/components/ui/progress";
 import { WorldIcon } from "@erda/ui/components/world-icon";
 import { Heart } from "lucide-react";
 
-import { useCharacterLook } from "#/features/character/use-character-look.ts";
-
 import { GuildMark } from "./guild-mark.tsx";
 
 type OpenGuild = (world: string, guild: string) => void;
@@ -29,11 +27,10 @@ function GuildLink({ world, guild, onOpenGuild }: { world: string; guild: string
 
 export function ProfileModule({ summary, onOpenGuild }: { summary: CharacterSummary; onOpenGuild?: OpenGuild }) {
   const rate = Number(summary.expRate) || 0;
-  const look = useCharacterLook(summary.image);
   return (
     <Module>
       <div className="flex items-center gap-3">
-        <Sprite {...look} size={96} alt="" />
+        <Sprite src={summary.image} size={96} alt="" />
         <div className="min-w-0 flex-1">
           <div className="truncate text-[17px] font-bold">{summary.name}</div>
           <div className="text-[13px]">

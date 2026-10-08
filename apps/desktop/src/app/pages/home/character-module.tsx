@@ -17,7 +17,7 @@ import { runAction } from "#/lib/action.ts";
 import { openSettingsAction } from "#/lib/tauri.ts";
 
 function CharacterHeadline({ summary: s }: { summary: CharacterSummary }) {
-  const look = useCharacterLook(s.image, { animated: true });
+  const look = useCharacterLook(s.image);
   return (
     <div className="flex items-center gap-3">
       <Sprite {...look} size={96} alt="" />

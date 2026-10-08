@@ -207,7 +207,7 @@ function SymbolGrowthRows() {
 }
 
 function PosePreview({ image }: { image: string }) {
-  const look = useCharacterLook(image, { animated: true });
+  const look = useCharacterLook(image);
   return <Sprite {...look} size={40} alt="" />;
 }
 
@@ -219,7 +219,7 @@ function CharacterLookRows() {
   return (
     <>
       <h2 className="pt-3 pb-1 text-[12px] font-semibold text-muted-foreground">캐릭터 이미지</h2>
-      <SettingRow label="자세" description="홈과 캐릭터 정보에 보이는 캐릭터의 자세">
+      <SettingRow label="자세" description="홈 화면에 보이는 본캐의 자세">
         <div className="flex shrink-0 items-center gap-2">
           {main.summary ? <PosePreview image={main.summary.image} /> : null}
           <Select
