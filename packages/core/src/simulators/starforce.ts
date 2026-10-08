@@ -283,7 +283,16 @@ export function formatMeso(value: bigint): string {
   return parts.join(" ");
 }
 
+// The equipped item the session started from; null when the level was entered by hand.
+export const starforceItemSchema = z.object({
+  name: z.string(),
+  icon: z.string(),
+  part: z.string(),
+});
+export type StarforceItem = z.infer<typeof starforceItemSchema>;
+
 export const starforceSettingsSchema = z.object({
+  item: starforceItemSchema.nullable().default(null),
   level: z.number().int().min(1).max(STARFORCE_MAX_LEVEL),
   startStar: z.number().int().min(0).max(30),
   options: starforceOptionsSchema,
@@ -295,6 +304,7 @@ export const starforceSettingsSchema = z.object({
 export type StarforceSettings = z.infer<typeof starforceSettingsSchema>;
 
 export const DEFAULT_STARFORCE_SETTINGS: StarforceSettings = {
+  item: null,
   level: 200,
   startStar: 0,
   options: DEFAULT_STARFORCE_OPTIONS,

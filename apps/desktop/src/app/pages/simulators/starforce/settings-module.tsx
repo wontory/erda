@@ -1,4 +1,4 @@
-import { MVP_LABELS, type StarforceOptions } from "@erda/core";
+import { MVP_LABELS, type StarforceItem, type StarforceOptions } from "@erda/core";
 import { IconTile } from "@erda/ui/components/icon-tile";
 import { Module } from "@erda/ui/components/module";
 import { Item, ItemActions, ItemContent, ItemMedia, ItemTitle } from "@erda/ui/components/ui/item";
@@ -22,6 +22,7 @@ function optionsSummary(options: StarforceOptions): string {
 }
 
 export function SettingsModule({
+  item,
   level,
   startStar,
   destroyed,
@@ -32,6 +33,7 @@ export function SettingsModule({
   onEffects,
   onOpenInfo,
 }: {
+  item: StarforceItem | null;
   level: number;
   startStar: number;
   destroyed: boolean;
@@ -50,7 +52,7 @@ export function SettingsModule({
         title="장비"
         value={
           <>
-            Lv.{level}
+            {item ? `${item.part} · ` : ""}Lv.{level}
             {destroyed ? " · 파괴됨" : ""} · 시작 <StarCount>{startStar}</StarCount>
           </>
         }

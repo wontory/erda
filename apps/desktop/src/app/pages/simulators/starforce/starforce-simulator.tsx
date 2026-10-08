@@ -56,10 +56,11 @@ function StarforceScreen({
 
   return (
     <div style={SF_THEME} className="flex flex-col gap-2.5">
-      <Module title={`Lv.${state.level} 장비`} icon={Star}>
+      <Module title={settings.item ? settings.item.name : `Lv.${state.level} 장비`} icon={Star}>
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-3">
             <ItemSlot
+              item={settings.item}
               destroyed={state.trace !== null}
               charging={session.phase === "charging"}
               pulse={
@@ -121,6 +122,7 @@ function StarforceScreen({
       </Module>
       <LedgerBox ledger={state.ledger} sparePrice={settings.sparePrice} />
       <SettingsModule
+        item={settings.item}
         level={settings.level}
         startStar={settings.startStar}
         destroyed={state.trace !== null}
@@ -134,11 +136,12 @@ function StarforceScreen({
       {dialog === "item" ? (
         <ItemDialog
           open={dialog === "item"}
+          item={settings.item}
           level={settings.level}
           startStar={settings.startStar}
           onOpenChange={(open) => setDialog(open ? "item" : null)}
-          onApply={(level, startStar) => {
-            patch({ level, startStar });
+          onApply={(item, level, startStar) => {
+            patch({ item, level, startStar });
             session.reset(level, startStar);
           }}
         />

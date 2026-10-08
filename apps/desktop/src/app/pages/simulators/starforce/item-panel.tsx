@@ -1,3 +1,5 @@
+import type { StarforceItem } from "@erda/core";
+import { GameIcon } from "@erda/ui/components/game-icon";
 import { m, type TargetAndTransition } from "motion/react";
 import type { ReactNode } from "react";
 
@@ -16,11 +18,13 @@ function slotMotion(charging: boolean, pulse: SlotPulse): TargetAndTransition {
 }
 
 export function ItemSlot({
+  item,
   destroyed,
   charging,
   pulse,
   overlay,
 }: {
+  item: StarforceItem | null;
   destroyed: boolean;
   charging: boolean;
   pulse: SlotPulse;
@@ -38,7 +42,16 @@ export function ItemSlot({
             : "border-border"
       }`}
     >
-      <ItemArt destroyed={destroyed} />
+      {item?.icon ? (
+        <GameIcon
+          src={item.icon}
+          size={52}
+          alt=""
+          className={`transition-[opacity,filter] duration-300 ${destroyed ? "opacity-45 grayscale" : ""}`}
+        />
+      ) : (
+        <ItemArt destroyed={destroyed} />
+      )}
       {overlay}
     </m.div>
   );

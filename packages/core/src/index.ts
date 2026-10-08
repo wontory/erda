@@ -39,3 +39,4 @@ export * from "#/calculators/boss-split.ts";
 export * from "#/simulators/catalog.ts";
 export * from "#/simulators/data/starforce-rules.ts";
 export * from "#/simulators/starforce.ts";
+export * from "#/simulators/starforce-item.ts";
