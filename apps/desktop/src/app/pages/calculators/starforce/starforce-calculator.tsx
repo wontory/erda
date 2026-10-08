@@ -1,10 +1,14 @@
 import { PLUS_ONE_MAX_STAR, attemptCost, canEnhance, chances, isGuaranteed, isProtectable, maxStar } from "@erda/core";
+import { useState } from "react";
 
 import { ActionBar } from "./action-bar.tsx";
 import { ChanceBox } from "./chance-box.tsx";
 import { CostRow } from "./cost-row.tsx";
+import { InfoDialog } from "./info-dialog.tsx";
+import { ItemDialog } from "./item-dialog.tsx";
 import { ItemPanel } from "./item-panel.tsx";
 import { LedgerBox } from "./ledger-box.tsx";
+import { OptionsDialog } from "./options-dialog.tsx";
 import { StarTrack } from "./star-track.tsx";
 import { SF_PANEL, SF_THEME } from "./theme.ts";
 import { useStarforceSession } from "./use-starforce-session.ts";
@@ -12,6 +16,7 @@ import { useStarforceSettings } from "./use-starforce-settings.ts";
 
 export function StarforceCalculator() {
   const { settings, patch } = useStarforceSettings();
+  const [dialog, setDialog] = useState<"item" | "options" | "info" | null>(null);
   const session = useStarforceSession(settings);
   const { state, last, protect } = session;
   const { options } = settings;
@@ -28,7 +33,7 @@ export function StarforceCalculator() {
         destroyed={state.trace !== null}
         charging={session.phase === "charging"}
         shakeKey={null}
-        onEditItem={() => {}}
+        onEditItem={() => setDialog("item")}
       />
       <section className={`${SF_PANEL} flex flex-col gap-2`}>
         <StarTrack star={state.star} cap={cap} next={next} popFrom={popFrom} />
@@ -57,10 +62,29 @@ export function StarforceCalculator() {
           onStopAuto={session.stopAuto}
           onOpenAuto={() => {}}
           onEffects={(effects) => patch({ effects })}
-          onOpenInfo={() => {}}
-          onOpenOptions={() => {}}
+          onOpenInfo={() => setDialog("info")}
+          onOpenOptions={() => setDialog("options")}
         />
       </section>
+      <ItemDialog
+        open={dialog === "item"}
+        level={settings.level}
+        startStar={settings.startStar}
+        onOpenChange={(open) => setDialog(open ? "item" : null)}
+        onApply={(level, startStar) => {
+          patch({ level, startStar });
+          session.reset(level, startStar);
+        }}
+      />
+      <OptionsDialog
+        open={dialog === "options"}
+        options={options}
+        sparePrice={settings.sparePrice}
+        onOpenChange={(open) => setDialog(open ? "options" : null)}
+        onOptions={(next) => patch({ options: next })}
+        onSparePrice={(sparePrice) => patch({ sparePrice })}
+      />
+      <InfoDialog open={dialog === "info"} onOpenChange={(open) => setDialog(open ? "info" : null)} />
     </div>
   );
 }
