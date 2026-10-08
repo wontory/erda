@@ -44,7 +44,6 @@ const fs = require("fs");
 const [version, tag, repo, out] = process.argv.slice(1);
 const asset = (name) => `https://github.com/${repo}/releases/download/${tag}/${name}`;
 const sig = (name) => fs.readFileSync(`${out}/${name}`, "utf8");
-// One universal bundle serves both Mac architectures.
 const mac = { signature: sig("mac.sig"), url: asset(`Erda_${version}_universal.app.tar.gz`) };
 const platforms = { "darwin-aarch64": mac, "darwin-x86_64": mac };
 if (fs.existsSync(`${out}/windows.sig`))

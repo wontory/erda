@@ -40,4 +40,4 @@ jobs:
           releaseName: Erda ${{ github.ref_name }}
           releaseBody: See the assets below to install. The app updates itself from here.
           releaseDraft: false
-          includeUpdaterJson: true
+          uploadUpdaterJson: true
