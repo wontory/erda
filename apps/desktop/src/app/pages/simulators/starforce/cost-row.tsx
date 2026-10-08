@@ -1,8 +1,8 @@
 import { KoreanNumber, type AttemptCost } from "@erda/core";
+import { Switch } from "@erda/ui/components/ui/switch";
+import { useId } from "react";
 
 import { RollingValue } from "#/app/pages/shared/rolling-value.tsx";
-
-import { SfSwitchRow } from "./sf-parts.tsx";
 
 export function CostRow({
   cost,
@@ -15,24 +15,31 @@ export function CostRow({
   protectable: boolean;
   onProtect: (on: boolean) => void;
 }) {
+  const id = useId();
   return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex items-center justify-between gap-2 rounded-md border border-(--sf-gold)/60 bg-(--sf-box) px-2.5 py-2 text-[12px]">
-        <span className="font-semibold text-(--sf-muted)">사용 재화</span>
-        <span className="flex items-center gap-1.5 tabular-nums">
-          <span aria-hidden className="size-3 rounded-full bg-[radial-gradient(circle_at_35%_35%,#fff2a8,#e0a400)]" />
-          {cost.before !== cost.total ? (
-            <s className="text-[11px] text-(--sf-muted)">{KoreanNumber.format(cost.before)}</s>
-          ) : null}
-          <span className="font-bold">
+    <div className="flex items-center gap-3 rounded-lg bg-foreground/4 px-2.5 py-2">
+      <div className="min-w-0 flex-1">
+        <div className="text-[11px] text-muted-foreground">1회 비용</div>
+        <div className="flex items-baseline gap-1.5 tabular-nums">
+          <span className="text-[15px] font-semibold">
             <RollingValue value={KoreanNumber.format(cost.total)} />
           </span>
-          <span className="text-(--sf-muted)">메소</span>
-        </span>
+          <span className="text-[11px] text-muted-foreground">메소</span>
+          {cost.before !== cost.total ? (
+            <s className="truncate text-[11px] text-muted-foreground">{KoreanNumber.format(cost.before)}</s>
+          ) : null}
+        </div>
       </div>
-      <div className="mx-auto w-3/5 rounded-full bg-(--sf-pill) px-3 py-1">
-        <SfSwitchRow label="파괴 방지" checked={protect && protectable} disabled={!protectable} onChange={onProtect} />
-      </div>
+      <label htmlFor={id} className={`flex shrink-0 items-center gap-2 text-[12px] ${protectable ? "" : "opacity-45"}`}>
+        파괴 방지
+        <Switch
+          id={id}
+          size="sm"
+          checked={protect && protectable}
+          disabled={!protectable}
+          onCheckedChange={(on) => onProtect(on)}
+        />
+      </label>
     </div>
   );
 }

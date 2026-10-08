@@ -1,65 +1,51 @@
-import { SfButton, SfSwitchRow } from "./sf-parts.tsx";
+import { Button } from "@erda/ui/components/ui/button";
+import { FastForward, RotateCcw, Square } from "lucide-react";
 
 export function ActionBar({
   canEnhance,
   busy,
   auto,
-  effects,
   onEnhance,
   onStopAuto,
   onOpenAuto,
-  onEffects,
-  onOpenInfo,
-  onOpenOptions,
+  onRestart,
 }: {
   canEnhance: boolean;
   busy: boolean;
   auto: boolean;
-  effects: boolean;
   onEnhance: () => void;
   onStopAuto: () => void;
   onOpenAuto: () => void;
-  onEffects: (on: boolean) => void;
-  onOpenInfo: () => void;
-  onOpenOptions: () => void;
+  onRestart: () => void;
 }) {
+  if (auto) {
+    return (
+      <Button size="lg" variant="destructive" className="h-10 w-full text-[14px]" onClick={onStopAuto}>
+        <Square className="fill-current" />
+        자동 강화 중지
+      </Button>
+    );
+  }
   return (
-    <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
-      <div className="flex items-center gap-1">
-        <button
-          type="button"
-          aria-label="규칙 안내"
-          className="grid size-7 place-items-center rounded-md bg-(--sf-pill) text-[12px] font-semibold text-(--sf-text) transition-[background-color,scale] duration-150 ease-out outline-none hover:bg-foreground/15 focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.95]"
-          onClick={onOpenInfo}
-        >
-          ?
-        </button>
-        <button
-          type="button"
-          className="h-7 rounded-md bg-(--sf-pill) px-2.5 text-[11px] font-medium text-(--sf-text) transition-[background-color,scale] duration-150 ease-out outline-none hover:bg-foreground/15 focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-[0.95]"
-          onClick={onOpenOptions}
-        >
-          이벤트·할인
-        </button>
-      </div>
-      {auto ? (
-        <SfButton className="h-9 w-28 text-[14px]" onClick={onStopAuto}>
-          중지
-        </SfButton>
-      ) : (
-        <SfButton className="h-9 w-28 text-[14px]" disabled={!canEnhance || busy} onClick={onEnhance}>
-          강화하기
-        </SfButton>
-      )}
-      <div className="flex flex-col gap-1 justify-self-end">
-        <SfSwitchRow
-          label="자동 강화"
-          checked={auto}
-          disabled={!canEnhance && !auto}
-          onChange={(on) => (on ? onOpenAuto() : onStopAuto())}
-        />
-        <SfSwitchRow label="강화 연출" checked={effects} onChange={onEffects} />
-      </div>
+    <div className="flex gap-2">
+      <Button
+        size="icon-lg"
+        variant="outline"
+        className="size-10"
+        aria-label="처음부터 다시"
+        title="처음부터 다시 (시작 성으로 되돌리고 기록 지우기)"
+        disabled={busy}
+        onClick={onRestart}
+      >
+        <RotateCcw />
+      </Button>
+      <Button size="lg" className="h-10 flex-1 text-[14px]" disabled={!canEnhance || busy} onClick={onEnhance}>
+        강화하기
+      </Button>
+      <Button size="lg" variant="outline" className="h-10" disabled={!canEnhance || busy} onClick={onOpenAuto}>
+        <FastForward />
+        자동
+      </Button>
     </div>
   );
 }

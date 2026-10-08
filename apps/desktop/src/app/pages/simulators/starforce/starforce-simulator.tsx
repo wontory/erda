@@ -8,6 +8,8 @@ import {
   maxStar,
   type StarforceSettings,
 } from "@erda/core";
+import { Module } from "@erda/ui/components/module";
+import { Star } from "lucide-react";
 import { m } from "motion/react";
 import { useState } from "react";
 
@@ -18,12 +20,13 @@ import { CostRow } from "./cost-row.tsx";
 import { EnchantEffect } from "./enchant-effect.tsx";
 import { InfoDialog } from "./info-dialog.tsx";
 import { ItemDialog } from "./item-dialog.tsx";
-import { ItemPanel } from "./item-panel.tsx";
+import { ItemSlot } from "./item-panel.tsx";
 import { LedgerBox } from "./ledger-box.tsx";
 import { OptionsDialog } from "./options-dialog.tsx";
 import { RestorePanel } from "./restore-panel.tsx";
+import { SettingsModule } from "./settings-module.tsx";
 import { StarTrack } from "./star-track.tsx";
-import { SF_PANEL, SF_THEME } from "./theme.ts";
+import { SF_THEME } from "./theme.ts";
 import { useStarforceSession } from "./use-starforce-session.ts";
 import { useStarforceSettings } from "./use-starforce-settings.ts";
 
@@ -53,74 +56,80 @@ function StarforceScreen({
 
   return (
     <div style={SF_THEME} className="flex flex-col gap-2.5">
-      <section className={`${SF_PANEL} flex flex-col gap-3`}>
-        <ItemPanel
-          level={state.level}
-          destroyed={state.trace !== null}
-          charging={session.phase === "charging"}
-          pulse={
-            settings.effects && !session.auto && last && session.phase === "result"
-              ? { id: last.id, kind: last.outcome === "success" ? "pop" : "shake" }
-              : null
-          }
-          overlay={
-            settings.effects && !session.auto ? (
-              <EnchantEffect phase={session.phase} last={last} />
-            ) : last ? (
-              <m.span
-                key={last.id}
-                className={`pointer-events-none absolute inset-0 rounded-md ${
-                  last.outcome === "success"
-                    ? "bg-(--sf-gold)/50"
-                    : last.outcome === "destroyed"
-                      ? "bg-(--sf-danger)/50"
-                      : "bg-(--sf-text)/15"
-                }`}
-                initial={{ opacity: 1 }}
-                animate={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              />
-            ) : null
-          }
-          onEditItem={() => setDialog("item")}
-        />
-        <StarTrack star={state.star} cap={cap} next={next} popFrom={popFrom} />
-        {state.trace !== null ? (
-          <RestorePanel
-            level={state.level}
-            trace={state.trace}
-            options={options}
-            sparePrice={settings.sparePrice}
-            onRestore={session.restoreWith}
-          />
-        ) : next !== null ? (
-          <>
-            <ChanceBox chances={chances(state.star, options, effectiveProtect)} />
-            <CostRow
-              cost={attemptCost(state.level, state.star, options, effectiveProtect)}
-              protect={protect}
-              protectable={protectable}
-              onProtect={session.setProtect}
+      <Module title={`Lv.${state.level} 장비`} icon={Star}>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <ItemSlot
+              destroyed={state.trace !== null}
+              charging={session.phase === "charging"}
+              pulse={
+                settings.effects && !session.auto && last && session.phase === "result"
+                  ? { id: last.id, kind: last.outcome === "success" ? "pop" : "shake" }
+                  : null
+              }
+              overlay={
+                settings.effects && !session.auto ? (
+                  <EnchantEffect phase={session.phase} last={last} />
+                ) : last ? (
+                  <m.span
+                    key={last.id}
+                    className={`pointer-events-none absolute inset-0 rounded-xl ${
+                      last.outcome === "success"
+                        ? "bg-(--sf-gold)/50"
+                        : last.outcome === "destroyed"
+                          ? "bg-(--sf-danger)/50"
+                          : "bg-(--sf-text)/15"
+                    }`}
+                    initial={{ opacity: 1 }}
+                    animate={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  />
+                ) : null
+              }
             />
-          </>
-        ) : null}
-        <ActionBar
-          canEnhance={canEnhance(state)}
-          busy={session.phase !== "idle"}
-          auto={session.auto}
-          effects={settings.effects}
-          onEnhance={session.attempt}
-          onStopAuto={session.stopAuto}
-          onOpenAuto={() => setDialog("auto")}
-          onEffects={(effects) => patch({ effects })}
-          onOpenInfo={() => setDialog("info")}
-          onOpenOptions={() => setDialog("options")}
-        />
-      </section>
-      <LedgerBox
-        ledger={state.ledger}
-        sparePrice={settings.sparePrice}
-        onReset={() => session.reset(settings.level, settings.startStar)}
+            <StarTrack star={state.star} cap={cap} next={next} popFrom={popFrom} />
+          </div>
+          {state.trace !== null ? (
+            <RestorePanel
+              level={state.level}
+              trace={state.trace}
+              options={options}
+              sparePrice={settings.sparePrice}
+              onRestore={session.restoreWith}
+            />
+          ) : next !== null ? (
+            <>
+              <ChanceBox chances={chances(state.star, options, effectiveProtect)} />
+              <CostRow
+                cost={attemptCost(state.level, state.star, options, effectiveProtect)}
+                protect={protect}
+                protectable={protectable}
+                onProtect={session.setProtect}
+              />
+            </>
+          ) : null}
+          <ActionBar
+            canEnhance={canEnhance(state)}
+            busy={session.phase !== "idle"}
+            auto={session.auto}
+            onEnhance={session.attempt}
+            onStopAuto={session.stopAuto}
+            onOpenAuto={() => setDialog("auto")}
+            onRestart={() => session.reset(settings.level, settings.startStar)}
+          />
+        </div>
+      </Module>
+      <LedgerBox ledger={state.ledger} sparePrice={settings.sparePrice} />
+      <SettingsModule
+        level={settings.level}
+        startStar={settings.startStar}
+        destroyed={state.trace !== null}
+        options={options}
+        effects={settings.effects}
+        onEditItem={() => setDialog("item")}
+        onOpenOptions={() => setDialog("options")}
+        onEffects={(effects) => patch({ effects })}
+        onOpenInfo={() => setDialog("info")}
       />
       {dialog === "item" ? (
         <ItemDialog
