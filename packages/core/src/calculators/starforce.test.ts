@@ -3,13 +3,22 @@ import { describe, expect, it } from "vitest";
 import { BASE_RATES } from "./data/starforce-rules.ts";
 import {
   DEFAULT_STARFORCE_OPTIONS,
+  DEFAULT_STARFORCE_SETTINGS,
+  EMPTY_LEDGER,
   PPM,
   attemptCost,
   baseCost,
   chances,
+  enhance,
   formatChance,
+  formatMeso,
+  initialStarforceState,
+  ledgerTotal,
   maxStar,
+  restore,
   restoreCost,
+  shouldStopAuto,
+  starforceSettingsSchema,
   type StarforceOptions,
 } from "./starforce.ts";
 
@@ -129,5 +138,103 @@ describe("restoreCost", () => {
       spares: 3,
       estimated: false,
     });
+  });
+});
+
+describe("initialStarforceState", () => {
+  it("clamps level and start star to the item cap", () => {
+    expect(initialStarforceState(120, 25)).toMatchObject({ level: 120, star: 15, trace: null });
+    expect(initialStarforceState(999, -3)).toMatchObject({ level: 250, star: 0 });
+  });
+});
+
+describe("enhance", () => {
+  const at = (star: number) => ({ ...initialStarforceState(200, 0), star });
+
+  it("succeeds below the success band and charges the attempt", () => {
+    const r = enhance(at(15), opts(), false, 0)!;
+    expect(r).toMatchObject({ outcome: "success", from: 15, to: 16 });
+    expect(r.state.ledger).toMatchObject({ attempts: 1, successes: 1, enhanceMeso: 71_316_500n });
+  });
+
+  it("keeps the star on a fail", () => {
+    const r = enhance(at(15), opts(), false, 315_000)!;
+    expect(r).toMatchObject({ outcome: "fail", to: 15 });
+    expect(r.state.ledger.failures).toBe(1);
+  });
+
+  it("destroys in the top band and caps the trace at 22", () => {
+    expect(enhance(at(15), opts(), false, PPM - 1)!.state).toMatchObject({ star: 15, trace: 15 });
+    expect(enhance(at(25), opts(), false, PPM - 1)!.state).toMatchObject({ trace: 22 });
+  });
+
+  it("reports a destroy roll blocked by protection", () => {
+    const r = enhance(at(16), opts(), true, PPM - 1)!;
+    expect(r.outcome).toBe("protected");
+    expect(r.state.trace).toBeNull();
+    expect(r.state.ledger.enhanceMeso).toBe(BigInt(baseCost(200, 16) * 3));
+  });
+
+  it("jumps two stars with 1+1 up to 10 stars", () => {
+    expect(enhance(at(10), opts({ plusOne: true }), false, 0)!.to).toBe(12);
+    expect(enhance(at(11), opts({ plusOne: true }), false, 0)!.to).toBe(12);
+  });
+
+  it("refuses at the cap or while destroyed", () => {
+    expect(enhance({ ...initialStarforceState(120, 15) }, opts(), false, 0)).toBeNull();
+    expect(enhance({ ...at(15), trace: 15 }, opts(), false, 0)).toBeNull();
+  });
+});
+
+describe("restore", () => {
+  const destroyed = { ...initialStarforceState(200, 0), star: 21, trace: 21 };
+
+  it("restores the trace star with spares and meso", () => {
+    expect(restore(destroyed, "full", opts())).toMatchObject({
+      star: 21,
+      trace: null,
+      ledger: { restoreMeso: 14_800_000_000n, spares: 3 },
+    });
+  });
+
+  it("restores to 12 stars with one spare and no meso", () => {
+    expect(restore(destroyed, "base", opts())).toMatchObject({
+      star: 12,
+      trace: null,
+      ledger: { restoreMeso: 0n, spares: 1 },
+    });
+  });
+});
+
+describe("ledgerTotal", () => {
+  it("re-prices every spare used at the current spare price", () => {
+    const ledger = { ...EMPTY_LEDGER, enhanceMeso: 100n, restoreMeso: 20n, spares: 3 };
+    expect(ledgerTotal(ledger, 0)).toBe(120n);
+    expect(ledgerTotal(ledger, 1_000_000_000)).toBe(3_000_000_120n);
+  });
+});
+
+describe("shouldStopAuto", () => {
+  const s = initialStarforceState(200, 17);
+  it("stops at or past the target, at the cap, or when destroyed", () => {
+    expect(shouldStopAuto(s, 17)).toBe(true);
+    expect(shouldStopAuto(s, 10)).toBe(true);
+    expect(shouldStopAuto(s, 22)).toBe(false);
+    expect(shouldStopAuto({ ...s, trace: 17 }, 22)).toBe(true);
+    expect(shouldStopAuto(initialStarforceState(120, 15), 30)).toBe(true);
+  });
+});
+
+describe("formatMeso", () => {
+  it("formats in 조/억/만 with exact digits past 2^53", () => {
+    expect(formatMeso(0n)).toBe("0");
+    expect(formatMeso(73_340n)).toBe("7만 3340");
+    expect(formatMeso(12_345_678_901_234_567n)).toBe("12345조 6789억 123만 4567");
+  });
+});
+
+describe("starforceSettingsSchema", () => {
+  it("accepts the defaults", () => {
+    expect(starforceSettingsSchema.parse(DEFAULT_STARFORCE_SETTINGS)).toEqual(DEFAULT_STARFORCE_SETTINGS);
   });
 });

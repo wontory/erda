@@ -1,15 +1,19 @@
 import { z } from "zod";
 
+import { MAX_MESO } from "#/calculators/boss-split.ts";
 import {
   BASE_RATES,
+  BASE_RESTORE_STAR,
   COST_DIVISORS,
   DESTROY_REDUCTION_MAX_STAR,
   GUARANTEE_STARS,
   LEVEL_STAR_CAPS,
+  MAX_TRACE_STAR,
   MEMBER_DISCOUNT_MAX_STAR,
   MVP_DISCOUNT_PERCENT,
   MVP_GRADES,
   PC_ROOM_DISCOUNT_PERCENT,
+  PLUS_ONE_MAX_STAR,
   PROTECTABLE_STARS,
   RESTORE_COEFFICIENTS,
   RESTORE_MESO,
@@ -132,3 +136,170 @@ export function restoreCost(level: number, traceStar: number, options: Starforce
     estimated: listed === undefined,
   };
 }
+
+export interface StarforceLedger {
+  attempts: number;
+  successes: number;
+  failures: number;
+  destroys: number;
+  enhanceMeso: bigint;
+  restoreMeso: bigint;
+  spares: number;
+}
+
+export const EMPTY_LEDGER: StarforceLedger = {
+  attempts: 0,
+  successes: 0,
+  failures: 0,
+  destroys: 0,
+  enhanceMeso: 0n,
+  restoreMeso: 0n,
+  spares: 0,
+};
+
+export interface StarforceState {
+  level: number;
+  star: number;
+  trace: number | null;
+  ledger: StarforceLedger;
+}
+
+export function initialStarforceState(level: number, star: number): StarforceState {
+  const clamped = clampLevel(level);
+  return {
+    level: clamped,
+    star: Math.min(Math.max(0, Math.trunc(star)), maxStar(clamped)),
+    trace: null,
+    ledger: EMPTY_LEDGER,
+  };
+}
+
+export const canEnhance = (state: StarforceState): boolean =>
+  state.trace === null && state.star < maxStar(state.level);
+
+export type EnhanceOutcome = "success" | "fail" | "protected" | "destroyed";
+
+export interface EnhanceResult {
+  state: StarforceState;
+  outcome: EnhanceOutcome;
+  from: number;
+  to: number;
+}
+
+export function enhance(
+  state: StarforceState,
+  options: StarforceOptions,
+  protect: boolean,
+  roll: number,
+): EnhanceResult | null {
+  if (!canEnhance(state)) return null;
+  const from = state.star;
+  const odds = chances(from, options, protect);
+  const cost = attemptCost(state.level, from, options, protect);
+  const ledger = {
+    ...state.ledger,
+    attempts: state.ledger.attempts + 1,
+    enhanceMeso: state.ledger.enhanceMeso + BigInt(cost.total),
+  };
+  if (roll < odds.success) {
+    const step = options.plusOne && from <= PLUS_ONE_MAX_STAR ? 2 : 1;
+    const to = Math.min(from + step, maxStar(state.level));
+    return {
+      state: { ...state, star: to, ledger: { ...ledger, successes: ledger.successes + 1 } },
+      outcome: "success",
+      from,
+      to,
+    };
+  }
+  if (roll >= PPM - odds.destroy) {
+    return {
+      state: {
+        ...state,
+        trace: Math.min(from, MAX_TRACE_STAR),
+        ledger: { ...ledger, destroys: ledger.destroys + 1 },
+      },
+      outcome: "destroyed",
+      from,
+      to: from,
+    };
+  }
+  const unprotectedDestroy = chances(from, options, false).destroy;
+  const blocked = protectionApplies(from, options, protect) && roll >= PPM - unprotectedDestroy;
+  return {
+    state: { ...state, ledger: { ...ledger, failures: ledger.failures + 1 } },
+    outcome: blocked ? "protected" : "fail",
+    from,
+    to: from,
+  };
+}
+
+export type RestoreMode = "full" | "base";
+
+export function restore(state: StarforceState, mode: RestoreMode, options: StarforceOptions): StarforceState {
+  if (state.trace === null) return state;
+  if (mode === "base") {
+    return {
+      ...state,
+      star: BASE_RESTORE_STAR,
+      trace: null,
+      ledger: { ...state.ledger, spares: state.ledger.spares + 1 },
+    };
+  }
+  const cost = restoreCost(state.level, state.trace, options);
+  return {
+    ...state,
+    star: state.trace,
+    trace: null,
+    ledger: {
+      ...state.ledger,
+      restoreMeso: state.ledger.restoreMeso + BigInt(cost.meso),
+      spares: state.ledger.spares + cost.spares,
+    },
+  };
+}
+
+export const ledgerTotal = (ledger: StarforceLedger, sparePrice: number): bigint =>
+  ledger.enhanceMeso + ledger.restoreMeso + BigInt(ledger.spares) * BigInt(Math.trunc(sparePrice));
+
+export const shouldStopAuto = (state: StarforceState, target: number): boolean =>
+  !canEnhance(state) || state.star >= Math.min(target, maxStar(state.level));
+
+const MESO_UNITS: ReadonlyArray<readonly [size: bigint, label: string]> = [
+  [1_0000_0000_0000n, "조"],
+  [1_0000_0000n, "억"],
+  [1_0000n, "만"],
+];
+
+export function formatMeso(value: bigint): string {
+  if (value === 0n) return "0";
+  let rest = value;
+  const parts: string[] = [];
+  for (const [unit, label] of MESO_UNITS) {
+    const q = rest / unit;
+    if (q > 0n) parts.push(`${q}${label}`);
+    rest %= unit;
+  }
+  if (rest > 0n) parts.push(String(rest));
+  return parts.join(" ");
+}
+
+export const starforceSettingsSchema = z.object({
+  level: z.number().int().min(1).max(STARFORCE_MAX_LEVEL),
+  startStar: z.number().int().min(0).max(30),
+  options: starforceOptionsSchema,
+  sparePrice: z.number().int().min(0).max(MAX_MESO),
+  effects: z.boolean(),
+  autoTarget: z.number().int().min(1).max(30),
+  autoProtect: z.array(z.number().int()),
+});
+export type StarforceSettings = z.infer<typeof starforceSettingsSchema>;
+
+export const DEFAULT_STARFORCE_SETTINGS: StarforceSettings = {
+  level: 200,
+  startStar: 0,
+  options: DEFAULT_STARFORCE_OPTIONS,
+  sparePrice: 0,
+  effects: true,
+  autoTarget: 22,
+  autoProtect: [],
+};

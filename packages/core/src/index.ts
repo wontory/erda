@@ -35,3 +35,5 @@ export * from "#/insights/achievements.ts";
 export * from "#/insights/battle.ts";
 export * from "#/calculators/catalog.ts";
 export * from "#/calculators/boss-split.ts";
+export * from "#/calculators/data/starforce-rules.ts";
+export * from "#/calculators/starforce.ts";
