@@ -10,7 +10,7 @@ export interface BossEntry {
 
 export const CYCLES: BossCycle[] = ["daily", "weekly", "monthly"];
 
-export const PRICE_BASE_DATE = "2026-10-01";
+export const PRICE_BASE_DATE = "2026-09-17";
 
 const bossOf =
   (cycle: BossCycle) =>
@@ -78,9 +78,10 @@ export const BOSS_CATALOG: readonly BossEntry[] = [
   weekly("kalos.normal", "감시자 칼로스", "노멀", 479_000_000),
   weekly("adversary.normal", "최초의 대적자", "노멀", 532_000_000),
   weekly("lotus.extreme", "스우", "익스트림", 545_000_000),
-  weekly("star.normal", "찬란한 흉성", "노멀", 576_000_000),
-  weekly("kaling.normal", "카링", "노멀", 593_000_000),
+  weekly("kaling.normal", "카링", "노멀", 576_000_000),
+  weekly("star.normal", "찬란한 흉성", "노멀", 593_000_000),
   weekly("bellona.normal", "벨로나", "노멀", 824_000_000),
+  weekly("limbo.normal", "림보", "노멀", 995_000_000),
   weekly("kalos.chaos", "감시자 칼로스", "카오스", 1_230_000_000),
   weekly("baldrix.normal", "발드릭스", "노멀", 1_320_000_000),
   weekly("adversary.hard", "최초의 대적자", "하드", 1_390_000_000),
