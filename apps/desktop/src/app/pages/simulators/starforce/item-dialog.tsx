@@ -96,7 +96,6 @@ export function ItemDialog({
   const [draftLevel, setDraftLevel] = useState(level);
   const [draftStar, setDraftStar] = useState(startStar);
   const cap = maxStar(clampLevel(draftLevel));
-  // Typing a different level means it's no longer that item.
   const setLevel = (next: number) => {
     setDraftLevel(next);
     setDraftItem(null);

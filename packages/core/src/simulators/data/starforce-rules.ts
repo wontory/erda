@@ -1,7 +1,3 @@
-// KMS starforce rules as of the 2026-09-17 update.
-// Official: base rates (2024-02-15 probability disclosure, 2025-03-20 update), the always-on 1.05x star catch
-// bonus (2026-03-19 update), level caps, MVP/PC room discounts, protection cost, restore spare counts.
-// Unofficial (community-collected, flagged in the UI): cost divisors from 10 stars and full-restore meso.
 export const STARFORCE_RULES_DATE = "2026-09-17";
 
 export const STARFORCE_MAX_LEVEL = 250;
@@ -17,7 +13,6 @@ export const LEVEL_STAR_CAPS: ReadonlyArray<readonly [maxLevel: number, maxStar:
   [250, 30],
 ];
 
-// Success and destroy rates before the star catch bonus, in basis points (1/10,000), indexed by current star.
 export const BASE_RATES: ReadonlyArray<readonly [success: number, destroy: number]> = [
   [9500, 0],
   [9000, 0],
@@ -51,7 +46,6 @@ export const BASE_RATES: ReadonlyArray<readonly [success: number, destroy: numbe
   [100, 1980],
 ];
 
-// Divisor per current star. Stars 0~9 use exponent 1, the rest 2.7.
 export const COST_DIVISORS: ReadonlyArray<number> = [
   36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 571, 314, 214, 157, 107, 200, 200, 150, 70, 45, 200, 125, 200, 200, 200, 200,
   200, 200, 200, 200,
@@ -88,7 +82,6 @@ export const MVP_DISCOUNT_PERCENT: Record<MvpGrade, number> = {
 
 export const PC_ROOM_DISCOUNT_PERCENT = 5;
 
-// Full-restore meso by level, then trace star.
 export const RESTORE_MESO: Readonly<Partial<Record<number, Readonly<Partial<Record<number, number>>>>>> = {
   130: { 15: 119_000_000, 16: 287_000_000, 17: 485_000_000, 18: 1_103_000_000, 19: 1_827_000_000 },
   135: { 15: 133_000_000, 16: 321_000_000, 17: 542_000_000, 18: 1_231_000_000, 19: 2_043_000_000 },
@@ -144,7 +137,6 @@ export const RESTORE_MESO: Readonly<Partial<Record<number, Readonly<Partial<Reco
   },
 };
 
-// Full-restore meso per L³ for levels missing above.
 export const RESTORE_COEFFICIENTS: Readonly<Record<number, number>> = {
   15: 54.15,
   16: 130.7,

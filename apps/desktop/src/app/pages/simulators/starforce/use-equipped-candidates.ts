@@ -5,7 +5,6 @@ import { useMemo } from "react";
 import { useExtra } from "#/features/character/use-extra.ts";
 import { useMainCharacter } from "#/features/character/use-main-character.ts";
 
-// The main character's equipped items that regular starforce applies to, in equipment-window order.
 export function useEquippedCandidates() {
   const main = useMainCharacter();
   const ocid = main.ocid ?? "";

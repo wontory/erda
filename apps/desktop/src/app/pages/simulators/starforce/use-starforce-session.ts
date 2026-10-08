@@ -45,7 +45,6 @@ type Action =
   | { type: "reset"; level: number; star: number }
   | { type: "auto"; target: number | null; protect?: readonly number[] };
 
-// Auto stops in the same update that reaches the target or destroys the item.
 const keepAuto = (state: StarforceState, target: number | null): number | null =>
   target !== null && !shouldStopAuto(state, target) ? target : null;
 

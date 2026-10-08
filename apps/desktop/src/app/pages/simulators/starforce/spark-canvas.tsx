@@ -93,7 +93,6 @@ function spawn(outcome: EnhanceOutcome): Particle[] {
   return out;
 }
 
-// A mote that drifts from the rim into the slot while the item charges.
 function mote(): Particle {
   const angle = rand(0, Math.PI * 2);
   const r = rand(70, 105);
@@ -194,7 +193,6 @@ function draw(ctx: CanvasRenderingContext2D, p: Particle) {
   ctx.restore();
 }
 
-// Owns the particles and the frame loop; runs only while something is alive or charging.
 class SparkEngine {
   private particles: Particle[] = [];
   private charging = false;
@@ -254,7 +252,6 @@ class SparkEngine {
   };
 }
 
-// Canvas particle layer centred on the item slot.
 export function SparkCanvas({ ref, disabled }: { ref: Ref<SparkHandle>; disabled: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engine = useRef<SparkEngine | null>(null);

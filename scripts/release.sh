@@ -1,13 +1,4 @@
 #!/usr/bin/env bash
-# Builds a universal (Apple Silicon + Intel) macOS bundle and a Windows x64 installer on this Mac, then
-# publishes both with one updater feed to wontory/erda-releases. For when CI can't run;
-# .github/workflows/release.yml does the same on a v* tag.
-#
-# Bump "version" in apps/desktop/src-tauri/tauri.conf.json first. Needs gh logged in with access to the repo.
-# One-time setup:
-#   rustup target add x86_64-apple-darwin x86_64-pc-windows-msvc
-#   brew install nsis llvm lld && cargo install --locked cargo-xwin
-# Pass --mac-only to skip Windows.
 set -euo pipefail
 
 REPO="wontory/erda-releases"
@@ -40,7 +31,6 @@ cp "$MAC/dmg/Erda_${VERSION}_universal.dmg" "$OUT/"
 ASSETS+=("$OUT/Erda_${VERSION}_universal.app.tar.gz" "$OUT/Erda_${VERSION}_universal.dmg")
 
 if [[ "$WINDOWS" == 1 ]]; then
-  # Cross-compiling links with LLVM's tools and the Windows SDK that cargo-xwin downloads; only NSIS can be built here.
   PATH="$(brew --prefix llvm)/bin:$(brew --prefix lld)/bin:$PATH" \
     pnpm --filter @erda/desktop tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc --bundles nsis
   WIN="$ROOT/target/x86_64-pc-windows-msvc/release/bundle/nsis/Erda_${VERSION}_x64-setup.exe"

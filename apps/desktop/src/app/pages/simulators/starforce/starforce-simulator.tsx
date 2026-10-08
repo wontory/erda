@@ -32,7 +32,6 @@ import { useStarforceSettings } from "./use-starforce-settings.ts";
 
 export function StarforceSimulator() {
   const { settings, loaded, patch } = useStarforceSettings();
-  // The session seeds from the saved item once, so wait for the store read.
   return loaded ? <StarforceScreen settings={settings} patch={patch} /> : null;
 }
 

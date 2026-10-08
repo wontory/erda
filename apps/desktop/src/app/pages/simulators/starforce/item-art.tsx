@@ -1,4 +1,3 @@
-// A flat, two-tone sword drawn with the app's tokens so it sits with the lucide icons around it.
 const INK = "color-mix(in oklab, var(--foreground) 72%, transparent)";
 const TINT = "color-mix(in oklab, var(--foreground) 7%, transparent)";
 const RIDGE = "color-mix(in oklab, var(--foreground) 22%, transparent)";

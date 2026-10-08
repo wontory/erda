@@ -7,7 +7,6 @@ import { ItemArt } from "./item-art.tsx";
 
 export type SlotPulse = { id: number; kind: "pop" | "shake" } | null;
 
-// Wind up while charging, then pop on success or shake on a miss.
 function slotMotion(charging: boolean, pulse: SlotPulse): TargetAndTransition {
   if (charging) return { scale: 0.96, transition: { duration: 0.6, ease: [0.25, 1, 0.5, 1] } };
   if (pulse?.kind === "pop") {

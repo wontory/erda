@@ -22,13 +22,9 @@ export interface StarforceCandidate {
   star: number;
 }
 
-// Superior items run on their own star table, which the simulator doesn't model.
 const SUPERIOR = /^타일런트 /;
 const AMAZING_ENHANCEMENT = "사용";
 
-// An equipped item the simulator can start from, or null when regular starforce doesn't apply to it:
-// no upgrade slots ever (emblems, badges, event rings), Amazing Enhancement stars, superior items, or
-// a level with no stars.
 export function starforceCandidate(equip: EquipLike): StarforceCandidate | null {
   const name = equip.item_name ?? "";
   if (!name || SUPERIOR.test(name) || equip.starforce_scroll_flag === AMAZING_ENHANCEMENT) return null;

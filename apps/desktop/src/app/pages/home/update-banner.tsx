@@ -3,7 +3,6 @@ import { Download } from "lucide-react";
 
 import { useAppUpdate } from "#/features/update/use-app-update.ts";
 
-// A slim row at the top of home once a newer release is out; installing restarts the app.
 export function UpdateBanner() {
   const { state, install } = useAppUpdate({ auto: true });
   const update = "update" in state ? state.update : null;

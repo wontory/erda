@@ -23,7 +23,6 @@ function StarIcon({ filled, pop }: { filled: boolean; pop: boolean }) {
   );
 }
 
-// The current star as a headline, then the cap as star icons: rows of fifteen, grouped by five.
 export function StarTrack({
   star,
   cap,
