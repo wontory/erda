@@ -13,6 +13,7 @@ const pageSchema = z.discriminatedUnion("kind", [
   fixedPage("timers"),
   fixedPage("scheduler"),
   fixedPage("news"),
+  z.object({ kind: z.literal("article"), id: z.string(), entryId: z.string() }),
   z.object({ kind: z.literal("calculator"), id: z.string(), calculator: z.enum(CALCULATOR_IDS) }),
   fixedPage("account"),
   z.object({ kind: z.literal("history"), id: z.string(), history: z.enum(HISTORY_KINDS) }),
