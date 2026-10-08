@@ -138,8 +138,6 @@ impl Gateway {
         self.blocking_cache(move |c| c.remove(&key)).await;
     }
 
-    /// Fetches a character look image. The webview can't do this itself: it always advertises `br`, and
-    /// Nexon's CDN keeps some of those variants cached as a redirect to a blank placeholder.
     pub async fn character_look(&self, url: &str) -> Result<Vec<u8>, NexonError> {
         let target = reqwest::Url::parse(url).map_err(|_| NexonError::invalid_parameter(url))?;
         let base = reqwest::Url::parse(&self.base_url).map_err(|_| NexonError::invalid_parameter(url))?;
@@ -148,7 +146,6 @@ impl Gateway {
         }
         let res = self.client.get(target).send().await.map_err(network_error)?;
         let status = res.status().as_u16();
-        // A redirect away from the look path lands on the placeholder, which is no image at all.
         if status != HTTP_OK || !res.url().path().starts_with(LOOK_PATH) {
             return Err(NexonError::unexpected_status(status));
         }

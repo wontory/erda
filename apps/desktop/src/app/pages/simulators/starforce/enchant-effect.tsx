@@ -15,7 +15,6 @@ const RESULT: Record<EnhanceOutcome, { label: string; icon: LucideIcon; tone: st
   destroyed: { label: "파괴", icon: Flame, tone: "var(--destructive)" },
 };
 
-// Soft light rays turning behind the item while it charges and when it succeeds.
 function Rays({ strength }: { strength: number }) {
   return (
     <m.span
@@ -113,7 +112,6 @@ function Burst({ outcome }: { outcome: EnhanceOutcome }) {
   );
 }
 
-// Opaque so it reads over the item; the tone tints both fill and outline.
 function ResultBadge({ outcome }: { outcome: EnhanceOutcome }) {
   const { label, icon: Icon, tone } = RESULT[outcome];
   return (

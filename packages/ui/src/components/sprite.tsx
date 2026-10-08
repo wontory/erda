@@ -7,15 +7,11 @@ import { imageA11y } from "#/lib/a11y.ts";
 import { spriteFetcher } from "#/lib/sprite-fetcher.ts";
 
 const IMAGE = 300;
-// Nexon stands every character on the same spot of the canvas: feet on y=200, body centred on x=147.
 const ANCHOR_X = 147;
 const FEET_Y = 200;
-// Only this far either side of the anchor counts as the body, so weapons and capes don't set the size.
 const BODY_HALF = 40;
-// Keeps a short character from being blown up to fill the tile.
 const MIN_SPAN = 80;
 const PAD = 6;
-// Used when the pixels can't be read: an average character, head to toe.
 const FALLBACK: Fit = { cx: ANCHOR_X, cy: 160, span: 96 };
 
 type Fit = { cx: number; cy: number; span: number };
@@ -31,7 +27,6 @@ async function fetchBitmap(src: string): Promise<ImageBitmap> {
   return createImageBitmap(img);
 }
 
-// Only 300px canvases are real looks; anything else is Nexon's "no image" placeholder.
 function loadImage(src: string): Promise<ImageBitmap | null> {
   return fetchBitmap(src).then(
     (bitmap) => (bitmap.width === IMAGE ? bitmap : null),
@@ -39,8 +34,6 @@ function loadImage(src: string): Promise<ImageBitmap | null> {
   );
 }
 
-// Square fitted to the character's height (tallest frame, head to feet) and centred on the anchor, so
-// every character lines up and fills the tile the same way; wide weapons run off the sides.
 function measureFit(images: ImageBitmap[]): Fit {
   const canvas = document.createElement("canvas");
   canvas.width = IMAGE;
@@ -64,9 +57,6 @@ function measureFit(images: ImageBitmap[]): Fit {
   return { cx: ANCHOR_X, cy: (top + FEET_Y + 1) / 2, span };
 }
 
-// Fetches the frames one at a time and keeps the decoded images,
-// so stepping through them never goes back to the network.
-// If no frame comes back, `fallback` (the plain image) is drawn instead.
 function useFrames(frames: readonly string[], fallback: string) {
   const key = [fallback, ...frames].join("\n");
   const [loaded, setLoaded] = useState<Loaded | null>(null);
@@ -103,7 +93,6 @@ type SpriteProps = {
   zoom?: number;
   alt?: string;
   className?: string;
-  /** Animation frames; without them, or when none of them load, `src` is drawn on its own. */
   frames?: readonly string[];
   frameMs?: number;
 };

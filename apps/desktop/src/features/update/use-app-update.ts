@@ -11,15 +11,11 @@ export type UpdateState =
   | { status: "error"; message: string; update: Update | null };
 
 const RECHECK_MS = 6 * 60 * 60 * 1000;
-// Lets the startup API calls go first.
 const FIRST_CHECK_DELAY_MS = 3000;
 
-// The last background result, so screens that mount again (home) don't hit the feed every time.
 let lastQuietCheck = 0;
 let lastFound: Update | null = null;
 
-// Checks the release feed and installs the update in place, then restarts the app.
-// `auto` checks once on mount and again every few hours, quietly: a failed background check isn't an error.
 export function useAppUpdate({ auto = false }: { auto?: boolean } = {}) {
   const [state, setState] = useState<UpdateState>(() =>
     auto && lastFound ? { status: "available", update: lastFound } : { status: "idle" },

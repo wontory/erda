@@ -1,5 +1,3 @@
-// Nexon's character image takes `action=<code>.<frame>`; frame counts were measured
-// against the live API, which falls back to frame 0 past the last one.
 export const CHARACTER_POSES = [
   { code: "A00", label: "기본 서기", frames: 3, frameMs: 500, zigzag: true },
   { code: "A01", label: "두 손 서기", frames: 3, frameMs: 500, zigzag: true },
@@ -46,7 +44,6 @@ function withAction(image: string, action: string): string {
   }
 }
 
-// One URL per displayed step, zigzag poses bounce back (0,1,2,1) like they do in game.
 export function characterLookFrames(image: string, code: CharacterPoseCode, animate: boolean): string[] {
   if (!image) return [];
   const pose = characterPose(code);
