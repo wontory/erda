@@ -1,9 +1,21 @@
 import { PROTECTABLE_STARS } from "@erda/core";
-import { Dialog, DialogContent, DialogTitle } from "@erda/ui/components/ui/dialog";
-import { useState } from "react";
+import { Button } from "@erda/ui/components/ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@erda/ui/components/ui/dialog";
+import { NumberField, NumberFieldGroup, NumberFieldInput } from "@erda/ui/components/ui/number-field";
+import { Switch } from "@erda/ui/components/ui/switch";
+import { useId, useState } from "react";
 
-import { SfBox, SfButton, SfSwitchRow } from "./sf-parts.tsx";
-import { SF_PILL, SF_THEME } from "./theme.ts";
+import { StarCount } from "./star-count.tsx";
+
+function ProtectRow({ star, checked, onChange }: { star: number; checked: boolean; onChange: (on: boolean) => void }) {
+  const id = useId();
+  return (
+    <label htmlFor={id} className="flex items-center justify-between gap-2 rounded-lg bg-foreground/4 px-2.5 py-1.5">
+      <StarCount>{star}</StarCount>
+      <Switch id={id} size="sm" checked={checked} onCheckedChange={(on) => onChange(on)} />
+    </label>
+  );
+}
 
 export function AutoDialog({
   open,
@@ -29,55 +41,56 @@ export function AutoDialog({
     setDraftProtect((list) => (on ? [...list.filter((x) => x !== s), s] : list.filter((x) => x !== s)));
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent style={SF_THEME} className="gap-2 sm:max-w-xs">
-        <DialogTitle>자동 강화</DialogTitle>
-        <SfBox>
-          <div className="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1.5 text-[12px]">
-            <span className="text-(--sf-muted)">현재 단계</span>
-            <span className={`${SF_PILL} font-bold tabular-nums`}>★ {star}</span>
-            <span className="text-(--sf-muted)">목표 단계</span>
-            <div className="flex items-center gap-1">
-              <span className="flex-1 rounded-md border border-(--sf-box-edge) bg-(--sf-box) px-2 py-0.5 text-right font-bold tabular-nums">
-                {clamped}
+      <DialogContent className="sm:max-w-xs">
+        <DialogHeader>
+          <DialogTitle>자동 강화</DialogTitle>
+        </DialogHeader>
+        <div className="flex flex-col gap-3 text-[12px]">
+          <div className="flex flex-col gap-1.5">
+            <span>
+              목표 단계{" "}
+              <span className="text-muted-foreground">
+                (현재 <StarCount>{star}</StarCount>)
               </span>
-              <SfButton
-                aria-label="목표 올리기"
-                className="size-6 text-[10px]"
-                onClick={() => setDraftTarget(Math.min(clamped + 1, cap))}
+            </span>
+            <div className="flex gap-1.5">
+              <NumberField
+                className="flex-1"
+                value={clamped}
+                min={star + 1}
+                max={cap}
+                step={1}
+                onValueChange={(v) => setDraftTarget(v ?? star + 1)}
               >
-                ▲
-              </SfButton>
-              <SfButton
-                aria-label="목표 내리기"
-                className="size-6 text-[10px]"
-                onClick={() => setDraftTarget(Math.max(clamped - 1, star + 1))}
-              >
-                ▼
-              </SfButton>
-              <SfButton className="h-6 px-1.5 text-[10px]" onClick={() => setDraftTarget(cap)}>
-                MAX
-              </SfButton>
+                <NumberFieldGroup className="w-full">
+                  <NumberFieldInput aria-label="목표 단계" className="text-right" />
+                </NumberFieldGroup>
+              </NumberField>
+              <Button variant="outline" onClick={() => setDraftTarget(cap)}>
+                최대
+              </Button>
             </div>
           </div>
-        </SfBox>
-        <SfBox title="파괴 방지 설정">
-          <div className="grid grid-cols-3 gap-2">
-            {PROTECTABLE_STARS.map((s) => (
-              <div key={s} className={`${SF_PILL} px-2`}>
-                <SfSwitchRow label={`★${s}`} checked={draftProtect.includes(s)} onChange={(on) => toggle(s, on)} />
-              </div>
-            ))}
+          <div className="flex flex-col gap-1.5">
+            <span>파괴 방지</span>
+            <div className="grid grid-cols-3 gap-1.5">
+              {PROTECTABLE_STARS.map((s) => (
+                <ProtectRow key={s} star={s} checked={draftProtect.includes(s)} onChange={(on) => toggle(s, on)} />
+              ))}
+            </div>
           </div>
-        </SfBox>
-        <SfButton
-          className="mx-auto h-8 w-28 text-[13px]"
-          onClick={() => {
-            onStart(clamped, draftProtect);
-            onOpenChange(false);
-          }}
-        >
-          자동 강화
-        </SfButton>
+        </div>
+        <DialogFooter>
+          <Button
+            size="sm"
+            onClick={() => {
+              onStart(clamped, draftProtect);
+              onOpenChange(false);
+            }}
+          >
+            시작
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
