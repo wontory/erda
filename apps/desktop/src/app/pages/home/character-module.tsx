@@ -11,14 +11,16 @@ import { Heart, User } from "lucide-react";
 
 import { KeyMetrics } from "#/app/pages/character/parts/key-metrics.tsx";
 import { EmptyState } from "#/app/pages/shared/empty-state.tsx";
+import { useCharacterLook } from "#/features/character/use-character-look.ts";
 import { useMainCharacter } from "#/features/character/use-main-character.ts";
 import { runAction } from "#/lib/action.ts";
 import { openSettingsAction } from "#/lib/tauri.ts";
 
 function CharacterHeadline({ summary: s }: { summary: CharacterSummary }) {
+  const look = useCharacterLook(s.image, { animated: true });
   return (
     <div className="flex items-center gap-3">
-      <Sprite src={s.image} size={72} zoom={1.3} alt="" />
+      <Sprite {...look} size={96} alt="" />
       <div className="min-w-0 flex-1">
         <div className="truncate text-[15px] font-semibold">{s.name}</div>
         <div className="text-[12px] text-muted-foreground">

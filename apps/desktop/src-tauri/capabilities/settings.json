@@ -16,6 +16,7 @@
     "process:allow-exit",
     "log:default",
     "allow-nexon-request",
+    "allow-nexon-character-look",
     "allow-nexon-calls-today",
     "allow-nexon-cache-size",
     "allow-nexon-cache-clear",

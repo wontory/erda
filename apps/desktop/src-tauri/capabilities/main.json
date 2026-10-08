@@ -20,6 +20,7 @@
     "allow-inspector-show",
     "allow-inspector-hide",
     "allow-nexon-request",
+    "allow-nexon-character-look",
     "allow-nexon-calls-today",
     "allow-timers-start",
     "allow-timers-start-group",

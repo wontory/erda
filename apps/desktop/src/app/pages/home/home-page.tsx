@@ -16,6 +16,7 @@ import { CharacterModule } from "./character-module.tsx";
 import { NewsModule } from "./news-module.tsx";
 import { OnboardingModule } from "./onboarding-module.tsx";
 import { SchedulerModule } from "./scheduler-module.tsx";
+import { SimulatorsModule } from "./simulators-module.tsx";
 import { TimerModule } from "./timer-module.tsx";
 
 function HomeSearch() {
@@ -68,9 +69,10 @@ export function HomePage() {
           <TimerModule onOpen={() => push(pages.timers())} />
           <SchedulerModule onOpen={() => push(pages.scheduler())} />
         </div>
-        <CalculatorsModule onOpen={(id) => push(pages.calculator(id))} />
         <NewsModule onOpen={() => push(pages.news())} onOpenEntry={(id) => push(pages.article(id))} />
         <AccountModule onOpen={() => push(pages.account())} />
+        <CalculatorsModule onOpen={(id) => push(pages.calculator(id))} />
+        <SimulatorsModule onOpen={(id) => push(pages.simulator(id))} />
       </div>
     </>
   );

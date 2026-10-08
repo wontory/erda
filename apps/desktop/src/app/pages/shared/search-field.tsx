@@ -43,6 +43,7 @@ export function SearchField({
       <InputGroupInput
         ref={ref}
         type="search"
+        className="[&::-webkit-search-cancel-button]:appearance-none"
         value={value}
         onChange={(e) => onValueChange(e.target.value)}
         placeholder={label}

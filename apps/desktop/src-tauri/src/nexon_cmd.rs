@@ -29,6 +29,14 @@ pub async fn nexon_request(
 }
 
 #[tauri::command]
+pub async fn nexon_character_look(
+    gateway: State<'_, GatewayState>,
+    url: String,
+) -> Result<tauri::ipc::Response, NexonError> {
+    gateway.0.character_look(&url).await.map(tauri::ipc::Response::new)
+}
+
+#[tauri::command]
 pub async fn nexon_calls_today(gateway: State<'_, GatewayState>) -> Result<u32, String> {
     Ok(gateway.0.calls_today().await)
 }

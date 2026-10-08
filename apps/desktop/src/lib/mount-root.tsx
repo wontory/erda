@@ -1,8 +1,10 @@
 import { ErrorRow } from "@erda/ui/components/error-row";
 import { startPlatform } from "@erda/ui/lib/platform";
+import { setSpriteFetcher } from "@erda/ui/lib/sprite-fetcher";
 
 import "@erda/ui/styles.css";
 import { startSystemTheme } from "@erda/ui/lib/theme";
+import { invoke } from "@tauri-apps/api/core";
 import { StrictMode, type ComponentType } from "react";
 import { createRoot } from "react-dom/client";
 
@@ -16,6 +18,7 @@ const defaultFallback: ErrorFallback = (_error, reset) => (
 
 export function mountRoot(Root: ComponentType, fallback: ErrorFallback = defaultFallback) {
   startSystemTheme();
+  setSpriteFetcher((url) => invoke<ArrayBuffer>("nexon_character_look", { url }));
   void startPlatform();
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
