@@ -18,7 +18,7 @@ export function CharacterRow({ name, world, job, image, level, onClick, trailing
   const body = (
     <>
       <ItemMedia>
-        <Sprite src={image} size={40} zoom={1.45} alt="" />
+        <Sprite src={image} size={40} alt="" />
       </ItemMedia>
       <ItemContent>
         <ItemTitle>{name}</ItemTitle>

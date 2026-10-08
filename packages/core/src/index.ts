@@ -5,6 +5,7 @@ export * from "#/api/dates.ts";
 export * from "#/api/worlds.ts";
 export * from "#/character/types.ts";
 export * from "#/character/summary.ts";
+export * from "#/character/look.ts";
 export * from "#/character/stat-format.ts";
 export * from "#/character/symbol-calc.ts";
 export * from "#/character/recent.ts";
