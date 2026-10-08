@@ -69,6 +69,7 @@ pub fn run() {
             windows::inspector_show,
             windows::inspector_hide,
             nexon_cmd::nexon_request,
+            nexon_cmd::nexon_character_look,
             nexon_cmd::nexon_calls_today,
             nexon_cmd::nexon_cache_size,
             nexon_cmd::nexon_cache_clear,
