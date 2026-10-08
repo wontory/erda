@@ -18,6 +18,7 @@ import { KeyRound, Newspaper, Sun, Wrench } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { useNav } from "#/app/nav/context.ts";
+import { pages } from "#/app/nav/stack.ts";
 import { FilterMenu, type NewsFilter } from "#/app/pages/news/parts/filter-menu.tsx";
 import { NewsRow } from "#/app/pages/news/parts/news-row.tsx";
 import { EmptyState } from "#/app/pages/shared/empty-state.tsx";
@@ -76,7 +77,7 @@ function FeedFooter({
 }
 
 export function NewsPage() {
-  const { pop } = useNav();
+  const { pop, push } = useNav();
   const news = useNotices();
   const now = useNow();
   const [filter, setFilter] = useState<NewsFilter>("all");
@@ -93,7 +94,7 @@ export function NewsPage() {
   const errorInFeed = feed.length === 0 && (!!news.error || (news.loaded && !news.loading && !!news.lastError));
   const footerError = errorInFeed ? null : news.lastError;
   const isUnread = (e: NewsEntry) => !news.seenSet.has(e.id);
-  const markSeen = (id: string) => void runAction(() => noticesCommands.markSeen([id]), MARK_SEEN_FAILED);
+  const openArticle = (id: string) => push(pages.article(id));
   const markAll = () =>
     void runAction(() => noticesCommands.markAllSeen(filter === "all" ? NEWS_CATEGORIES : [filter]), MARK_SEEN_FAILED);
   const refresh = () => void runAction(() => noticesCommands.refresh(true), "소식을 갱신하지 못했어요");
@@ -113,12 +114,12 @@ export function NewsPage() {
           <>
             {banner && (filter === "all" || filter === "notice") ? (
               <Module title="점검 공지" icon={Wrench}>
-                <NewsRow entry={banner} unread={isUnread(banner)} now={now} onOpen={markSeen} banner />
+                <NewsRow entry={banner} unread={isUnread(banner)} now={now} onOpen={openArticle} banner />
               </Module>
             ) : null}
             {sunday && (filter === "all" || filter === "event") ? (
               <Module title="썬데이 메이플" icon={Sun}>
-                <NewsRow entry={sunday} unread={isUnread(sunday)} now={now} onOpen={markSeen} />
+                <NewsRow entry={sunday} unread={isUnread(sunday)} now={now} onOpen={openArticle} />
               </Module>
             ) : null}
             <Module
@@ -131,7 +132,7 @@ export function NewsPage() {
               }
             >
               {feed.length > 0 ? (
-                feed.map((e) => <NewsRow key={e.id} entry={e} unread={isUnread(e)} now={now} onOpen={markSeen} />)
+                feed.map((e) => <NewsRow key={e.id} entry={e} unread={isUnread(e)} now={now} onOpen={openArticle} />)
               ) : (
                 <FeedFallback news={news} onRefresh={refresh} />
               )}

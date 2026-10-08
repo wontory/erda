@@ -11,7 +11,7 @@ import { openExternal } from "#/lib/tauri.ts";
 export function NewsDetail({ entry }: { entry: NewsEntry }) {
   const detail = useNoticeDetail(entry, true);
   return (
-    <div className="mt-1.5 pl-[30px]">
+    <div className="mt-3">
       {detail.isLoading ? <LoadingRow label="본문 불러오는 중…" /> : null}
       {detail.error ? <ErrorRow message={describeError(detail.error)} onRetry={() => void detail.refetch()} /> : null}
       {detail.content?.empty ? (
