@@ -174,8 +174,7 @@ export function initialStarforceState(level: number, star: number): StarforceSta
   };
 }
 
-export const canEnhance = (state: StarforceState): boolean =>
-  state.trace === null && state.star < maxStar(state.level);
+export const canEnhance = (state: StarforceState): boolean => state.trace === null && state.star < maxStar(state.level);
 
 export type EnhanceOutcome = "success" | "fail" | "protected" | "destroyed";
 

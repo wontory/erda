@@ -5,11 +5,14 @@ import { useNav } from "#/app/nav/context.ts";
 import { openSettingsAction } from "#/lib/tauri.ts";
 
 import { BossSplitCalculator } from "./boss-split/boss-split-calculator.tsx";
+import { StarforceCalculator } from "./starforce/starforce-calculator.tsx";
 
 function CalculatorBody({ calculator }: { calculator: CalculatorId }) {
   switch (calculator) {
     case "boss-split":
       return <BossSplitCalculator />;
+    case "starforce":
+      return <StarforceCalculator />;
   }
 }
 

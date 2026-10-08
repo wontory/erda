@@ -53,8 +53,8 @@ export const BASE_RATES: ReadonlyArray<readonly [success: number, destroy: numbe
 
 // Divisor per current star. Stars 0~9 use exponent 1, the rest 2.7.
 export const COST_DIVISORS: ReadonlyArray<number> = [
-  36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 571, 314, 214, 157, 107, 200, 200, 150, 70, 45, 200, 125, 200, 200, 200,
-  200, 200, 200, 200, 200,
+  36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 571, 314, 214, 157, 107, 200, 200, 150, 70, 45, 200, 125, 200, 200, 200, 200,
+  200, 200, 200, 200,
 ];
 
 export const PROTECTABLE_STARS: ReadonlyArray<number> = [15, 16, 17];
