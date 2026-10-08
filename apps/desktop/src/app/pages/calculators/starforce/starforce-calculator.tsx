@@ -9,6 +9,7 @@ import { ItemDialog } from "./item-dialog.tsx";
 import { ItemPanel } from "./item-panel.tsx";
 import { LedgerBox } from "./ledger-box.tsx";
 import { OptionsDialog } from "./options-dialog.tsx";
+import { RestorePanel } from "./restore-panel.tsx";
 import { StarTrack } from "./star-track.tsx";
 import { SF_PANEL, SF_THEME } from "./theme.ts";
 import { useStarforceSession } from "./use-starforce-session.ts";
@@ -42,7 +43,15 @@ export function StarforceCalculator() {
           sparePrice={settings.sparePrice}
           onReset={() => session.reset(settings.level, settings.startStar)}
         />
-        {next !== null ? (
+        {state.trace !== null ? (
+          <RestorePanel
+            level={state.level}
+            trace={state.trace}
+            options={options}
+            sparePrice={settings.sparePrice}
+            onRestore={session.restoreWith}
+          />
+        ) : next !== null ? (
           <>
             <ChanceBox chances={chances(state.star, options, protect && protectable)} />
             <CostRow
