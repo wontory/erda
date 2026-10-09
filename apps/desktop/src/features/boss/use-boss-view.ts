@@ -26,6 +26,8 @@ export function useBossView(cycle: BossCycle) {
   const ocid = main.ocid ?? main.summary?.ocid ?? null;
   const schedulerAvailable = hasApiKey(apiKey) && !!ocid;
   const [useScheduler, setUseScheduler, schedulerSettingLoaded] = useUseScheduler();
+  const resolving =
+    !schedulerSettingLoaded || (useScheduler && hasApiKey(apiKey) && !ocid && (!main.nameLoaded || main.isPending));
   const mode = schedulerSettingLoaded && schedulerAvailable && useScheduler ? "scheduler" : "manual";
   const boss = useBossState();
   const scheduler = useSchedulerState(ocid, mode === "scheduler");
@@ -48,6 +50,7 @@ export function useBossView(cycle: BossCycle) {
   return {
     ...view,
     schedulerAvailable,
+    resolving,
     useScheduler,
     setUseScheduler,
     boss,

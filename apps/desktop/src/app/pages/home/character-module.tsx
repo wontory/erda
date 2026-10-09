@@ -63,7 +63,7 @@ export function CharacterModule({ onOpen }: { onOpen: () => void }) {
               <KeyMetrics summary={s} className="mt-3" />
             </>
           ) : main.isPending ? (
-            <LoadingRow label="본캐 불러오는 중…" />
+            <LoadingRow label="본캐 불러오는 중…" minHeight={160} />
           ) : main.error ? (
             <ErrorRow
               message={describeError(main.error)}

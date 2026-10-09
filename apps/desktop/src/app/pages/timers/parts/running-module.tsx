@@ -1,4 +1,5 @@
 import { ErrorRow } from "@erda/ui/components/error-row";
+import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Module } from "@erda/ui/components/module";
 import { Button } from "@erda/ui/components/ui/button";
 import {
@@ -105,7 +106,9 @@ export function RunningModule() {
               ))
             )}
           </AnimatePresence>
-        ) : null}
+        ) : (
+          <LoadingRow minHeight={130} />
+        )}
       </div>
       <CancelAllDialog
         open={confirming}

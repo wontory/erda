@@ -7,9 +7,8 @@ import { RefreshButton } from "@erda/ui/components/refresh-button";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
 import { StackItem } from "@erda/ui/components/stack-item";
 import { Button } from "@erda/ui/components/ui/button";
-import { fadeScale } from "@erda/ui/lib/motion";
 import { Star } from "lucide-react";
-import { AnimatePresence, m } from "motion/react";
+import { AnimatePresence } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
 import { useNav } from "#/app/nav/context.ts";
@@ -37,14 +36,21 @@ function FavoriteButton({
   popped,
   onToggle,
 }: {
-  summary: CharacterSummary;
+  summary: CharacterSummary | undefined;
   favorite: boolean;
   popped: boolean;
   onToggle: (summary: CharacterSummary) => void;
 }) {
   const label = favorite ? "즐겨찾기 해제" : "즐겨찾기 추가";
   return (
-    <Button variant="ghost" size="icon-sm" aria-label={label} title={label} onClick={() => onToggle(summary)}>
+    <Button
+      variant="ghost"
+      size="icon-sm"
+      aria-label={label}
+      title={label}
+      disabled={!summary}
+      onClick={() => summary && onToggle(summary)}
+    >
       <Star
         key={String(favorite)}
         className={`${favorite ? "fill-yellow-500 text-yellow-500" : ""} ${popped ? "animate-in duration-200 ease-snappy zoom-in-50 motion-reduce:animate-none" : ""}`}
@@ -75,13 +81,7 @@ export function ViewingPage({ ocid, name }: { ocid: string; name: string }) {
         onSettings={() => openSettingsAction()}
         trailing={
           <>
-            <AnimatePresence initial={false}>
-              {s ? (
-                <m.div key="favorite" {...fadeScale}>
-                  <FavoriteButton summary={s} favorite={isFavorite(ocid)} popped={popped} onToggle={toggleFavorite} />
-                </m.div>
-              ) : null}
-            </AnimatePresence>
+            <FavoriteButton summary={s} favorite={isFavorite(ocid)} popped={popped} onToggle={toggleFavorite} />
             <RefreshButton onClick={refresh} loading={refreshing} />
           </>
         }

@@ -1,11 +1,20 @@
 import { describeError } from "@erda/api/errors";
-import { DETAIL_PAGES, PAGE_SECTIONS, type CharacterSummary, type DetailPage, type DetailSectionId } from "@erda/core";
+import {
+  DETAIL_PAGES,
+  PAGE_SECTIONS,
+  SECTION_META,
+  type CharacterSummary,
+  type DetailPage,
+  type DetailSectionId,
+} from "@erda/core";
 import { ErrorRow } from "@erda/ui/components/error-row";
 import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Module } from "@erda/ui/components/module";
 import { RefreshButton } from "@erda/ui/components/refresh-button";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
+import { SectionHeader } from "@erda/ui/components/section-header";
 import { StackItem } from "@erda/ui/components/stack-item";
+import { Trophy } from "lucide-react";
 import { AnimatePresence } from "motion/react";
 
 import { useNav } from "#/app/nav/context.ts";
@@ -52,10 +61,12 @@ function PageSections({
   page,
   ocid,
   summary,
+  summaryPending,
 }: {
   page: DetailPage;
   ocid: string;
   summary: CharacterSummary | undefined;
+  summaryPending: boolean;
 }) {
   switch (page) {
     case "stats":
@@ -98,7 +109,14 @@ function PageSections({
     case "records":
       return (
         <>
-          {summary ? <RankingSection summary={summary} /> : null}
+          {summary ? (
+            <RankingSection summary={summary} />
+          ) : summaryPending ? (
+            <Module>
+              <SectionHeader title={SECTION_META.ranking.title} color={SECTION_META.ranking.color} icon={Trophy} />
+              <LoadingRow minHeight={360} />
+            </Module>
+          ) : null}
           <DojangSection ocid={ocid} />
           <BattleSection ocid={ocid} />
         </>
@@ -172,7 +190,7 @@ export function SectionPage({ ocid, name, page }: { ocid: string; name: string; 
             </StackItem>
           ) : null}
           <StackItem key="sections" className="flex flex-col gap-2.5">
-            <PageSections page={page} ocid={ocid} summary={summary.data} />
+            <PageSections page={page} ocid={ocid} summary={summary.data} summaryPending={summary.isPending} />
           </StackItem>
         </AnimatePresence>
       </div>

@@ -1,4 +1,5 @@
 import { CYCLES, CYCLE_META, bossById, bossesOf, type BossCycle, type BossEntry, type BossRow } from "@erda/core";
+import { LoadingRow } from "@erda/ui/components/loading-row";
 import { RefreshButton } from "@erda/ui/components/refresh-button";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
 import { StackItem } from "@erda/ui/components/stack-item";
@@ -20,10 +21,10 @@ import { useMainCharacter } from "#/features/character/use-main-character.ts";
 import { runAction } from "#/lib/action.ts";
 import { openSettingsAction } from "#/lib/tauri.ts";
 
-function EditToggle({ editing, onToggle }: { editing: boolean; onToggle: () => void }) {
+function EditToggle({ editing, disabled, onToggle }: { editing: boolean; disabled: boolean; onToggle: () => void }) {
   const label = editing ? "편집 끝내기" : "편집";
   return (
-    <Button variant="ghost" size="icon-sm" aria-label={label} title={label} onClick={onToggle}>
+    <Button variant="ghost" size="icon-sm" aria-label={label} title={label} disabled={disabled} onClick={onToggle}>
       {editing ? <Check /> : <Pencil />}
     </Button>
   );
@@ -71,14 +72,14 @@ export function SchedulerPage() {
     setEditing(false);
     void runAction(() => view.setUseScheduler(on), "설정을 저장하지 못했어요");
   };
-  const editToggle = <EditToggle editing={editing} onToggle={() => setEditing(!editing)} />;
-  const trailing = scheduler ? (
+  const editToggle = (
+    <EditToggle editing={editing} disabled={view.resolving || !editable} onToggle={() => setEditing(!editing)} />
+  );
+  const trailing = (
     <>
-      <RefreshButton onClick={refresh} loading={view.refreshing} />
-      {editable ? editToggle : null}
+      {scheduler ? <RefreshButton onClick={refresh} loading={view.refreshing} /> : null}
+      {editToggle}
     </>
-  ) : (
-    editToggle
   );
   const onParty = (id: string, n: number) => save(() => boss.setParty(id, n));
   const onPrice = (id: string, n: number) => save(() => boss.setPrice(id, n));
@@ -99,7 +100,11 @@ export function SchedulerPage() {
           <StackItem key="summary">
             <BossSummaryModule view={view} cycle={cycle} now={view.now} />
           </StackItem>
-          {scheduler && editing ? (
+          {view.resolving ? (
+            <StackItem key="resolving">
+              <LoadingRow />
+            </StackItem>
+          ) : scheduler && editing ? (
             <StackItem key="edit">
               <EditList
                 entries={catalogEntries(view.rows)}
@@ -145,7 +150,7 @@ export function SchedulerPage() {
               />
             </StackItem>
           )}
-          {view.schedulerAvailable ? (
+          {view.schedulerAvailable && !view.resolving ? (
             <StackItem key="settings">
               <SettingsModule useScheduler={view.useScheduler} onChange={changeUseScheduler} />
             </StackItem>

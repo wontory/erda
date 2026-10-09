@@ -128,9 +128,9 @@ function MainCharacterRow() {
 }
 
 function FavoritesRow() {
-  const { favorites, remove } = useFavorites();
+  const { favorites, loaded, remove } = useFavorites();
   return (
-    <SettingRow label="즐겨찾기" description={favorites.length === 0 ? "없음" : undefined}>
+    <SettingRow label="즐겨찾기" description={loaded && favorites.length === 0 ? "없음" : undefined}>
       <div className="flex shrink-0 flex-col items-end">
         <AnimatePresence initial={false}>
           {favorites.map((f) => (
@@ -156,11 +156,11 @@ function FavoritesRow() {
 }
 
 function RecentRow() {
-  const { recent, clear } = useRecent();
+  const { recent, loaded, clear } = useRecent();
   const [clearOpen, setClearOpen] = useState(false);
   return (
     <>
-      <SettingRow label="최근 검색" description={`${recent.length}개 저장됨`}>
+      <SettingRow label="최근 검색" description={loaded ? `${recent.length}개 저장됨` : "…"}>
         <Button variant="outline" disabled={recent.length === 0} onClick={() => setClearOpen(true)}>
           모두 지우기
         </Button>
@@ -226,13 +226,15 @@ function CharacterLookRows() {
       <h2 className="pt-3 pb-1 text-[12px] font-semibold text-muted-foreground">캐릭터 이미지</h2>
       <SettingRow label="자세" description="홈 화면에 보이는 본캐의 자세">
         <div className="flex shrink-0 items-center gap-2">
-          <AnimatePresence initial={false}>
-            {main.summary ? (
-              <m.div key="preview" {...fadeScale}>
-                <PosePreview image={main.summary.image} />
-              </m.div>
-            ) : null}
-          </AnimatePresence>
+          <div className="size-10 shrink-0">
+            <AnimatePresence initial={false}>
+              {main.summary ? (
+                <m.div key="preview" {...fadeScale}>
+                  <PosePreview image={main.summary.image} />
+                </m.div>
+              ) : null}
+            </AnimatePresence>
+          </div>
           <Select
             items={POSE_ITEMS}
             value={pose}

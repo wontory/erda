@@ -15,19 +15,25 @@ import { useInView } from "#/features/character/use-in-view.ts";
 import { ErrorBoundary } from "#/lib/error-boundary.tsx";
 
 const LOADING_HEIGHT: Partial<Record<DetailSectionId, number>> = {
-  equipment: 320,
-  symbols: 240,
-  skill: 240,
-  cashItem: 240,
-  hexa: 200,
-  vMatrix: 200,
-  linkSkill: 160,
-  otherStat: 200,
-  hyperStat: 200,
-  ability: 140,
-  propensity: 200,
-  unionRaider: 200,
-  setEffect: 120,
+  equipment: 900,
+  symbols: 400,
+  skill: 300,
+  cashItem: 300,
+  hexa: 300,
+  vMatrix: 300,
+  linkSkill: 300,
+  otherStat: 350,
+  hyperStat: 300,
+  ability: 160,
+  propensity: 220,
+  unionRaider: 350,
+  unionArtifact: 220,
+  unionChampion: 300,
+  setEffect: 160,
+  android: 120,
+  pet: 100,
+  beauty: 100,
+  rings: 100,
 };
 const DEFAULT_LOADING_HEIGHT = 64;
 

@@ -20,7 +20,7 @@ export function UpdateBanner() {
               <span className="min-w-0 flex-1 truncate">
                 {state.status === "error" ? "업데이트하지 못했어요" : `새 버전 ${update.version}이 나왔어요`}
               </span>
-              <Button disabled={installing} onClick={() => void install(update)}>
+              <Button disabled={installing} className="min-w-28 tabular-nums" onClick={() => void install(update)}>
                 {installing ? `설치 중${progress}` : state.status === "error" ? "다시 시도" : "업데이트"}
               </Button>
             </div>

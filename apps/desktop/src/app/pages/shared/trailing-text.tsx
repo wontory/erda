@@ -6,5 +6,5 @@ export function TrailingText({
   className,
   ...props
 }: ComponentProps<"span"> & { tone?: string }) {
-  return <span {...props} className={cn("text-[11px] font-normal", className, tone)} />;
+  return <span {...props} className={cn("text-[11px] font-normal tabular-nums", className, tone)} />;
 }

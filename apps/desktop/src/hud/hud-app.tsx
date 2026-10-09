@@ -28,7 +28,7 @@ export function HudApp() {
       <div className={cn("relative flex flex-col gap-3 p-3", leaving ? "hud-leave" : reentering && "hud-enter")}>
         <AnimatePresence mode="popLayout">
           {rows.map((r) => (
-            <m.div key={hudCardKey(r)} {...row}>
+            <m.div key={hudCardKey(r)} layout="position" {...row}>
               <HudRowView row={r} />
             </m.div>
           ))}
