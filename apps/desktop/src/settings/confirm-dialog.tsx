@@ -47,8 +47,8 @@ export function ConfirmDialog({
           {description ? <DialogDescription>{description}</DialogDescription> : null}
         </DialogHeader>
         <DialogFooter>
-          <DialogClose render={<Button variant="outline" size="sm" />}>취소</DialogClose>
-          <Button variant="destructive" size="sm" disabled={pending} onClick={confirm}>
+          <DialogClose render={<Button variant="outline" />}>취소</DialogClose>
+          <Button variant="destructive" disabled={pending} onClick={confirm}>
             {confirmLabel}
           </Button>
         </DialogFooter>

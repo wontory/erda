@@ -19,7 +19,7 @@ export function AccountCharactersModule({
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
       <Module title={`내 계정 캐릭터 ${characters.length}명`} icon={Users}>
-        <CollapsibleTrigger render={<Button variant="ghost" size="xs" />}>
+        <CollapsibleTrigger render={<Button variant="ghost" />}>
           <ChevronDown
             className="transition-transform duration-200 ease-snappy in-aria-expanded:rotate-180 motion-reduce:transition-none"
             aria-hidden

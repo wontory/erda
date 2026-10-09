@@ -73,7 +73,7 @@ function HistoryBody({
         </div>
       ))}
       {days.length > shown ? (
-        <Button variant="outline" size="sm" onClick={onMore}>
+        <Button variant="outline" onClick={onMore}>
           더 보기
         </Button>
       ) : null}

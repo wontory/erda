@@ -148,7 +148,7 @@ export function SectionPage({ ocid, name, page }: { ocid: string; name: string; 
     <>
       <ScreenHeader
         title={title}
-        subtitle={name}
+        parent={name}
         onBack={pop}
         onSettings={() => openSettingsAction()}
         trailing={<RefreshButton onClick={refresh} loading={refreshing} />}

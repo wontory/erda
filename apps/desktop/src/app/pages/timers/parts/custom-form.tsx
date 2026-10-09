@@ -43,7 +43,7 @@ export function CustomForm({ onStart }: { onStart: StartCustom }) {
           <span>반복</span>
           <Switch id={repeatId} size="sm" checked={repeats} onCheckedChange={(on) => setRepeats(on)} />
         </label>
-        <Button type="submit" size="sm" disabled={pending}>
+        <Button type="submit" disabled={pending}>
           시작
         </Button>
       </div>

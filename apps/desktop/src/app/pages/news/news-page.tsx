@@ -40,7 +40,7 @@ function KeyMissing() {
         title="API 키가 필요해요"
         description="설정 › 일반에서 넥슨 Open API 키를 넣어 주세요"
         action={
-          <Button size="sm" variant="outline" onClick={() => void openSettingsAction("general")}>
+          <Button variant="outline" onClick={() => void openSettingsAction("general")}>
             설정 열기
           </Button>
         }
@@ -126,7 +126,7 @@ export function NewsPage() {
               title={filter === "all" ? "전체" : NEWS_META[filter].title}
               icon={Newspaper}
               trailing={
-                <Button variant="ghost" size="xs" disabled={visibleUnread === 0} onClick={markAll}>
+                <Button variant="ghost" disabled={visibleUnread === 0} onClick={markAll}>
                   모두 읽음으로 표시
                 </Button>
               }

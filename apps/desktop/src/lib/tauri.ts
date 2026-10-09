@@ -13,6 +13,7 @@ export function usePanelVisibility(): boolean {
   const seeded = useRef(false);
   const show = (next: boolean) => {
     seeded.current = true;
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
     setVisible(next);
   };
   useTauriSignal("panel:shown", () => show(true));

@@ -62,7 +62,7 @@ export function PartyModule({
         </Tabs>
         <label htmlFor={switchId} className="flex items-center justify-between gap-2 px-0.5 text-[12px]">
           <span>비율로 나누기</span>
-          <Switch id={switchId} checked={byRatio} onCheckedChange={(on) => onByRatio(on)} />
+          <Switch size="sm" id={switchId} checked={byRatio} onCheckedChange={(on) => onByRatio(on)} />
         </label>
         {byRatio ? (
           <>

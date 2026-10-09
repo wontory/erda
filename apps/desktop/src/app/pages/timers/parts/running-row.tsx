@@ -33,19 +33,13 @@ export function RunningRow({ timer, remaining }: { timer: ActiveTimer; remaining
       </ItemContent>
       <ItemValue className={cn(remaining < 60 && "text-danger")}>{formatRemaining(remaining)}</ItemValue>
       <ItemActions>
-        <Toggle
-          size="sm"
-          pressed={timer.repeats}
-          onPressedChange={setRepeat}
-          aria-label={`${timer.name} 반복`}
-          title="반복"
-        >
+        <Toggle pressed={timer.repeats} onPressedChange={setRepeat} aria-label={`${timer.name} 반복`} title="반복">
           <Repeat />
         </Toggle>
         <Button
           data-row-focus
           variant="ghost"
-          size="icon-xs"
+          size="icon"
           aria-label={`${timer.name} 취소`}
           title="취소"
           onClick={cancel}

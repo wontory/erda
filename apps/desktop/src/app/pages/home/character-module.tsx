@@ -75,7 +75,7 @@ export function CharacterModule({ onOpen }: { onOpen: () => void }) {
           title="본캐가 없어요"
           description="설정 › 캐릭터에서 닉네임을 정해 주세요"
           action={
-            <Button size="sm" variant="outline" onClick={() => void openSettingsAction()}>
+            <Button variant="outline" onClick={() => void openSettingsAction()}>
               설정 열기
             </Button>
           }

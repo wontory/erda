@@ -3,7 +3,7 @@ import { Module } from "@erda/ui/components/module";
 import { Button } from "@erda/ui/components/ui/button";
 import { Input } from "@erda/ui/components/ui/input";
 import { ExternalLink } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import { useSetting } from "#/features/settings/use-settings.ts";
 import { useAction } from "#/lib/action.ts";
@@ -13,10 +13,6 @@ export function OnboardingModule() {
   const [, setApiKey] = useSetting("settings.apiKey");
   const [draft, setDraft] = useState("");
   const save = useAction();
-  const inputRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
   return (
     <>
       <Module title="Erda 시작하기">
@@ -28,7 +24,7 @@ export function OnboardingModule() {
         <p className="mb-2 text-[12px] text-muted-foreground">
           넥슨 Open API 사이트에 로그인해 애플리케이션을 등록하면 키가 바로 나와요.
         </p>
-        <Button variant="outline" size="sm" onClick={() => void openExternal(NEXON_APP_URL)}>
+        <Button variant="outline" onClick={() => void openExternal(NEXON_APP_URL)}>
           <ExternalLink /> openapi.nexon.com 열기
         </Button>
       </Module>
@@ -42,7 +38,6 @@ export function OnboardingModule() {
           }}
         >
           <Input
-            ref={inputRef}
             type="password"
             placeholder="API 키"
             aria-label="넥슨 Open API 키"

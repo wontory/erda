@@ -39,7 +39,7 @@ function AccountPicker({ onPick }: { onPick: (name: string) => void }) {
   const { byWorld } = useAccountCharacters();
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="outline" size="sm" />}>내 계정에서 고르기</DropdownMenuTrigger>
+      <DropdownMenuTrigger render={<Button variant="outline" />}>내 계정에서 고르기</DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="p-0">
         <ScrollArea viewportClassName="max-h-80 p-1">
           {byWorld.map((g, i) => (
@@ -112,7 +112,7 @@ function MainCharacterRow() {
           autoComplete="off"
           spellCheck={false}
         />
-        <Button variant="outline" size="sm" disabled={draft === null || applying.pending} onClick={apply}>
+        <Button variant="outline" disabled={draft === null || applying.pending} onClick={apply}>
           적용
         </Button>
         <AccountPicker onPick={pick} />
@@ -135,7 +135,6 @@ function FavoritesRow() {
                 </span>
                 <Button
                   variant="ghost"
-                  size="xs"
                   aria-label={`${f.name} 즐겨찾기 제거`}
                   onClick={() => runAction(() => remove(f.ocid), "즐겨찾기에서 제거하지 못했어요")}
                 >
@@ -156,7 +155,7 @@ function RecentRow() {
   return (
     <>
       <SettingRow label="최근 검색" description={`${recent.length}개 저장됨`}>
-        <Button variant="outline" size="sm" disabled={recent.length === 0} onClick={() => setClearOpen(true)}>
+        <Button variant="outline" disabled={recent.length === 0} onClick={() => setClearOpen(true)}>
           모두 지우기
         </Button>
       </SettingRow>
@@ -230,7 +229,7 @@ function CharacterLookRows() {
               if (v) void runAction(() => setPose(v as CharacterPoseCode), SAVE_LOOK_FAILED);
             }}
           >
-            <SelectTrigger className="h-7 w-32" aria-label="자세">
+            <SelectTrigger className="w-32" aria-label="자세">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

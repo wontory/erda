@@ -1,13 +1,13 @@
-import { ErrorRow } from "@erda/ui/components/error-row";
+import { Module } from "@erda/ui/components/module";
 import { MotionProvider } from "@erda/ui/components/motion-provider";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
 import { Button } from "@erda/ui/components/ui/button";
-import { ScrollArea } from "@erda/ui/components/ui/scroll-area";
 import { Toaster } from "@erda/ui/components/ui/toast";
 import { DURATION, EASE_SNAPPY } from "@erda/ui/lib/motion";
 import { focusScreenTitle } from "@erda/ui/lib/screen-title";
 import { cn } from "@erda/ui/lib/utils";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { AlertCircle } from "lucide-react";
 import { AnimatePresence, m, type Variants } from "motion/react";
 import { useRef, type RefObject } from "react";
 
@@ -82,11 +82,22 @@ function ScreenFallback({ reset }: { reset: () => void }) {
   return (
     <>
       <ScreenHeader title="오류" onBack={canGoBack ? () => pop() : undefined} />
-      <div className="flex flex-col items-start gap-2 px-3 pb-3">
-        <ErrorRow message="화면을 표시하지 못했어요" onRetry={reset} />
-        <Button variant="outline" size="xs" className="ml-2" onClick={goHome}>
-          홈으로
-        </Button>
+      <div className="flex flex-col gap-2.5 px-3 pb-3">
+        <Module>
+          <div role="alert" className="flex flex-col items-center gap-3 py-4 text-center">
+            <AlertCircle aria-hidden className="size-8 text-destructive" />
+            <div className="flex flex-col gap-1">
+              <p className="m-0 text-[14px] font-semibold">화면을 표시하지 못했어요</p>
+              <p className="m-0 text-[12px] text-muted-foreground">다시 시도하거나 홈으로 돌아가 주세요.</p>
+            </div>
+            <div className="flex w-full gap-2 *:flex-1">
+              <Button variant="outline" onClick={goHome}>
+                홈으로
+              </Button>
+              <Button onClick={reset}>다시 시도</Button>
+            </div>
+          </div>
+        </Module>
       </div>
     </>
   );
@@ -150,9 +161,9 @@ export function App() {
         <MainCharacterProvider>
           <NavProvider>
             <div className={cn(PANEL_CLASS, visible ? PANEL_SHOWN : PANEL_HIDDEN)}>
-              <ScrollArea className="h-full" viewportRef={viewportRef}>
+              <div ref={viewportRef} className="scrollbar-none h-full overflow-y-auto">
                 <Screens viewportRef={viewportRef} />
-              </ScrollArea>
+              </div>
             </div>
             <Toaster />
           </NavProvider>

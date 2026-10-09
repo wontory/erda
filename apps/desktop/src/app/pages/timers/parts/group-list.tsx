@@ -19,7 +19,7 @@ function GroupRow({ group, onStart }: { group: TimerGroup; onStart: () => void }
       </ItemContent>
       <ItemValue>{`${group.entries.length}개`}</ItemValue>
       <ItemActions>
-        <Button variant="ghost" size="icon-xs" aria-label={`${group.name} 시작`} onClick={onStart}>
+        <Button variant="ghost" size="icon" aria-label={`${group.name} 시작`} onClick={onStart}>
           <Play />
         </Button>
       </ItemActions>
@@ -42,7 +42,7 @@ export function GroupList({
         <EmptyState icon={Layers} title="그룹 없음" description="설정 › 타이머에서 그룹을 만들어 주세요" />
       ) : null}
       {loaded && groups.map((g) => <GroupRow key={g.id} group={g} onStart={() => onStart(g)} />)}
-      <Button variant="ghost" size="sm" className="self-start" onClick={() => void openSettingsAction("timer")}>
+      <Button variant="ghost" className="self-start" onClick={() => void openSettingsAction("timer")}>
         그룹 편집…
       </Button>
     </div>

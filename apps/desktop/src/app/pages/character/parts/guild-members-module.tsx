@@ -121,7 +121,7 @@ export function GuildMembersModule({ guild: g }: { guild: GuildBasic }) {
       {members.length === 0 && needle ? (
         <div className="flex items-center justify-between gap-2 px-2 py-1 text-[12px] text-muted-foreground">
           <span className="min-w-0 truncate">‘{needle}’와 일치하는 길드원이 없어요</span>
-          <Button variant="ghost" size="xs" onClick={clearFilter}>
+          <Button variant="ghost" onClick={clearFilter}>
             검색 지우기
           </Button>
         </div>

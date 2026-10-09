@@ -127,7 +127,7 @@ function ApiKeyRow() {
           data-1p-ignore
           data-lpignore="true"
         />
-        <Button variant="outline" size="sm" disabled={!keyDirty || keySave.pending} onClick={saveKey}>
+        <Button variant="outline" disabled={!keyDirty || keySave.pending} onClick={saveKey}>
           저장
         </Button>
       </div>
@@ -173,7 +173,7 @@ export function GeneralPage() {
         label="응답 캐시"
         description={`${cacheText} · 캐릭터 10분, 공지 5분, 랭킹 1시간, 스케줄러 1분 동안 재사용해요`}
       >
-        <Button variant="outline" size="sm" disabled={cacheClear.pending} onClick={clearCache}>
+        <Button variant="outline" disabled={cacheClear.pending} onClick={clearCache}>
           캐시 비우기
         </Button>
       </SettingRow>
@@ -196,7 +196,7 @@ export function GeneralPage() {
       </SettingRow>
       <Separator />
       <SettingRow label="Erda 종료">
-        <Button variant="outline" size="sm" onClick={() => setQuitOpen(true)}>
+        <Button variant="outline" onClick={() => setQuitOpen(true)}>
           종료
         </Button>
       </SettingRow>
