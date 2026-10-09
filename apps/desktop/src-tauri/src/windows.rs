@@ -1,4 +1,7 @@
-use std::{sync::Arc, time::Duration};
+use std::{
+    sync::{Arc, Mutex},
+    time::Duration,
+};
 
 use flyout::Flyout;
 use tauri::{window::Color, AppHandle, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder, WindowEvent};
@@ -10,18 +13,65 @@ const DEV_PANEL_DELAY: Duration = Duration::from_secs(3);
 const DEV_INSPECTOR_DELAY: Duration = Duration::from_secs(5);
 const INSPECTOR_GAP: f64 = 8.0;
 const INSPECTOR_MARGIN: f64 = 8.0;
+const FOCUS_SETTLE: Duration = Duration::from_millis(80);
 const SETTINGS_LABEL: &str = "settings";
 
 pub struct FlyoutState(pub Box<dyn Flyout>);
 
+#[derive(Default)]
+struct SheetState(Mutex<Option<u64>>);
+
 pub fn setup(app: &AppHandle, flyout: Box<dyn Flyout>) -> tauri::Result<()> {
-    let dismiss: flyout::Dismiss = Arc::new(|app: &AppHandle| hide_panel(app));
+    let dismiss: flyout::Dismiss = Arc::new(|app: &AppHandle| dismiss_unless_focused(app));
     let toggle: flyout::Toggle = Arc::new(|app: &AppHandle| toggle_panel(app));
-    flyout.setup(app, dismiss, toggle)?;
+    flyout.setup(app, dismiss.clone(), toggle)?;
     flyout.setup_inspector(app)?;
+    flyout.setup_sheet(app, dismiss)?;
     flyout.setup_hud(app)?;
     app.manage(FlyoutState(flyout));
+    app.manage(SheetState::default());
     Ok(())
+}
+
+fn is_focused(app: &AppHandle, label: &str) -> bool {
+    app.get_webview_window(label)
+        .and_then(|w| w.is_focused().ok())
+        .unwrap_or(false)
+}
+
+fn dismiss_unless_focused(app: &AppHandle) {
+    runtime::after(app, FOCUS_SETTLE, |app| async move {
+        runtime::on_main_thread(&app, "dismiss panel", |h| {
+            if is_focused(h, flyout::PANEL_LABEL) || is_focused(h, flyout::SHEET_LABEL) {
+                return;
+            }
+            hide_panel(h);
+        });
+    });
+}
+
+fn sheet_id(app: &AppHandle) -> Option<u64> {
+    app.state::<SheetState>().0.lock().ok().and_then(|id| *id)
+}
+
+fn set_sheet_id(app: &AppHandle, next: Option<u64>) {
+    if let Ok(mut id) = app.state::<SheetState>().0.lock() {
+        *id = next;
+    }
+}
+
+fn close_sheet(app: &AppHandle) {
+    let Some(id) = sheet_id(app) else {
+        return;
+    };
+    set_sheet_id(app, None);
+    flyout(app).hide_sheet(app);
+    runtime::emit_to(
+        app,
+        flyout::PANEL_LABEL,
+        "sheet:closed",
+        serde_json::json!({ "id": id }),
+    );
 }
 
 pub fn flyout(app: &AppHandle) -> &dyn Flyout {
@@ -59,6 +109,7 @@ pub fn show_inspector_after_launch(app: &AppHandle) {
 }
 
 pub fn hide_panel(app: &AppHandle) {
+    close_sheet(app);
     let f = flyout(app);
     f.hide_inspector(app);
     if !f.is_visible(app) {
@@ -74,12 +125,12 @@ pub fn hide_panel(app: &AppHandle) {
     });
 }
 
-fn place_inspector(app: &AppHandle) {
+fn place_beside(app: &AppHandle, label: &str) {
     let (Some(main), Some(inspector)) = (
         app.get_webview_window(flyout::PANEL_LABEL),
-        app.get_webview_window(flyout::INSPECTOR_LABEL),
+        app.get_webview_window(label),
     ) else {
-        return log::warn!("place_inspector: main or inspector window missing");
+        return log::warn!("place_beside: main or `{label}` window missing");
     };
     let (pos, size, inspector_size, scale) = match (
         main.outer_position(),
@@ -88,12 +139,12 @@ fn place_inspector(app: &AppHandle) {
         main.scale_factor(),
     ) {
         (Ok(p), Ok(s), Ok(i), Ok(f)) => (p, s, i, f),
-        _ => return log::warn!("place_inspector: could not read window geometry"),
+        _ => return log::warn!("place_beside: could not read window geometry"),
     };
     let monitor = match main.current_monitor() {
         Ok(Some(m)) => m,
-        Ok(None) => return log::warn!("place_inspector: main window has no monitor"),
-        Err(e) => return log::warn!("place_inspector: current_monitor failed: {e}"),
+        Ok(None) => return log::warn!("place_beside: main window has no monitor"),
+        Err(e) => return log::warn!("place_beside: current_monitor failed: {e}"),
     };
     let p = flyout::anchor_beside(
         flyout::Rect::from_physical(pos, size),
@@ -103,7 +154,7 @@ fn place_inspector(app: &AppHandle) {
         flyout::to_physical(INSPECTOR_MARGIN, scale),
     );
     if let Err(e) = inspector.set_position(tauri::PhysicalPosition::new(p.x, p.y)) {
-        log::warn!("inspector set_position failed: {e}");
+        log::warn!("{label} set_position failed: {e}");
     }
 }
 
@@ -112,7 +163,7 @@ pub fn inspector_show(app: AppHandle, payload: serde_json::Value) {
     if !flyout(&app).is_visible(&app) {
         return;
     }
-    place_inspector(&app);
+    place_beside(&app, flyout::INSPECTOR_LABEL);
     runtime::emit_to(&app, flyout::INSPECTOR_LABEL, "inspector:content", payload);
     flyout(&app).show_inspector(&app);
 }
@@ -120,6 +171,47 @@ pub fn inspector_show(app: AppHandle, payload: serde_json::Value) {
 #[tauri::command]
 pub fn inspector_hide(app: AppHandle) {
     flyout(&app).hide_inspector(&app);
+}
+
+#[tauri::command]
+pub fn sheet_show(app: AppHandle, id: u64, payload: serde_json::Value) {
+    let f = flyout(&app);
+    if !f.is_visible(&app) {
+        return;
+    }
+    let opening = sheet_id(&app) != Some(id);
+    set_sheet_id(&app, Some(id));
+    runtime::emit_to(&app, flyout::SHEET_LABEL, "sheet:content", payload);
+    if opening {
+        f.hide_inspector(&app);
+        place_beside(&app, flyout::SHEET_LABEL);
+        f.show_sheet(&app);
+    }
+}
+
+#[tauri::command]
+pub fn sheet_hide(app: AppHandle, id: u64) {
+    if sheet_id(&app) != Some(id) {
+        return;
+    }
+    flyout(&app).focus_panel(&app);
+    close_sheet(&app);
+}
+
+#[tauri::command]
+pub fn window_fit(app: AppHandle, window: WebviewWindow, height: f64) {
+    let label = window.label().to_string();
+    if label != flyout::SHEET_LABEL && label != flyout::INSPECTOR_LABEL {
+        return;
+    }
+    let width = match (window.inner_size(), window.scale_factor()) {
+        (Ok(size), Ok(scale)) => f64::from(size.width) / scale,
+        _ => return log::warn!("window_fit: could not read `{label}` size"),
+    };
+    if let Err(e) = window.set_size(tauri::LogicalSize::new(width, height.clamp(1.0, flyout::PANEL_SIZE.1))) {
+        return log::warn!("window_fit: set_size failed: {e}");
+    }
+    place_beside(&app, &label);
 }
 
 fn settings_url(page: Option<&str>) -> String {

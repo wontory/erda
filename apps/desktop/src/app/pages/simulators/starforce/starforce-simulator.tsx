@@ -6,23 +6,23 @@ import {
   isGuaranteed,
   isProtectable,
   maxStar,
+  type StarforceOptions,
   type StarforceSettings,
 } from "@erda/core";
 import { Module } from "@erda/ui/components/module";
-import { Star } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { m } from "motion/react";
 import { useState } from "react";
 
+import { SideSheet } from "#/features/sheet/side-sheet.tsx";
+
 import { ActionBar } from "./action-bar.tsx";
-import { AutoDialog } from "./auto-dialog.tsx";
 import { ChanceBox } from "./chance-box.tsx";
 import { CostRow } from "./cost-row.tsx";
 import { EnchantEffect } from "./enchant-effect.tsx";
-import { InfoDialog } from "./info-dialog.tsx";
-import { ItemDialog } from "./item-dialog.tsx";
 import { ItemSlot } from "./item-panel.tsx";
+import { ItemSheetHost } from "./item-sheet-host.tsx";
 import { LedgerBox } from "./ledger-box.tsx";
-import { OptionsDialog } from "./options-dialog.tsx";
 import { RestorePanel } from "./restore-panel.tsx";
 import { SettingsModule } from "./settings-module.tsx";
 import { StarTrack } from "./star-track.tsx";
@@ -55,9 +55,15 @@ function StarforceScreen({
 
   return (
     <div style={SF_THEME} className="flex flex-col gap-2.5">
-      <Module title={settings.item ? settings.item.name : `Lv.${state.level} 장비`} icon={Star}>
+      <Module>
         <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-3">
+          <button
+            type="button"
+            aria-label="장비 설정"
+            disabled={session.auto || session.phase !== "idle"}
+            onClick={() => setDialog("item")}
+            className="-m-1 flex items-center gap-3 rounded-[calc(var(--radius-2xl)-9px)] p-1 text-left transition-colors duration-100 ease-out outline-none hover:bg-foreground/5 focus-visible:ring-3 focus-visible:ring-ring/50 active:bg-foreground/10 disabled:pointer-events-none"
+          >
             <ItemSlot
               item={settings.item}
               destroyed={state.trace !== null}
@@ -73,7 +79,7 @@ function StarforceScreen({
                 ) : last ? (
                   <m.span
                     key={last.id}
-                    className={`pointer-events-none absolute inset-0 rounded-[calc(var(--radius-xl)-1px)] ${
+                    className={`pointer-events-none absolute inset-0 rounded-[calc(var(--radius-2xl)-14px)] ${
                       last.outcome === "success"
                         ? "bg-(--sf-gold)/50"
                         : last.outcome === "destroyed"
@@ -87,8 +93,18 @@ function StarforceScreen({
                 ) : null
               }
             />
-            <StarTrack star={state.star} cap={cap} next={next} popFrom={popFrom} />
-          </div>
+            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <span className="truncate text-[14px] font-semibold">
+                {settings.item ? settings.item.name : "직접 입력한 장비"}
+              </span>
+              <span className="truncate text-[12px] text-muted-foreground">
+                {settings.item ? `${settings.item.part} · ` : ""}Lv.{state.level}
+                {state.trace !== null ? <span className="text-destructive"> · 파괴됨</span> : null}
+              </span>
+            </span>
+            <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+          </button>
+          <StarTrack star={state.star} cap={cap} next={next} popFrom={popFrom} />
           {state.trace !== null ? (
             <RestorePanel
               level={state.level}
@@ -133,39 +149,40 @@ function StarforceScreen({
         onOpenInfo={() => setDialog("info")}
       />
       {dialog === "item" ? (
-        <ItemDialog
-          open={dialog === "item"}
+        <ItemSheetHost
           item={settings.item}
           level={settings.level}
           startStar={settings.startStar}
-          onOpenChange={(open) => setDialog(open ? "item" : null)}
           onApply={(item, level, startStar) => {
             patch({ item, level, startStar });
             session.reset(level, startStar);
           }}
+          onClose={() => setDialog(null)}
         />
       ) : null}
-      <OptionsDialog
-        open={dialog === "options"}
-        options={options}
-        sparePrice={settings.sparePrice}
-        onOpenChange={(open) => setDialog(open ? "options" : null)}
-        onOptions={(next) => patch({ options: next })}
-        onSparePrice={(sparePrice) => patch({ sparePrice })}
-      />
-      <InfoDialog open={dialog === "info"} onOpenChange={(open) => setDialog(open ? "info" : null)} />
-      {dialog === "auto" ? (
-        <AutoDialog
-          open={dialog === "auto"}
-          star={state.star}
-          cap={cap}
-          target={settings.autoTarget}
-          protectStars={settings.autoProtect}
-          onOpenChange={(open) => setDialog(open ? "auto" : null)}
-          onStart={(autoTarget, autoProtect) => {
-            patch({ autoTarget, autoProtect });
-            session.startAuto(autoTarget, autoProtect);
+      {dialog === "options" ? (
+        <SideSheet
+          kind="starforce-options"
+          props={{ options, sparePrice: settings.sparePrice }}
+          onResult={(type, value) => {
+            if (type === "options") patch({ options: value as StarforceOptions });
+            if (type === "sparePrice") patch({ sparePrice: value as number });
           }}
+          onClose={() => setDialog(null)}
+        />
+      ) : null}
+      {dialog === "info" ? <SideSheet kind="starforce-info" props={null} onClose={() => setDialog(null)} /> : null}
+      {dialog === "auto" ? (
+        <SideSheet
+          kind="starforce-auto"
+          props={{ star: state.star, cap, target: settings.autoTarget, protectStars: settings.autoProtect }}
+          onResult={(type, value) => {
+            if (type !== "start") return;
+            const { target, protect } = value as { target: number; protect: number[] };
+            patch({ autoTarget: target, autoProtect: protect });
+            session.startAuto(target, protect);
+          }}
+          onClose={() => setDialog(null)}
         />
       ) : null}
     </div>

@@ -1,37 +1,39 @@
 import { PROTECTABLE_STARS } from "@erda/core";
 import { Button } from "@erda/ui/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@erda/ui/components/ui/dialog";
 import { NumberField, NumberFieldGroup, NumberFieldInput } from "@erda/ui/components/ui/number-field";
 import { Switch } from "@erda/ui/components/ui/switch";
 import { useId, useState } from "react";
+
+import { SheetBody, SheetFooter, SheetHeader, SheetLayout, SheetTitle } from "#/sheet/sheet-layout.tsx";
 
 import { StarCount } from "./star-count.tsx";
 
 function ProtectRow({ star, checked, onChange }: { star: number; checked: boolean; onChange: (on: boolean) => void }) {
   const id = useId();
   return (
-    <label htmlFor={id} className="flex items-center justify-between gap-2 rounded-lg bg-foreground/4 px-2.5 py-1.5">
+    <label
+      htmlFor={id}
+      className="flex h-8 items-center justify-between gap-2 rounded-lg bg-foreground/4 px-2.5 text-[13px]"
+    >
       <StarCount>{star}</StarCount>
       <Switch id={id} size="sm" checked={checked} onCheckedChange={(on) => onChange(on)} />
     </label>
   );
 }
 
-export function AutoDialog({
-  open,
+export function AutoSheet({
   star,
   cap,
   target,
   protectStars,
-  onOpenChange,
+  onClose,
   onStart,
 }: {
-  open: boolean;
   star: number;
   cap: number;
   target: number;
   protectStars: number[];
-  onOpenChange: (open: boolean) => void;
+  onClose: () => void;
   onStart: (target: number, protectStars: number[]) => void;
 }) {
   const [draftTarget, setDraftTarget] = useState(target);
@@ -40,11 +42,11 @@ export function AutoDialog({
   const toggle = (s: number, on: boolean) =>
     setDraftProtect((list) => (on ? [...list.filter((x) => x !== s), s] : list.filter((x) => x !== s)));
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xs">
-        <DialogHeader>
-          <DialogTitle>자동 강화</DialogTitle>
-        </DialogHeader>
+    <SheetLayout>
+      <SheetHeader>
+        <SheetTitle>자동 강화</SheetTitle>
+      </SheetHeader>
+      <SheetBody>
         <div className="flex flex-col gap-3 text-[12px]">
           <div className="flex flex-col gap-1.5">
             <span>
@@ -80,18 +82,17 @@ export function AutoDialog({
             </div>
           </div>
         </div>
-        <DialogFooter>
-          <Button
-            size="sm"
-            onClick={() => {
-              onStart(clamped, draftProtect);
-              onOpenChange(false);
-            }}
-          >
-            시작
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </SheetBody>
+      <SheetFooter>
+        <Button
+          onClick={() => {
+            onStart(clamped, draftProtect);
+            onClose();
+          }}
+        >
+          시작
+        </Button>
+      </SheetFooter>
+    </SheetLayout>
   );
 }

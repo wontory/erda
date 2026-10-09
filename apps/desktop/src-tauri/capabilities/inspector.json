@@ -3,5 +3,5 @@
   "identifier": "inspector",
   "description": "side inspector window",
   "windows": ["inspector"],
-  "permissions": ["core:event:default", "log:default"]
+  "permissions": ["core:event:default", "log:default", "allow-window-fit"]
 }

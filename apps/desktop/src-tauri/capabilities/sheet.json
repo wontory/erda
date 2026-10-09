@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "sheet",
+  "description": "side sheet window",
+  "windows": ["sheet"],
+  "permissions": ["core:event:default", "log:default", "allow-sheet-hide", "allow-window-fit"]
+}

@@ -47,6 +47,22 @@
         "visibleOnAllWorkspaces": true
       },
       {
+        "label": "sheet",
+        "url": "sheet.html",
+        "title": "Erda 설정",
+        "width": 360,
+        "height": 400,
+        "resizable": false,
+        "decorations": false,
+        "transparent": true,
+        "shadow": true,
+        "visible": false,
+        "focus": false,
+        "skipTaskbar": true,
+        "alwaysOnTop": true,
+        "visibleOnAllWorkspaces": true
+      },
+      {
         "label": "hud",
         "url": "hud.html",
         "title": "Erda HUD",

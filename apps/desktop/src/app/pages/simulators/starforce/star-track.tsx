@@ -9,7 +9,7 @@ function StarIcon({ filled, pop }: { filled: boolean; pop: boolean }) {
   return (
     <m.span
       key={filled ? "on" : "off"}
-      className="grid size-3.5 place-items-center"
+      className="grid size-[18px] place-items-center"
       initial={pop ? { scale: 1.8, opacity: 0 } : false}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ type: "spring", stiffness: 520, damping: 18 }}
@@ -17,7 +17,7 @@ function StarIcon({ filled, pop }: { filled: boolean; pop: boolean }) {
       <Star
         aria-hidden
         strokeWidth={0}
-        className={`size-3.5 fill-current ${filled ? "text-(--sf-gold)" : "text-foreground/15"}`}
+        className={`size-[18px] fill-current ${filled ? "text-(--sf-gold)" : "text-foreground/15"}`}
       />
     </m.span>
   );
@@ -56,7 +56,7 @@ export function StarTrack({
       </div>
       <div className="flex flex-col gap-1" aria-label={`${star}성 / 최대 ${cap}성`}>
         {rows.map((row) => (
-          <div key={row[0]} className="flex gap-1.5">
+          <div key={row[0]} className="flex gap-2.5">
             {Array.from({ length: Math.ceil(row.length / 5) }, (_, g) => (
               <span key={g} className="flex">
                 {row.slice(g * 5, g * 5 + 5).map((i) => (
