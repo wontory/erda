@@ -17,6 +17,7 @@ import { runAction } from "#/lib/action.ts";
 
 const chip = {
   ...fadeScale,
+  layout: "position" as const,
   exit: { opacity: 0, scale: 0.9, transition: { duration: DURATION.fast, ease: EASE_SNAPPY } },
 };
 
@@ -27,8 +28,8 @@ export function FavoritesModule({ onOpen, limit }: { onOpen: (ocid: string, name
   return (
     <Module title="즐겨찾기" icon={Star}>
       <ScrollArea orientation="horizontal">
-        <div className="flex w-max gap-1.5 in-data-has-overflow-x:pb-2">
-          <AnimatePresence initial={false}>
+        <div className="relative flex w-max gap-1.5 in-data-has-overflow-x:pb-2">
+          <AnimatePresence mode="popLayout" initial={false}>
             {shown.map((f) => (
               <m.div key={f.ocid} {...chip} className="shrink-0">
                 <ContextMenu>

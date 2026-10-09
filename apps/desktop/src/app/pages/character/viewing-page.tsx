@@ -5,8 +5,11 @@ import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Module } from "@erda/ui/components/module";
 import { RefreshButton } from "@erda/ui/components/refresh-button";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
+import { StackItem } from "@erda/ui/components/stack-item";
 import { Button } from "@erda/ui/components/ui/button";
+import { fadeScale } from "@erda/ui/lib/motion";
 import { Star } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
 import { useNav } from "#/app/nav/context.ts";
@@ -72,25 +75,39 @@ export function ViewingPage({ ocid, name }: { ocid: string; name: string }) {
         onSettings={() => openSettingsAction()}
         trailing={
           <>
-            {s ? (
-              <FavoriteButton summary={s} favorite={isFavorite(ocid)} popped={popped} onToggle={toggleFavorite} />
-            ) : null}
+            <AnimatePresence initial={false}>
+              {s ? (
+                <m.div key="favorite" {...fadeScale}>
+                  <FavoriteButton summary={s} favorite={isFavorite(ocid)} popped={popped} onToggle={toggleFavorite} />
+                </m.div>
+              ) : null}
+            </AnimatePresence>
             <RefreshButton onClick={refresh} loading={refreshing} />
           </>
         }
       />
       <div className="flex flex-col gap-2.5 px-3 pb-3">
-        {summary.error ? (
-          <Module>
-            <ErrorRow message={describeError(summary.error)} onRetry={() => summary.refetch()} />
-          </Module>
-        ) : null}
-        {summary.isPending ? (
-          <Module>
-            <LoadingRow label={`${name} 불러오는 중…`} />
-          </Module>
-        ) : null}
-        {s ? <CharacterBody summary={s} /> : null}
+        <AnimatePresence mode="popLayout" initial={false}>
+          {summary.error ? (
+            <StackItem key="error">
+              <Module>
+                <ErrorRow message={describeError(summary.error)} onRetry={() => summary.refetch()} />
+              </Module>
+            </StackItem>
+          ) : null}
+          {summary.isPending ? (
+            <StackItem key="loading">
+              <Module>
+                <LoadingRow label={`${name} 불러오는 중…`} />
+              </Module>
+            </StackItem>
+          ) : null}
+          {s ? (
+            <StackItem key="body" className="flex flex-col gap-2.5">
+              <CharacterBody summary={s} />
+            </StackItem>
+          ) : null}
+        </AnimatePresence>
       </div>
     </>
   );

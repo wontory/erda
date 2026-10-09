@@ -1,10 +1,12 @@
 import { describeError } from "@erda/api/errors";
 import type { NexonCachePolicy } from "@erda/api/mutator";
 import { SECTION_META, type DetailSectionId } from "@erda/core";
+import { AutoHeight } from "@erda/ui/components/auto-height";
 import { ErrorRow } from "@erda/ui/components/error-row";
 import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Module } from "@erda/ui/components/module";
 import { SectionHeader } from "@erda/ui/components/section-header";
+import { Swap } from "@erda/ui/components/swap";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -57,26 +59,30 @@ export function Section<T>({
     <div ref={ref}>
       <Module>
         <SectionHeader title={meta.title} color={meta.color} icon={icon} trailing={trailing} />
-        {data === undefined && (!inView || query.isPending) ? (
-          <LoadingRow minHeight={LOADING_HEIGHT[id] ?? DEFAULT_LOADING_HEIGHT} />
-        ) : null}
-        {query.error ? <ErrorRow message={describeError(query.error)} onRetry={retry} /> : null}
-        {data !== undefined ? (
-          <ErrorBoundary
-            resetKeys={[data]}
-            fallback={(_, reset) => (
-              <ErrorRow
-                message="이 정보를 표시하지 못했어요"
-                onRetry={() => {
-                  reset();
-                  retry();
-                }}
-              />
-            )}
-          >
-            <SectionBody data={data} isEmpty={isEmpty} render={children} />
-          </ErrorBoundary>
-        ) : null}
+        <AutoHeight>
+          <Swap id={data !== undefined ? "data" : query.error ? "error" : "loading"}>
+            {data === undefined && (!inView || query.isPending) ? (
+              <LoadingRow minHeight={LOADING_HEIGHT[id] ?? DEFAULT_LOADING_HEIGHT} />
+            ) : null}
+            {query.error ? <ErrorRow message={describeError(query.error)} onRetry={retry} /> : null}
+            {data !== undefined ? (
+              <ErrorBoundary
+                resetKeys={[data]}
+                fallback={(_, reset) => (
+                  <ErrorRow
+                    message="이 정보를 표시하지 못했어요"
+                    onRetry={() => {
+                      reset();
+                      retry();
+                    }}
+                  />
+                )}
+              >
+                <SectionBody data={data} isEmpty={isEmpty} render={children} />
+              </ErrorBoundary>
+            ) : null}
+          </Swap>
+        </AutoHeight>
       </Module>
     </div>
   );
@@ -91,13 +97,9 @@ function SectionBody<T>({
   isEmpty?: (data: T) => boolean;
   render: (data: T) => ReactNode;
 }) {
-  return (
-    <div className="animate-in duration-150 fade-in">
-      {isEmpty?.(data) ? (
-        <p className="px-2 py-1 text-[12px] text-muted-foreground">해당 정보가 없어요</p>
-      ) : (
-        render(data)
-      )}
-    </div>
+  return isEmpty?.(data) ? (
+    <p className="px-2 py-1 text-[12px] text-muted-foreground">해당 정보가 없어요</p>
+  ) : (
+    render(data)
   );
 }

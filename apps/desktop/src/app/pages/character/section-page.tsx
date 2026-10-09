@@ -5,6 +5,8 @@ import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Module } from "@erda/ui/components/module";
 import { RefreshButton } from "@erda/ui/components/refresh-button";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
+import { StackItem } from "@erda/ui/components/stack-item";
+import { AnimatePresence } from "motion/react";
 
 import { useNav } from "#/app/nav/context.ts";
 import { AbilitySection } from "#/app/pages/character/sections/ability-section.tsx";
@@ -154,17 +156,25 @@ export function SectionPage({ ocid, name, page }: { ocid: string; name: string; 
         trailing={<RefreshButton onClick={refresh} loading={refreshing} />}
       />
       <div className="flex flex-col gap-2.5 px-3 pb-3">
-        {needsSummary && summary.error && !summary.data ? (
-          <Module>
-            <ErrorRow message={describeError(summary.error)} onRetry={() => summary.refetch()} />
-          </Module>
-        ) : null}
-        {needsSummary && summary.isPending && !summary.error ? (
-          <Module>
-            <LoadingRow />
-          </Module>
-        ) : null}
-        <PageSections page={page} ocid={ocid} summary={summary.data} />
+        <AnimatePresence mode="popLayout" initial={false}>
+          {needsSummary && summary.error && !summary.data ? (
+            <StackItem key="error">
+              <Module>
+                <ErrorRow message={describeError(summary.error)} onRetry={() => summary.refetch()} />
+              </Module>
+            </StackItem>
+          ) : null}
+          {needsSummary && summary.isPending && !summary.error ? (
+            <StackItem key="loading">
+              <Module>
+                <LoadingRow />
+              </Module>
+            </StackItem>
+          ) : null}
+          <StackItem key="sections" className="flex flex-col gap-2.5">
+            <PageSections page={page} ocid={ocid} summary={summary.data} />
+          </StackItem>
+        </AnimatePresence>
       </div>
     </>
   );
