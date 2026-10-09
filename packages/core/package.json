@@ -12,7 +12,8 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "potential:fetch": "node scripts/fetch-potential.ts"
   },
   "dependencies": {
     "zod": "^4.1.0"
