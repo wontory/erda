@@ -24,7 +24,7 @@ export function CompletedModule() {
   return (
     <AnimatePresence initial={false}>
       {completed.length > 0 ? (
-        <m.div key="completed" {...listItem} className="-mt-2.5 overflow-hidden">
+        <m.div key="completed" {...listItem} className="-mt-2.5">
           <div className="pt-2.5">
             <Module
               title="완료"
@@ -38,7 +38,7 @@ export function CompletedModule() {
               <div {...listProps}>
                 <AnimatePresence initial={false} onExitComplete={rescue}>
                   {completed.map((c) => (
-                    <m.div key={c.timer.id} data-row {...listItem} className="overflow-hidden">
+                    <m.div key={c.timer.id} data-row {...listItem}>
                       <CompletedRow item={c} />
                     </m.div>
                   ))}
