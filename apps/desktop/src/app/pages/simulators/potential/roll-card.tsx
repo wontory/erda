@@ -1,7 +1,6 @@
 import { POTENTIAL_GRADE_LABELS, lineGrade, type PotentialGrade, type PotentialRoll } from "@erda/core";
 import { cn } from "@erda/ui/lib/utils";
 import { m } from "motion/react";
-import type { ReactNode } from "react";
 
 import { CardGradeUp } from "./grade-up-effect.tsx";
 import { GRADE_BORDER, GRADE_DOT, GRADE_HEADER, GRADE_TEXT } from "./styles.ts";
@@ -14,19 +13,26 @@ export function GradeLabel({ grade, className }: { grade: PotentialGrade; classN
   );
 }
 
+const TITLE_TONE = {
+  before: "bg-foreground/12 text-foreground/80",
+  after: "bg-primary text-primary-foreground",
+} as const;
+
 export function RollCard({
   title,
   roll,
   revealId,
   animate,
-  action,
+  selectLabel,
+  onSelect,
   gradeUp,
 }: {
-  title: string;
+  title: keyof typeof TITLE_TONE;
   roll: PotentialRoll | null;
   revealId?: number;
   animate?: boolean;
-  action?: ReactNode;
+  selectLabel?: string;
+  onSelect?: () => void;
   gradeUp?: boolean;
 }) {
   return (
@@ -36,18 +42,28 @@ export function RollCard({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ type: "spring", duration: 0.35, bounce: 0.2 }}
       className={cn(
-        "relative flex min-w-0 flex-col gap-1.5 rounded-xl border bg-foreground/3 px-2.5 py-2 transition-[border-color,box-shadow] duration-300",
+        "relative flex min-w-0 flex-col gap-1.5 rounded-xl border bg-foreground/3 px-2.5 py-2 transition-[border-color,box-shadow,background-color] duration-300",
         roll ? GRADE_BORDER[roll.grade] : "border-border",
+        onSelect &&
+          "has-[>button:active]:bg-foreground/9 has-[>button:focus-visible]:ring-3 has-[>button:focus-visible]:ring-ring/50 has-[>button:hover]:bg-foreground/6",
       )}
     >
       <div
         className={cn(
-          "-mx-2.5 -mt-2 flex flex-wrap items-center gap-x-2 gap-y-0.5 rounded-t-[inherit] px-2.5 pt-2 pb-1.5",
+          "-mx-2.5 -mt-2 flex min-h-8 flex-wrap items-center gap-x-2 gap-y-0.5 rounded-t-[inherit] px-2.5 pt-2 pb-1.5",
           roll && GRADE_HEADER[roll.grade],
         )}
       >
-        <span className="text-[11px] font-semibold tracking-wide text-muted-foreground">{title}</span>
-        {roll ? <GradeLabel grade={roll.grade} /> : null}
+        <span
+          className={cn(
+            "rounded-md px-1.5 py-px text-[10px] font-bold tracking-wide uppercase transition-opacity duration-150",
+            TITLE_TONE[title],
+            !onSelect && "opacity-50",
+          )}
+        >
+          {title}
+        </span>
+        {roll ? <GradeLabel grade={roll.grade} /> : <GradeLabel grade="rare" className="invisible" />}
       </div>
       {roll ? (
         <ul className="m-0 flex list-none flex-col gap-1 p-0 text-[12px] leading-snug text-foreground">
@@ -80,7 +96,15 @@ export function RollCard({
       ) : (
         <p className="m-0 flex flex-1 items-center text-[12px] text-muted-foreground">재설정하면 결과가 여기 나와요.</p>
       )}
-      {action ? <div className="mt-auto pt-1">{action}</div> : null}
+      {selectLabel ? (
+        <button
+          type="button"
+          aria-label={selectLabel}
+          disabled={!onSelect}
+          onClick={onSelect}
+          className="absolute inset-0 cursor-pointer rounded-[inherit] outline-none disabled:cursor-default"
+        />
+      ) : null}
       {gradeUp && roll ? <CardGradeUp grade={roll.grade} /> : null}
     </m.div>
   );

@@ -25,7 +25,11 @@ export function OddsRow({ odds, pity, cost }: { odds: UpgradeOdds | null; pity: 
         />
         <Cell label="1회 비용" value={formatMeso(BigInt(cost))} tone="text-warning" />
       </div>
-      {odds ? <Progress aria-label="등급 상승 보장" value={pity} max={odds.ceiling - 1} /> : null}
+      {odds ? (
+        <Progress aria-label="등급 상승 보장" value={pity} max={odds.ceiling - 1} />
+      ) : (
+        <div aria-hidden className="h-1" />
+      )}
     </div>
   );
 }

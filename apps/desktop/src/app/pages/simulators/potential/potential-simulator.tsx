@@ -19,8 +19,8 @@ import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Module } from "@erda/ui/components/module";
 import { StackItem } from "@erda/ui/components/stack-item";
 import { Swap } from "@erda/ui/components/swap";
-import { Button } from "@erda/ui/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@erda/ui/components/ui/tabs";
+import { useStableHeight } from "@erda/ui/hooks/use-stable-height";
 import { listItem } from "@erda/ui/lib/motion";
 import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useMemo, useState } from "react";
@@ -87,6 +87,8 @@ function PotentialScreen({
   const animate = settings.effects && !reduced && !session.auto && last !== null;
   const burst = animate && last?.upgraded ? last.id : null;
   const [flipped, setFlipped] = useState<number | null>(null);
+  const cards = Math.max(1, state?.pending.length ?? 0);
+  const gridRef = useStableHeight<HTMLDivElement>(`${kind}:${config.part}:${config.level}:${cards}`);
   const selectKind = (k: PotentialKind) => {
     setKindWanted(k);
     patch({ kind: k });
@@ -138,24 +140,14 @@ function PotentialScreen({
           {state ? (
             <>
               <AutoHeight>
-                <div className="grid grid-cols-2 gap-2">
+                <div ref={gridRef} className="grid auto-rows-fr grid-cols-2 gap-2">
                   <RollCard
-                    title="BEFORE"
+                    title="before"
                     roll={state.current}
-                    action={
-                      session.auto ? null : (
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          disabled={state.pending.length === 0}
-                          onClick={() => session.choose("before")}
-                        >
-                          BEFORE 유지
-                        </Button>
-                      )
-                    }
+                    selectLabel="BEFORE 유지"
+                    onSelect={session.auto || state.pending.length === 0 ? undefined : () => session.choose("before")}
                   />
-                  {Array.from({ length: Math.max(1, state.pending.length) }, (_, i) => {
+                  {Array.from({ length: cards }, (_, i) => {
                     const roll = state.pending[i] ?? null;
                     if (session.concealed.includes(i)) {
                       return (
@@ -173,18 +165,13 @@ function PotentialScreen({
                     return (
                       <div key={i} className="relative flex min-w-0 *:flex-1">
                         <RollCard
-                          title="AFTER"
+                          title="after"
                           roll={roll}
                           revealId={last?.id}
                           animate={animate}
                           gradeUp={burst !== null && !!roll?.upgraded}
-                          action={
-                            session.auto ? null : (
-                              <Button className="w-full" disabled={!roll} onClick={() => session.choose(i)}>
-                                AFTER 적용
-                              </Button>
-                            )
-                          }
+                          selectLabel="AFTER 적용"
+                          onSelect={session.auto || !roll ? undefined : () => session.choose(i)}
                         />
                         {flash ? <RevealFlash onDone={() => setFlipped(null)} /> : null}
                       </div>
