@@ -1,5 +1,7 @@
 import { IconTile } from "@erda/ui/components/icon-tile";
+import { Swap } from "@erda/ui/components/swap";
 import { Info, Settings2, Timer, User, type LucideIcon } from "lucide-react";
+import { m } from "motion/react";
 import { useState, type ComponentType } from "react";
 import { z } from "zod";
 
@@ -38,20 +40,23 @@ export function SettingsApp() {
             type="button"
             onClick={() => setPage(p.id)}
             aria-current={p.id === page ? "page" : undefined}
-            className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors duration-100 ${p.id === page ? "bg-sidebar-accent" : "hover:bg-sidebar-accent/60"}`}
+            className={`relative isolate flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors duration-100 ${p.id === page ? "" : "hover:bg-sidebar-accent/60"}`}
           >
+            {p.id === page ? (
+              <m.span layoutId="settings-nav-active" className="absolute inset-0 -z-10 rounded-md bg-sidebar-accent" />
+            ) : null}
             <IconTile icon={p.icon} color={p.color} size={20} />
             {p.title}
           </button>
         ))}
       </nav>
       <main className="min-w-0 flex-1">
-        <div className="scrollbar-none h-full overflow-y-auto">
-          <div key={page} className="animate-in px-6 py-4 duration-150 fade-in">
+        <m.div layoutScroll className="relative scrollbar-none h-full overflow-y-auto">
+          <Swap id={page} className="px-6 py-4">
             <h1 className="mb-3 text-[17px] font-semibold">{current.title}</h1>
             <current.Page />
-          </div>
-        </div>
+          </Swap>
+        </m.div>
       </main>
     </div>
   );

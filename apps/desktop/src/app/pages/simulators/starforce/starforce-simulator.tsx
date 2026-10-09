@@ -9,9 +9,11 @@ import {
   type StarforceOptions,
   type StarforceSettings,
 } from "@erda/core";
+import { AutoHeight } from "@erda/ui/components/auto-height";
 import { Module } from "@erda/ui/components/module";
+import { fade } from "@erda/ui/lib/motion";
 import { ChevronRight } from "lucide-react";
-import { m } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { useState } from "react";
 
 import { SideSheet } from "#/features/sheet/side-sheet.tsx";
@@ -105,25 +107,33 @@ function StarforceScreen({
             <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
           </button>
           <StarTrack star={state.star} cap={cap} next={next} popFrom={popFrom} />
-          {state.trace !== null ? (
-            <RestorePanel
-              level={state.level}
-              trace={state.trace}
-              options={options}
-              sparePrice={settings.sparePrice}
-              onRestore={session.restoreWith}
-            />
-          ) : next !== null ? (
-            <>
-              <ChanceBox chances={chances(state.star, options, effectiveProtect)} />
-              <CostRow
-                cost={attemptCost(state.level, state.star, options, effectiveProtect)}
-                protect={protect}
-                protectable={protectable}
-                onProtect={session.setProtect}
-              />
-            </>
-          ) : null}
+          <div className="-mt-3">
+            <AutoHeight>
+              <AnimatePresence initial={false} mode="popLayout">
+                {state.trace !== null ? (
+                  <m.div key="restore" {...fade} className="pt-3">
+                    <RestorePanel
+                      level={state.level}
+                      trace={state.trace}
+                      options={options}
+                      sparePrice={settings.sparePrice}
+                      onRestore={session.restoreWith}
+                    />
+                  </m.div>
+                ) : next !== null ? (
+                  <m.div key="enhance" {...fade} className="flex flex-col gap-3 pt-3">
+                    <ChanceBox chances={chances(state.star, options, effectiveProtect)} />
+                    <CostRow
+                      cost={attemptCost(state.level, state.star, options, effectiveProtect)}
+                      protect={protect}
+                      protectable={protectable}
+                      onProtect={session.setProtect}
+                    />
+                  </m.div>
+                ) : null}
+              </AnimatePresence>
+            </AutoHeight>
+          </div>
           <ActionBar
             canEnhance={canEnhance(state)}
             busy={session.phase !== "idle"}

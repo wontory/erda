@@ -192,14 +192,18 @@ function Editor({ initial, onClose, onSave }: GroupHandlers & { initial: TimerGr
           onKeyDown={guardIme}
         />
         <ScrollArea className="min-h-0 flex-1">
-          {entries.length === 0 ? (
-            <div className="py-6 text-center text-[12px] text-muted-foreground">
-              아래 "타이머 추가"로 항목을 넣어 주세요
-            </div>
-          ) : null}
+          <AnimatePresence initial={false}>
+            {entries.length === 0 ? (
+              <m.div key="empty" {...listItem}>
+                <div className="py-6 text-center text-[12px] text-muted-foreground">
+                  아래 "타이머 추가"로 항목을 넣어 주세요
+                </div>
+              </m.div>
+            ) : null}
+          </AnimatePresence>
           <AnimatePresence initial={false}>
             {entries.map((e, i) => (
-              <m.div key={e.id} {...listItem} className="overflow-hidden">
+              <m.div key={e.id} {...listItem}>
                 <EntryRow
                   entry={e}
                   first={i === 0}
@@ -212,11 +216,15 @@ function Editor({ initial, onClose, onSave }: GroupHandlers & { initial: TimerGr
             ))}
           </AnimatePresence>
         </ScrollArea>
-        {error ? (
-          <p role="alert" className="text-[12px] text-destructive">
-            {error}
-          </p>
-        ) : null}
+        <AnimatePresence initial={false}>
+          {error ? (
+            <m.div key="error" {...listItem} className="-mt-3">
+              <p role="alert" className="pt-3 text-[12px] text-destructive">
+                {error}
+              </p>
+            </m.div>
+          ) : null}
+        </AnimatePresence>
         <DialogFooter className="sm:justify-between">
           <AddTimerMenu onAdd={(entry) => setDraft(addEntry(draft, entry))} />
           <div className="flex gap-2">

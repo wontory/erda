@@ -4,6 +4,8 @@ import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Module } from "@erda/ui/components/module";
 import { RefreshButton } from "@erda/ui/components/refresh-button";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
+import { StackItem } from "@erda/ui/components/stack-item";
+import { AnimatePresence } from "motion/react";
 
 import { useNav } from "#/app/nav/context.ts";
 import { GuildMembersModule } from "#/app/pages/character/parts/guild-members-module.tsx";
@@ -37,26 +39,32 @@ export function GuildPage({ world, name }: { world: string; name: string }) {
         trailing={<RefreshButton onClick={refresh} loading={refreshing} />}
       />
       <div className="flex flex-col gap-2.5 px-3 pb-3">
-        {guild.error ? (
-          <Module>
-            <ErrorRow message={describeError(guild.error)} onRetry={() => guild.refetch()} />
-          </Module>
-        ) : null}
-        {guild.isPending ? (
-          <Module>
-            <LoadingRow />
-          </Module>
-        ) : null}
-        {g ? (
-          <>
-            <GuildProfileModule guild={g} world={world} name={name} />
-            <Module>
-              <RankingCardView card={ranking.card} />
-            </Module>
-            <GuildSkillsModule guild={g} />
-            <GuildMembersModule guild={g} />
-          </>
-        ) : null}
+        <AnimatePresence mode="popLayout" initial={false}>
+          {guild.error ? (
+            <StackItem key="error">
+              <Module>
+                <ErrorRow message={describeError(guild.error)} onRetry={() => guild.refetch()} />
+              </Module>
+            </StackItem>
+          ) : null}
+          {guild.isPending ? (
+            <StackItem key="loading">
+              <Module>
+                <LoadingRow />
+              </Module>
+            </StackItem>
+          ) : null}
+          {g ? (
+            <StackItem key="body" className="flex flex-col gap-2.5">
+              <GuildProfileModule guild={g} world={world} name={name} />
+              <Module>
+                <RankingCardView card={ranking.card} />
+              </Module>
+              <GuildSkillsModule guild={g} />
+              <GuildMembersModule guild={g} />
+            </StackItem>
+          ) : null}
+        </AnimatePresence>
       </div>
     </>
   );

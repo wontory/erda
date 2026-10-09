@@ -1,3 +1,4 @@
+import { AutoHeight } from "@erda/ui/components/auto-height";
 import { Module } from "@erda/ui/components/module";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@erda/ui/components/ui/tabs";
@@ -43,23 +44,25 @@ export function TimersPage() {
                 </TabsTrigger>
               ))}
             </TabsList>
-            <TabsContent value="프리셋">
-              <PresetGrid
-                buffRepeat={buffRepeat}
-                onBuffRepeat={setBuffRepeat}
-                onStart={(p) => void run(() => start.startPreset(p, buffRepeat), START_FAILED)}
-              />
-            </TabsContent>
-            <TabsContent value="그룹">
-              <GroupList
-                groups={groups}
-                loaded={groupsLoaded}
-                onStart={(g) => void run(() => start.startGroup(g), START_FAILED)}
-              />
-            </TabsContent>
-            <TabsContent value="직접">
-              <CustomForm onStart={start.startCustom} />
-            </TabsContent>
+            <AutoHeight>
+              <TabsContent value="프리셋">
+                <PresetGrid
+                  buffRepeat={buffRepeat}
+                  onBuffRepeat={setBuffRepeat}
+                  onStart={(p) => void run(() => start.startPreset(p, buffRepeat), START_FAILED)}
+                />
+              </TabsContent>
+              <TabsContent value="그룹">
+                <GroupList
+                  groups={groups}
+                  loaded={groupsLoaded}
+                  onStart={(g) => void run(() => start.startGroup(g), START_FAILED)}
+                />
+              </TabsContent>
+              <TabsContent value="직접">
+                <CustomForm onStart={start.startCustom} />
+              </TabsContent>
+            </AutoHeight>
           </Tabs>
         </Module>
       </div>

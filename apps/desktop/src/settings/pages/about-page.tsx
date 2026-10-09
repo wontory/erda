@@ -1,7 +1,9 @@
 import { PRICE_BASE_DATE } from "@erda/core";
 import { Button } from "@erda/ui/components/ui/button";
 import { Field, FieldTitle } from "@erda/ui/components/ui/field";
+import { fade } from "@erda/ui/lib/motion";
 import { getVersion } from "@tauri-apps/api/app";
+import { AnimatePresence, m } from "motion/react";
 import { useEffect, useState, type ReactNode } from "react";
 
 import { useAppUpdate, type UpdateState } from "#/features/update/use-app-update.ts";
@@ -42,9 +44,17 @@ function UpdateRow() {
   return (
     <InfoRow label="업데이트">
       <div className="flex items-center gap-2">
-        {status ? (
-          <span className={state.status === "error" ? "text-destructive" : "text-muted-foreground"}>{status}</span>
-        ) : null}
+        <AnimatePresence initial={false}>
+          {status ? (
+            <m.span
+              key="status"
+              {...fade}
+              className={state.status === "error" ? "text-destructive" : "text-muted-foreground"}
+            >
+              {status}
+            </m.span>
+          ) : null}
+        </AnimatePresence>
         {update ? (
           <Button disabled={busy} onClick={() => void install(update)}>
             업데이트 후 재시작

@@ -4,8 +4,10 @@ import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Module } from "@erda/ui/components/module";
 import { RefreshButton } from "@erda/ui/components/refresh-button";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
+import { StackItem } from "@erda/ui/components/stack-item";
 import { Button } from "@erda/ui/components/ui/button";
 import { User } from "lucide-react";
+import { AnimatePresence } from "motion/react";
 
 import { useNav } from "#/app/nav/context.ts";
 import { CharacterBody } from "#/app/pages/character/parts/character-body.tsx";
@@ -36,27 +38,37 @@ export function CharacterPage() {
         trailing={<RefreshButton onClick={refresh} loading={refreshing} disabled={!main.name} />}
       />
       <div className="flex flex-col gap-2.5 px-3 pb-3">
-        {!main.nameLoaded ? loadingMain : null}
-        {missing && main.error ? (
-          <Module>
-            <ErrorRow message={describeError(main.error)} onRetry={refresh} />
-          </Module>
-        ) : null}
-        {missing && main.isPending ? loadingMain : null}
-        {missing && !main.isPending && !main.error ? (
-          <Module>
-            <EmptyState
-              icon={User}
-              title="본캐가 없어요"
-              action={
-                <Button variant="outline" onClick={() => openSettingsAction()}>
-                  설정 열기
-                </Button>
-              }
-            />
-          </Module>
-        ) : null}
-        {s ? <CharacterBody summary={s} /> : null}
+        <AnimatePresence mode="popLayout" initial={false}>
+          {!main.nameLoaded ? <StackItem key="loading">{loadingMain}</StackItem> : null}
+          {missing && main.error ? (
+            <StackItem key="error">
+              <Module>
+                <ErrorRow message={describeError(main.error)} onRetry={refresh} />
+              </Module>
+            </StackItem>
+          ) : null}
+          {missing && main.isPending ? <StackItem key="loading">{loadingMain}</StackItem> : null}
+          {missing && !main.isPending && !main.error ? (
+            <StackItem key="empty">
+              <Module>
+                <EmptyState
+                  icon={User}
+                  title="본캐가 없어요"
+                  action={
+                    <Button variant="outline" onClick={() => openSettingsAction()}>
+                      설정 열기
+                    </Button>
+                  }
+                />
+              </Module>
+            </StackItem>
+          ) : null}
+          {s ? (
+            <StackItem key="body" className="flex flex-col gap-2.5">
+              <CharacterBody summary={s} />
+            </StackItem>
+          ) : null}
+        </AnimatePresence>
       </div>
     </>
   );

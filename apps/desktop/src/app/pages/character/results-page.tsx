@@ -1,9 +1,12 @@
 import { describeError } from "@erda/api/errors";
 import type { CharacterSummary, FavoriteCharacter } from "@erda/core";
+import { AutoHeight } from "@erda/ui/components/auto-height";
 import { ErrorRow } from "@erda/ui/components/error-row";
 import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Module } from "@erda/ui/components/module";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
+import { StackItem } from "@erda/ui/components/stack-item";
+import { Swap } from "@erda/ui/components/swap";
 import { Button } from "@erda/ui/components/ui/button";
 import { listItem } from "@erda/ui/lib/motion";
 import { useQueryClient } from "@tanstack/react-query";
@@ -88,7 +91,7 @@ function RecentModule({
     >
       <AnimatePresence initial={false}>
         {recent.map((r) => (
-          <m.div key={r.ocid} {...listItem} className="overflow-hidden">
+          <m.div key={r.ocid} {...listItem}>
             <CharacterRow
               name={r.name}
               world={r.world}
@@ -126,77 +129,122 @@ export function ResultsPage({ query }: { query: string }) {
     openCharacter(s.ocid, s.name);
   };
   const nothing = found === null && !guilds.isPending && !guilds.error && guildHits.length === 0;
+  const characterView = character.isPending
+    ? "loading"
+    : character.error
+      ? "error"
+      : found
+        ? "found"
+        : nothing
+          ? "empty"
+          : "none";
   const noHistory = favorites.length === 0 && recent.length === 0 && account.length === 0;
   return (
     <>
       <ScreenHeader onBack={pop} onSettings={() => openSettingsAction()} leading={<ResultsSearch query={query} />} />
       <div className="flex flex-col gap-2.5 px-3 pb-3">
-        <Module title="캐릭터" icon={Search}>
-          {character.isPending ? <LoadingRow label={`‘${query}’ 검색 중…`} /> : null}
-          {character.error ? (
-            <ErrorRow message={describeError(character.error)} onRetry={() => character.refetch()} />
+        <AnimatePresence mode="popLayout" initial={false}>
+          <StackItem key="character">
+            <Module title="캐릭터" icon={Search}>
+              <AutoHeight>
+                <Swap id={characterView}>
+                  {character.isPending ? <LoadingRow label={`‘${query}’ 검색 중…`} /> : null}
+                  {character.error ? (
+                    <ErrorRow message={describeError(character.error)} onRetry={() => character.refetch()} />
+                  ) : null}
+                  {found ? (
+                    <CharacterRow
+                      name={found.name}
+                      world={found.world}
+                      job={found.job}
+                      image={found.image}
+                      level={found.level}
+                      onClick={() => openFound(found)}
+                    />
+                  ) : null}
+                  {nothing ? (
+                    <EmptyState
+                      icon={Search}
+                      title="결과 없음"
+                      description={`‘${query}’에 해당하는 캐릭터나 길드가 없어요`}
+                    />
+                  ) : null}
+                  {found === null && guildHits.length > 0 ? (
+                    <p className="px-2 py-1 text-[12px] text-muted-foreground">‘{query}’ 캐릭터는 없어요.</p>
+                  ) : null}
+                </Swap>
+              </AutoHeight>
+            </Module>
+          </StackItem>
+          {guilds.isPending ? (
+            <StackItem key="guilds-loading">
+              <Module>
+                <LoadingRow label={allWorlds ? "모든 월드에서 길드 찾는 중…" : "길드 찾는 중…"} />
+              </Module>
+            </StackItem>
           ) : null}
-          {found ? (
-            <CharacterRow
-              name={found.name}
-              world={found.world}
-              job={found.job}
-              image={found.image}
-              level={found.level}
-              onClick={() => openFound(found)}
-            />
+          {guilds.error ? (
+            <StackItem key="guilds-error">
+              <Module title="길드">
+                <ErrorRow message={describeError(guilds.error)} onRetry={() => guilds.refetch()} />
+              </Module>
+            </StackItem>
           ) : null}
-          {nothing ? (
-            <EmptyState icon={Search} title="결과 없음" description={`‘${query}’에 해당하는 캐릭터나 길드가 없어요`} />
+          {guildHits.length > 0 ? (
+            <StackItem key="guilds">
+              <Module title={`길드 · ${guildHits.length}곳`}>
+                {guildHits.map((h) => (
+                  <GuildHitRow
+                    key={`${h.world}|${h.name}`}
+                    hit={h}
+                    onClick={() => push(pages.guild(h.world, h.name))}
+                  />
+                ))}
+              </Module>
+            </StackItem>
           ) : null}
-          {found === null && guildHits.length > 0 ? (
-            <p className="px-2 py-1 text-[12px] text-muted-foreground">‘{query}’ 캐릭터는 없어요.</p>
+          {!allWorlds && !guilds.isPending ? (
+            <StackItem key="all-worlds">
+              <AllWorldsHint onSearch={() => setAllWorlds(true)} />
+            </StackItem>
           ) : null}
-        </Module>
-        {guilds.isPending ? (
-          <Module>
-            <LoadingRow label={allWorlds ? "모든 월드에서 길드 찾는 중…" : "길드 찾는 중…"} />
-          </Module>
-        ) : null}
-        {guilds.error ? (
-          <Module title="길드">
-            <ErrorRow message={describeError(guilds.error)} onRetry={() => guilds.refetch()} />
-          </Module>
-        ) : null}
-        {guildHits.length > 0 ? (
-          <Module title={`길드 · ${guildHits.length}곳`}>
-            {guildHits.map((h) => (
-              <GuildHitRow key={`${h.world}|${h.name}`} hit={h} onClick={() => push(pages.guild(h.world, h.name))} />
-            ))}
-          </Module>
-        ) : null}
-        {!allWorlds && !guilds.isPending ? <AllWorldsHint onSearch={() => setAllWorlds(true)} /> : null}
-        {favorites.length > 0 ? (
-          <Module title="즐겨찾기" icon={Star}>
-            {favorites.map((f) => (
-              <CharacterRow
-                key={f.ocid}
-                name={f.name}
-                world={f.world}
-                job={f.job}
-                image={f.image}
-                onClick={() => openCharacter(f.ocid, f.name)}
+          {favorites.length > 0 ? (
+            <StackItem key="favorites">
+              <Module title="즐겨찾기" icon={Star}>
+                {favorites.map((f) => (
+                  <CharacterRow
+                    key={f.ocid}
+                    name={f.name}
+                    world={f.world}
+                    job={f.job}
+                    image={f.image}
+                    onClick={() => openCharacter(f.ocid, f.name)}
+                  />
+                ))}
+              </Module>
+            </StackItem>
+          ) : null}
+          {recent.length > 0 ? (
+            <StackItem key="recent">
+              <RecentModule
+                recent={recent}
+                onOpen={openCharacter}
+                onRemove={(ocid) => runAction(() => remove(ocid), CLEAR_RECENT_FAILED)}
+                onClear={() => runAction(clear, CLEAR_RECENT_FAILED)}
               />
-            ))}
-          </Module>
-        ) : null}
-        {recent.length > 0 ? (
-          <RecentModule
-            recent={recent}
-            onOpen={openCharacter}
-            onRemove={(ocid) => runAction(() => remove(ocid), CLEAR_RECENT_FAILED)}
-            onClear={() => runAction(clear, CLEAR_RECENT_FAILED)}
-          />
-        ) : null}
-        {account.length > 0 ? <AccountCharactersModule characters={account} onOpen={openCharacter} /> : null}
-        {!character.isPending && !guilds.isPending && noHistory && nothing ? (
-          <p className="px-2 text-[12px] text-muted-foreground">닉네임이나 길드 이름을 정확히 입력해 주세요.</p>
-        ) : null}
+            </StackItem>
+          ) : null}
+          {account.length > 0 ? (
+            <StackItem key="account">
+              <AccountCharactersModule characters={account} onOpen={openCharacter} />
+            </StackItem>
+          ) : null}
+          {!character.isPending && !guilds.isPending && noHistory && nothing ? (
+            <StackItem key="hint">
+              <p className="px-2 text-[12px] text-muted-foreground">닉네임이나 길드 이름을 정확히 입력해 주세요.</p>
+            </StackItem>
+          ) : null}
+        </AnimatePresence>
       </div>
     </>
   );

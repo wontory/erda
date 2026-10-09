@@ -8,11 +8,15 @@ import {
   type HistoryKind,
   type SyncPhase,
 } from "@erda/core";
+import { AutoHeight } from "@erda/ui/components/auto-height";
 import { LoadingRow } from "@erda/ui/components/loading-row";
 import { RefreshButton } from "@erda/ui/components/refresh-button";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
+import { Swap } from "@erda/ui/components/swap";
 import { Button } from "@erda/ui/components/ui/button";
+import { listItem } from "@erda/ui/lib/motion";
 import { cn } from "@erda/ui/lib/utils";
+import { AnimatePresence, m } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 
 import { useNav } from "#/app/nav/context.ts";
@@ -63,7 +67,7 @@ function HistoryBody({
   onMore: () => void;
 }) {
   return (
-    <>
+    <div className="flex flex-col gap-2.5">
       <HistoryMetrics kind={kind} agg={aggregate} />
       <DailyBars kind={kind} agg={aggregate} />
       <ItemUsage kind={kind} agg={aggregate} />
@@ -77,7 +81,7 @@ function HistoryBody({
           더 보기
         </Button>
       ) : null}
-    </>
+    </div>
   );
 }
 
@@ -94,6 +98,8 @@ export function HistoryPage({ kind }: { kind: HistoryKind }) {
   const days = useMemo(() => (h.archive?.days ?? []).filter((d) => d.entries.length > 0), [h.archive]);
   const phase = h.state.phase;
   const copy = emptyCopy(phase);
+  const status = statusLine(h.state, now.getTime());
+  const view = !h.archive || !h.aggregate ? "loading" : h.aggregate.total === 0 ? "empty" : "body";
   return (
     <>
       <ScreenHeader
@@ -108,29 +114,36 @@ export function HistoryPage({ kind }: { kind: HistoryKind }) {
         }
         onSettings={() => openSettingsAction("general")}
       />
-      <div className="flex flex-col gap-2.5 px-3 pb-3">
-        <output
-          className={cn(
-            "block px-1 text-[11px] empty:hidden",
-            phase === "error" ? "text-destructive" : "text-muted-foreground",
-          )}
-        >
-          {statusLine(h.state, now.getTime())}
-        </output>
-        {!h.archive || !h.aggregate ? (
-          <LoadingRow label="기록 불러오는 중…" />
-        ) : h.aggregate.total === 0 ? (
-          <EmptyState icon={historyIcon(kind)} title={copy.title} description={copy.description} />
-        ) : (
-          <HistoryBody
-            kind={kind}
-            aggregate={h.aggregate}
-            days={days}
-            today={today}
-            shown={shown}
-            onMore={() => setShown((n) => n + DAYS_PER_PAGE)}
-          />
-        )}
+      <output
+        className={cn("block px-4 text-[11px]", phase === "error" ? "text-destructive" : "text-muted-foreground")}
+      >
+        <AnimatePresence initial={false}>
+          {status ? (
+            <m.span key="status" {...listItem} className="block">
+              <span className="block pb-2.5">{status}</span>
+            </m.span>
+          ) : null}
+        </AnimatePresence>
+      </output>
+      <div className="px-3 pb-3">
+        <AutoHeight>
+          <Swap id={view}>
+            {!h.archive || !h.aggregate ? (
+              <LoadingRow label="기록 불러오는 중…" />
+            ) : h.aggregate.total === 0 ? (
+              <EmptyState icon={historyIcon(kind)} title={copy.title} description={copy.description} />
+            ) : (
+              <HistoryBody
+                kind={kind}
+                aggregate={h.aggregate}
+                days={days}
+                today={today}
+                shown={shown}
+                onMore={() => setShown((n) => n + DAYS_PER_PAGE)}
+              />
+            )}
+          </Swap>
+        </AutoHeight>
       </div>
     </>
   );

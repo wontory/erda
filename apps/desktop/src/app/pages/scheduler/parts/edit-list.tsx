@@ -8,7 +8,9 @@ import {
   NumberFieldIncrement,
   NumberFieldInput,
 } from "@erda/ui/components/ui/number-field";
+import { listItem } from "@erda/ui/lib/motion";
 import { Pencil } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 
 import { DifficultyTile } from "./difficulty-tile.tsx";
 
@@ -42,38 +44,40 @@ function EditRow({
           {entry.name} <span className="text-[11px] text-muted-foreground">{entry.difficulty}</span>
         </span>
       </div>
-      {selected ? (
-        <>
-          <div className="mt-1.5 flex items-center justify-end gap-2 text-[12px]">
-            <NumberField
-              value={partyOf(state, entry.id)}
-              min={1}
-              max={6}
-              onValueCommitted={committed((n) => onParty(entry.id, n))}
-            >
-              <NumberFieldGroup>
-                <NumberFieldDecrement />
-                <NumberFieldInput aria-label={`${label} 파티`} className="w-8" />
-                <NumberFieldIncrement />
-              </NumberFieldGroup>
-              <span className="text-muted-foreground">인</span>
-            </NumberField>
-            <NumberField
-              value={priceOf(state, entry)}
-              min={0}
-              max={99_999_999_999}
-              onValueCommitted={committed((n) => onPrice(entry.id, n))}
-            >
-              <NumberFieldGroup>
-                <NumberFieldInput aria-label={`${label} 가격`} className="w-28 text-right" />
-              </NumberFieldGroup>
-            </NumberField>
-          </div>
-          <div className="mt-0.5 text-right text-[11px] text-muted-foreground tabular-nums">
-            {KoreanNumber.format(priceOf(state, entry))} 메소
-          </div>
-        </>
-      ) : null}
+      <AnimatePresence initial={false}>
+        {selected ? (
+          <m.div key="fields" {...listItem}>
+            <div className="mt-1.5 flex items-center justify-end gap-2 text-[12px]">
+              <NumberField
+                value={partyOf(state, entry.id)}
+                min={1}
+                max={6}
+                onValueCommitted={committed((n) => onParty(entry.id, n))}
+              >
+                <NumberFieldGroup>
+                  <NumberFieldDecrement />
+                  <NumberFieldInput aria-label={`${label} 파티`} className="w-8" />
+                  <NumberFieldIncrement />
+                </NumberFieldGroup>
+                <span className="text-muted-foreground">인</span>
+              </NumberField>
+              <NumberField
+                value={priceOf(state, entry)}
+                min={0}
+                max={99_999_999_999}
+                onValueCommitted={committed((n) => onPrice(entry.id, n))}
+              >
+                <NumberFieldGroup>
+                  <NumberFieldInput aria-label={`${label} 가격`} className="w-28 text-right" />
+                </NumberFieldGroup>
+              </NumberField>
+            </div>
+            <div className="mt-0.5 text-right text-[11px] text-muted-foreground tabular-nums">
+              {KoreanNumber.format(priceOf(state, entry))} 메소
+            </div>
+          </m.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }

@@ -161,9 +161,9 @@ export function App() {
         <MainCharacterProvider>
           <NavProvider>
             <div className={cn(PANEL_CLASS, visible ? PANEL_SHOWN : PANEL_HIDDEN)}>
-              <div ref={viewportRef} className="scrollbar-none h-full overflow-y-auto">
+              <m.div ref={viewportRef} layoutScroll className="scrollbar-none h-full overflow-y-auto">
                 <Screens viewportRef={viewportRef} />
-              </div>
+              </m.div>
             </div>
             <Toaster />
           </NavProvider>

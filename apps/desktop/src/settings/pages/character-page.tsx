@@ -15,7 +15,7 @@ import { Input } from "@erda/ui/components/ui/input";
 import { ScrollArea } from "@erda/ui/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@erda/ui/components/ui/select";
 import { Separator } from "@erda/ui/components/ui/separator";
-import { listItem } from "@erda/ui/lib/motion";
+import { fadeScale, listItem } from "@erda/ui/lib/motion";
 import { AnimatePresence, m } from "motion/react";
 import { useId, useState } from "react";
 
@@ -92,7 +92,13 @@ function MainCharacterRow() {
           {main.summary
             ? `${main.summary.name} · Lv.${main.summary.level} · ${main.summary.world}`
             : "비워 두면 내 계정에서 레벨이 가장 높은 캐릭터를 자동으로 골라요"}
-          {main.error ? <span className="block text-destructive">{describeError(main.error)}</span> : null}
+          <AnimatePresence initial={false}>
+            {main.error ? (
+              <m.span key="error" {...listItem} className="block text-destructive">
+                {describeError(main.error)}
+              </m.span>
+            ) : null}
+          </AnimatePresence>
         </>
       }
     >
@@ -128,7 +134,7 @@ function FavoritesRow() {
       <div className="flex shrink-0 flex-col items-end">
         <AnimatePresence initial={false}>
           {favorites.map((f) => (
-            <m.div key={f.ocid} {...listItem} className="overflow-hidden">
+            <m.div key={f.ocid} {...listItem}>
               <div className="flex items-center gap-2 py-0.5 text-[12px]">
                 <span>
                   {f.name} <span className="text-muted-foreground">· {f.world}</span>
@@ -220,7 +226,13 @@ function CharacterLookRows() {
       <h2 className="pt-3 pb-1 text-[12px] font-semibold text-muted-foreground">캐릭터 이미지</h2>
       <SettingRow label="자세" description="홈 화면에 보이는 본캐의 자세">
         <div className="flex shrink-0 items-center gap-2">
-          {main.summary ? <PosePreview image={main.summary.image} /> : null}
+          <AnimatePresence initial={false}>
+            {main.summary ? (
+              <m.div key="preview" {...fadeScale}>
+                <PosePreview image={main.summary.image} />
+              </m.div>
+            ) : null}
+          </AnimatePresence>
           <Select
             items={POSE_ITEMS}
             value={pose}

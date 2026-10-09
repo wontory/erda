@@ -1,7 +1,9 @@
 import { NEWS_META, isOngoing, periodCaption, type NewsEntry } from "@erda/core";
+import { AutoHeight } from "@erda/ui/components/auto-height";
 import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Module } from "@erda/ui/components/module";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
+import { Swap } from "@erda/ui/components/swap";
 import { Newspaper } from "lucide-react";
 import { useEffect } from "react";
 
@@ -50,15 +52,19 @@ export function ArticlePage({ entryId }: { entryId: string }) {
         onSettings={() => void openSettingsAction()}
       />
       <div className="flex flex-col gap-2.5 px-3 pb-3">
-        {entry ? (
-          <Article entry={entry} now={now} />
-        ) : !news.loaded || news.loading ? (
-          <LoadingRow label="소식 불러오는 중…" />
-        ) : (
-          <Module>
-            <EmptyState icon={Newspaper} title="글을 찾을 수 없어요" description="목록에서 내려간 글이에요" />
-          </Module>
-        )}
+        <AutoHeight>
+          <Swap id={entry ? "article" : !news.loaded || news.loading ? "loading" : "missing"}>
+            {entry ? (
+              <Article entry={entry} now={now} />
+            ) : !news.loaded || news.loading ? (
+              <LoadingRow label="소식 불러오는 중…" />
+            ) : (
+              <Module>
+                <EmptyState icon={Newspaper} title="글을 찾을 수 없어요" description="목록에서 내려간 글이에요" />
+              </Module>
+            )}
+          </Swap>
+        </AutoHeight>
       </div>
     </>
   );

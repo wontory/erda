@@ -1,12 +1,15 @@
 import { describeError } from "@erda/api/errors";
 import type { GuildBasic } from "@erda/api/generated/model";
+import { AutoHeight } from "@erda/ui/components/auto-height";
 import { ErrorRow } from "@erda/ui/components/error-row";
 import { Module } from "@erda/ui/components/module";
 import { Button } from "@erda/ui/components/ui/button";
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@erda/ui/components/ui/item";
 import { Spinner } from "@erda/ui/components/ui/spinner";
+import { listItem } from "@erda/ui/lib/motion";
 import { useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, Crown, User } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
 import { useNav } from "#/app/nav/context.ts";
@@ -102,7 +105,7 @@ export function GuildMembersModule({ guild: g }: { guild: GuildBasic }) {
   const needle = filter.trim();
   const members = (g.guild_member ?? [])
     .slice(0, MAX_MEMBERS)
-    .filter((m) => m.toLowerCase().includes(needle.toLowerCase()));
+    .filter((name) => name.toLowerCase().includes(needle.toLowerCase()));
   const clearFilter = () => {
     setFilter("");
     filterRef.current?.focus();
@@ -117,18 +120,34 @@ export function GuildMembersModule({ guild: g }: { guild: GuildBasic }) {
         className="mb-2 h-8"
         icon={false}
       />
-      {error ? <ErrorRow message={error} /> : null}
-      {members.length === 0 && needle ? (
-        <div className="flex items-center justify-between gap-2 px-2 py-1 text-[12px] text-muted-foreground">
-          <span className="min-w-0 truncate">‘{needle}’와 일치하는 길드원이 없어요</span>
-          <Button variant="ghost" onClick={clearFilter}>
-            검색 지우기
-          </Button>
-        </div>
-      ) : null}
-      {members.map((m) => (
-        <MemberRow key={m} name={m} isMaster={m === g.guild_master_name} opening={opening} onOpen={() => open(m)} />
-      ))}
+      <AutoHeight>
+        <AnimatePresence initial={false}>
+          {error ? (
+            <m.div key="error" {...listItem}>
+              <ErrorRow message={error} />
+            </m.div>
+          ) : null}
+          {members.length === 0 && needle ? (
+            <m.div key="empty" {...listItem}>
+              <div className="flex items-center justify-between gap-2 px-2 py-1 text-[12px] text-muted-foreground">
+                <span className="min-w-0 truncate">‘{needle}’와 일치하는 길드원이 없어요</span>
+                <Button variant="ghost" onClick={clearFilter}>
+                  검색 지우기
+                </Button>
+              </div>
+            </m.div>
+          ) : null}
+        </AnimatePresence>
+        {members.map((name) => (
+          <MemberRow
+            key={name}
+            name={name}
+            isMaster={name === g.guild_master_name}
+            opening={opening}
+            onOpen={() => open(name)}
+          />
+        ))}
+      </AutoHeight>
     </Module>
   );
 }

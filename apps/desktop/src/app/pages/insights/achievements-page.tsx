@@ -1,13 +1,17 @@
 import { describeError } from "@erda/api/errors";
 import { filterAchievements, type Achievement } from "@erda/core";
+import { AutoHeight } from "@erda/ui/components/auto-height";
 import { ErrorRow } from "@erda/ui/components/error-row";
 import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Module } from "@erda/ui/components/module";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
+import { Swap } from "@erda/ui/components/swap";
 import { Button } from "@erda/ui/components/ui/button";
 import { Item, ItemContent, ItemDescription, ItemTitle } from "@erda/ui/components/ui/item";
+import { listItem } from "@erda/ui/lib/motion";
 import { Award, Trophy } from "lucide-react";
-import { useMemo, useState } from "react";
+import { AnimatePresence, m } from "motion/react";
+import { useMemo, useState, type ReactNode } from "react";
 
 import { useNav } from "#/app/nav/context.ts";
 import { EmptyState } from "#/app/pages/shared/empty-state.tsx";
@@ -23,46 +27,73 @@ const PAGE_SIZE = 50;
 
 const count = (n: number) => n.toLocaleString("en-US");
 
+function rankView(
+  main: ReturnType<typeof useMainCharacter>,
+  rank: ReturnType<typeof useAchievementRank>,
+  decided: boolean,
+): { id: string; node: ReactNode } {
+  if (!decided || (main.ocid && rank.isLoading)) return { id: "loading", node: <LoadingRow /> };
+  if (main.error && !main.ocid) return { id: "error", node: <ErrorRow message={describeError(main.error)} /> };
+  if (!main.ocid) return { id: "no-main", node: <EmptyState icon={Trophy} title="본캐를 정하면 순위가 보여요" /> };
+  if (rank.error) return { id: "error", node: <ErrorRow message={describeError(rank.error)} /> };
+  if (!rank.rank) return { id: "empty", node: <EmptyState icon={Trophy} title="순위 기록이 없어요" /> };
+  const { grade, score, rank: position } = rank.rank;
+  return {
+    id: "rank",
+    node: (
+      <Item size="row">
+        <ItemContent className="min-w-0">
+          <ItemTitle>등급 · 점수 · 순위</ItemTitle>
+        </ItemContent>
+        <ItemValue>{`${grade} · ${count(score)}점 · #${count(position)}`}</ItemValue>
+      </Item>
+    ),
+  };
+}
+
 function RankContent() {
   const main = useMainCharacter();
   const decided = main.nameLoaded && !main.isPending;
   const rank = useAchievementRank(main.ocid, main.summary?.name ?? main.name, decided);
-  if (!decided || (main.ocid && rank.isLoading)) return <LoadingRow />;
-  if (main.error && !main.ocid) return <ErrorRow message={describeError(main.error)} />;
-  if (!main.ocid) return <EmptyState icon={Trophy} title="본캐를 정하면 순위가 보여요" />;
-  if (rank.error) return <ErrorRow message={describeError(rank.error)} />;
-  if (!rank.rank) return <EmptyState icon={Trophy} title="순위 기록이 없어요" />;
-  const { grade, score, rank: position } = rank.rank;
+  const { id, node } = rankView(main, rank, decided);
   return (
-    <Item size="row">
-      <ItemContent className="min-w-0">
-        <ItemTitle>등급 · 점수 · 순위</ItemTitle>
-      </ItemContent>
-      <ItemValue>{`${grade} · ${count(score)}점 · #${count(position)}`}</ItemValue>
-    </Item>
+    <AutoHeight>
+      <Swap id={id}>{node}</Swap>
+    </AutoHeight>
   );
 }
 
 function AchievementList({ shown, limit, onMore }: { shown: Achievement[]; limit: number; onMore: () => void }) {
+  const rowMotion = limit <= PAGE_SIZE ? listItem : {};
+  const seen = new Map<string, number>();
+  const keyOf = (name: string) => {
+    const n = seen.get(name) ?? 0;
+    seen.set(name, n + 1);
+    return n === 0 ? name : `${name}:${n}`;
+  };
   return (
     <>
-      {shown.slice(0, limit).map((a, i) => (
-        <Item
-          key={`${a.name}:${i}`}
-          size="row"
-          className={i >= PAGE_SIZE ? "animate-in duration-150 fade-in" : undefined}
-        >
-          <ItemContent>
-            <ItemTitle>{a.name}</ItemTitle>
-            <ItemDescription>{a.description}</ItemDescription>
-          </ItemContent>
-        </Item>
-      ))}
-      {shown.length > limit ? (
-        <Button variant="outline" className="mt-1 w-full" onClick={onMore}>
-          더 보기 ({shown.length - limit}개 남음)
-        </Button>
-      ) : null}
+      <AnimatePresence initial={false}>
+        {shown.slice(0, limit).map((a, i) => (
+          <m.div key={keyOf(a.name)} {...rowMotion}>
+            <Item size="row" className={i >= PAGE_SIZE ? "animate-in duration-150 fade-in" : undefined}>
+              <ItemContent>
+                <ItemTitle>{a.name}</ItemTitle>
+                <ItemDescription>{a.description}</ItemDescription>
+              </ItemContent>
+            </Item>
+          </m.div>
+        ))}
+      </AnimatePresence>
+      <AnimatePresence initial={false}>
+        {shown.length > limit ? (
+          <m.div key="more" {...listItem}>
+            <Button variant="outline" className="mt-1 w-full" onClick={onMore}>
+              더 보기 ({shown.length - limit}개 남음)
+            </Button>
+          </m.div>
+        ) : null}
+      </AnimatePresence>
     </>
   );
 }
@@ -78,6 +109,7 @@ export function AchievementsPage() {
   };
   const all = useMemo(() => q.data ?? [], [q.data]);
   const shown = useMemo(() => filterAchievements(all, query), [all, query]);
+  const view = q.isLoading ? "loading" : q.error ? "error" : shown.length === 0 ? "empty" : "list";
   const header = query.trim() ? `${shown.length} / ${all.length}` : `${all.length}개`;
   return (
     <>
@@ -96,15 +128,19 @@ export function AchievementsPage() {
           <SearchField value={query} onValueChange={search} label="업적 이름·설명 검색" />
         </form>
         <Module title="달성한 업적" icon={Award} trailing={<TrailingText aria-live="polite">{header}</TrailingText>}>
-          {q.isLoading ? (
-            <LoadingRow />
-          ) : q.error ? (
-            <ErrorRow message={describeError(q.error)} onRetry={() => q.refetch()} />
-          ) : shown.length === 0 ? (
-            <EmptyState icon={Award} title="표시할 업적이 없어요" />
-          ) : (
-            <AchievementList shown={shown} limit={limit} onMore={() => setLimit((n) => n + PAGE_SIZE)} />
-          )}
+          <AutoHeight>
+            <Swap id={view}>
+              {q.isLoading ? (
+                <LoadingRow />
+              ) : q.error ? (
+                <ErrorRow message={describeError(q.error)} onRetry={() => q.refetch()} />
+              ) : shown.length === 0 ? (
+                <EmptyState icon={Award} title="표시할 업적이 없어요" />
+              ) : (
+                <AchievementList shown={shown} limit={limit} onMore={() => setLimit((n) => n + PAGE_SIZE)} />
+              )}
+            </Swap>
+          </AutoHeight>
         </Module>
       </div>
     </>

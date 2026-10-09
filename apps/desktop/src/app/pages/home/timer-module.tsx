@@ -1,6 +1,8 @@
 import { endClock, formatRemaining, presetDuration, type TimerPreset } from "@erda/core";
+import { AutoHeight } from "@erda/ui/components/auto-height";
 import { Module } from "@erda/ui/components/module";
 import { RingGauge } from "@erda/ui/components/ring-gauge";
+import { Swap } from "@erda/ui/components/swap";
 import { TimerIcon } from "@erda/ui/components/timer-icon";
 import { Badge } from "@erda/ui/components/ui/badge";
 import { timerTint } from "@erda/ui/lib/timer-tint";
@@ -55,11 +57,15 @@ export function TimerModule({ onOpen }: { onOpen: () => void }) {
       onOpen={onOpen}
       trailing={<TrailingText tone={n > 0 ? "text-primary" : undefined}>실행 중 {n}</TrailingText>}
     >
-      {nearest ? (
-        <NearestTimer timer={nearest} remaining={timers.remainingOf(nearest)} />
-      ) : (
-        <div className="text-[11px] text-muted-foreground">시작하면 종료 직전에 화면 위에 카운트다운이 떠요.</div>
-      )}
+      <AutoHeight>
+        <Swap id={nearest ? "nearest" : "hint"}>
+          {nearest ? (
+            <NearestTimer timer={nearest} remaining={timers.remainingOf(nearest)} />
+          ) : (
+            <div className="text-[11px] text-muted-foreground">시작하면 종료 직전에 화면 위에 카운트다운이 떠요.</div>
+          )}
+        </Swap>
+      </AutoHeight>
       <div className="mt-2 flex flex-wrap gap-1.5">
         {presets.map((p) => (
           <PresetChip

@@ -1,4 +1,5 @@
 import { describeGroup, type TimerGroup } from "@erda/core";
+import { Swap } from "@erda/ui/components/swap";
 import { Button } from "@erda/ui/components/ui/button";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@erda/ui/components/ui/item";
 import { Layers, Play } from "lucide-react";
@@ -37,11 +38,13 @@ export function GroupList({
   onStart: (group: TimerGroup) => void;
 }) {
   return (
-    <div className="flex flex-col">
-      {loaded && groups.length === 0 ? (
-        <EmptyState icon={Layers} title="그룹 없음" description="설정 › 타이머에서 그룹을 만들어 주세요" />
-      ) : null}
-      {loaded && groups.map((g) => <GroupRow key={g.id} group={g} onStart={() => onStart(g)} />)}
+    <div className="relative flex flex-col">
+      <Swap id={!loaded ? "loading" : groups.length === 0 ? "empty" : "rows"}>
+        {loaded && groups.length === 0 ? (
+          <EmptyState icon={Layers} title="그룹 없음" description="설정 › 타이머에서 그룹을 만들어 주세요" />
+        ) : null}
+        {loaded && groups.map((g) => <GroupRow key={g.id} group={g} onStart={() => onStart(g)} />)}
+      </Swap>
       <Button variant="ghost" className="self-start" onClick={() => void openSettingsAction("timer")}>
         그룹 편집…
       </Button>

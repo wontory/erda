@@ -8,13 +8,17 @@ import {
   unreadCount,
   type NewsEntry,
 } from "@erda/core";
+import { AutoHeight } from "@erda/ui/components/auto-height";
 import { ErrorRow } from "@erda/ui/components/error-row";
 import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Module } from "@erda/ui/components/module";
 import { RefreshButton } from "@erda/ui/components/refresh-button";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
+import { StackItem } from "@erda/ui/components/stack-item";
 import { Button } from "@erda/ui/components/ui/button";
+import { listItem } from "@erda/ui/lib/motion";
 import { KeyRound, Newspaper, Sun, Wrench } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 
 import { useNav } from "#/app/nav/context.ts";
@@ -108,38 +112,60 @@ export function NewsPage() {
     <>
       <ScreenHeader title="소식" onBack={pop} trailing={trailing} onSettings={() => void openSettingsAction()} />
       <div className="flex flex-col gap-2.5 px-3 pb-3">
-        {news.keyMissing ? (
-          <KeyMissing />
-        ) : (
-          <>
-            {banner && (filter === "all" || filter === "notice") ? (
-              <Module title="점검 공지" icon={Wrench}>
-                <NewsRow entry={banner} unread={isUnread(banner)} now={now} onOpen={openArticle} banner />
-              </Module>
-            ) : null}
-            {sunday && (filter === "all" || filter === "event") ? (
-              <Module title="썬데이 메이플" icon={Sun}>
-                <NewsRow entry={sunday} unread={isUnread(sunday)} now={now} onOpen={openArticle} />
-              </Module>
-            ) : null}
-            <Module
-              title={filter === "all" ? "전체" : NEWS_META[filter].title}
-              icon={Newspaper}
-              trailing={
-                <Button variant="ghost" disabled={visibleUnread === 0} onClick={markAll}>
-                  모두 읽음으로 표시
-                </Button>
-              }
-            >
-              {feed.length > 0 ? (
-                feed.map((e) => <NewsRow key={e.id} entry={e} unread={isUnread(e)} now={now} onOpen={openArticle} />)
-              ) : (
-                <FeedFallback news={news} onRefresh={refresh} />
-              )}
-            </Module>
-            <FeedFooter error={footerError} updatedAt={news.updatedAt} now={now} />
-          </>
-        )}
+        <AnimatePresence mode="popLayout" initial={false}>
+          {news.keyMissing ? (
+            <StackItem key="key-missing">
+              <KeyMissing />
+            </StackItem>
+          ) : (
+            [
+              banner && (filter === "all" || filter === "notice") ? (
+                <StackItem key="banner">
+                  <Module title="점검 공지" icon={Wrench}>
+                    <NewsRow entry={banner} unread={isUnread(banner)} now={now} onOpen={openArticle} banner />
+                  </Module>
+                </StackItem>
+              ) : null,
+              sunday && (filter === "all" || filter === "event") ? (
+                <StackItem key="sunday">
+                  <Module title="썬데이 메이플" icon={Sun}>
+                    <NewsRow entry={sunday} unread={isUnread(sunday)} now={now} onOpen={openArticle} />
+                  </Module>
+                </StackItem>
+              ) : null,
+              <StackItem key="feed">
+                <Module
+                  title={filter === "all" ? "전체" : NEWS_META[filter].title}
+                  icon={Newspaper}
+                  trailing={
+                    <Button variant="ghost" disabled={visibleUnread === 0} onClick={markAll}>
+                      모두 읽음으로 표시
+                    </Button>
+                  }
+                >
+                  <AutoHeight>
+                    <AnimatePresence initial={false}>
+                      {feed.length > 0 ? (
+                        feed.map((e) => (
+                          <m.div key={e.id} {...listItem}>
+                            <NewsRow entry={e} unread={isUnread(e)} now={now} onOpen={openArticle} />
+                          </m.div>
+                        ))
+                      ) : (
+                        <m.div key="fallback" {...listItem}>
+                          <FeedFallback news={news} onRefresh={refresh} />
+                        </m.div>
+                      )}
+                    </AnimatePresence>
+                  </AutoHeight>
+                </Module>
+              </StackItem>,
+              <StackItem key="footer">
+                <FeedFooter error={footerError} updatedAt={news.updatedAt} now={now} />
+              </StackItem>,
+            ]
+          )}
+        </AnimatePresence>
       </div>
     </>
   );

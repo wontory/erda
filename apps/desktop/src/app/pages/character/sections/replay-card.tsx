@@ -1,8 +1,10 @@
 import { describeError } from "@erda/api/errors";
 import { KoreanNumber, TimeFormat, replaySummary, topSkills, type Replay } from "@erda/core";
+import { AutoHeight } from "@erda/ui/components/auto-height";
 import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Metric } from "@erda/ui/components/metric";
 import { Module } from "@erda/ui/components/module";
+import { Swap } from "@erda/ui/components/swap";
 
 type ReplayResult = { data?: unknown; isLoading: boolean; error: unknown };
 type SkillShare = ReturnType<typeof topSkills>[number];
@@ -27,26 +29,11 @@ function SkillShareRow({ skill }: { skill: SkillShare }) {
   );
 }
 
-export function ReplayCard({ replay, result }: { replay: Replay; result: ReplayResult }) {
-  const title = `${TimeFormat.shortDate(replay.date)} · 회차 ${replay.period}`;
-  if (result.isLoading) {
-    return (
-      <Module title={title}>
-        <LoadingRow />
-      </Module>
-    );
-  }
-  if (result.error) {
-    return (
-      <Module title={title}>
-        <div className="text-[12px] text-destructive">{describeError(result.error)}</div>
-      </Module>
-    );
-  }
-  const s = replaySummary(result.data);
-  const skills = topSkills(result.data);
+function ReplayBody({ data }: { data: unknown }) {
+  const s = replaySummary(data);
+  const skills = topSkills(data);
   return (
-    <Module title={title}>
+    <>
       <div className="grid grid-cols-2 gap-2">
         <Metric title="총 데미지" value={KoreanNumber.format(s.totalDamage)} />
         <Metric title="DPS" value={KoreanNumber.format(s.dps)} />
@@ -58,6 +45,22 @@ export function ReplayCard({ replay, result }: { replay: Replay; result: ReplayR
           <SkillShareRow key={`${k.name}:${i}`} skill={k} />
         ))}
       </div>
+    </>
+  );
+}
+
+export function ReplayCard({ replay, result }: { replay: Replay; result: ReplayResult }) {
+  const title = `${TimeFormat.shortDate(replay.date)} · 회차 ${replay.period}`;
+  const view = result.isLoading ? "loading" : result.error ? "error" : "data";
+  return (
+    <Module title={title}>
+      <AutoHeight>
+        <Swap id={view}>
+          {view === "loading" ? <LoadingRow /> : null}
+          {view === "error" ? <div className="text-[12px] text-destructive">{describeError(result.error)}</div> : null}
+          {view === "data" ? <ReplayBody data={result.data} /> : null}
+        </Swap>
+      </AutoHeight>
     </Module>
   );
 }

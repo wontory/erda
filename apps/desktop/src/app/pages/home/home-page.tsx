@@ -1,5 +1,7 @@
 import { hasApiKey } from "@erda/core";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
+import { StackItem } from "@erda/ui/components/stack-item";
+import { AnimatePresence } from "motion/react";
 import { useState } from "react";
 
 import { useNav } from "#/app/nav/context.ts";
@@ -42,7 +44,6 @@ function HomeSearch() {
         label="캐릭터·길드 이름 검색"
         autoCorrect="off"
         autoCapitalize="off"
-        clearClassName="animate-in fade-in zoom-in-95 duration-100 ease-out motion-reduce:zoom-in-100"
       />
     </form>
   );
@@ -56,25 +57,43 @@ export function HomePage() {
   return (
     <>
       {header}
+      <UpdateBanner />
       <div className="flex flex-col gap-2.5 px-3 pb-3">
-        <UpdateBanner />
-        {hasApiKey(apiKey) ? (
-          <>
-            <HomeSearch />
-            <FavoritesModule limit={6} onOpen={(ocid, name) => push(pages.viewing(ocid, name))} />
-            <CharacterModule onOpen={() => push(pages.character())} />
-          </>
-        ) : (
-          <OnboardingModule />
-        )}
-        <div className="grid grid-cols-2 gap-2.5">
-          <TimerModule onOpen={() => push(pages.timers())} />
-          <SchedulerModule onOpen={() => push(pages.scheduler())} />
-        </div>
-        <NewsModule onOpen={() => push(pages.news())} onOpenEntry={(id) => push(pages.article(id))} />
-        <AccountModule onOpen={() => push(pages.account())} />
-        <CalculatorsModule onOpen={(id) => push(pages.calculator(id))} />
-        <SimulatorsModule onOpen={(id) => push(pages.simulator(id))} />
+        <AnimatePresence mode="popLayout" initial={false}>
+          {hasApiKey(apiKey)
+            ? [
+                <StackItem key="search">
+                  <HomeSearch />
+                </StackItem>,
+                <StackItem key="favorites">
+                  <FavoritesModule limit={6} onOpen={(ocid, name) => push(pages.viewing(ocid, name))} />
+                </StackItem>,
+                <StackItem key="character">
+                  <CharacterModule onOpen={() => push(pages.character())} />
+                </StackItem>,
+              ]
+            : [
+                <StackItem key="onboarding">
+                  <OnboardingModule />
+                </StackItem>,
+              ]}
+          <StackItem key="timers" className="grid grid-cols-2 gap-2.5">
+            <TimerModule onOpen={() => push(pages.timers())} />
+            <SchedulerModule onOpen={() => push(pages.scheduler())} />
+          </StackItem>
+          <StackItem key="news">
+            <NewsModule onOpen={() => push(pages.news())} onOpenEntry={(id) => push(pages.article(id))} />
+          </StackItem>
+          <StackItem key="account">
+            <AccountModule onOpen={() => push(pages.account())} />
+          </StackItem>
+          <StackItem key="calculators">
+            <CalculatorsModule onOpen={(id) => push(pages.calculator(id))} />
+          </StackItem>
+          <StackItem key="simulators">
+            <SimulatorsModule onOpen={(id) => push(pages.simulator(id))} />
+          </StackItem>
+        </AnimatePresence>
       </div>
     </>
   );

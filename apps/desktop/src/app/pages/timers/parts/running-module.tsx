@@ -90,7 +90,7 @@ export function RunningModule() {
         ) : loaded ? (
           <AnimatePresence initial={false} onExitComplete={rescue}>
             {n === 0 ? (
-              <m.div key="empty" {...listItem} className="overflow-hidden">
+              <m.div key="empty" {...listItem}>
                 <EmptyState
                   icon={Timer}
                   title="실행 중인 타이머 없음"
@@ -99,7 +99,7 @@ export function RunningModule() {
               </m.div>
             ) : (
               active.map((t) => (
-                <m.div key={t.id} data-row {...listItem} className="overflow-hidden">
+                <m.div key={t.id} data-row {...listItem}>
                   <RunningRow timer={t} remaining={remainingOf(t)} />
                 </m.div>
               ))
