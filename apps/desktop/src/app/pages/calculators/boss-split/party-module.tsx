@@ -3,7 +3,9 @@ import { Module } from "@erda/ui/components/module";
 import { NumberField, NumberFieldGroup, NumberFieldInput } from "@erda/ui/components/ui/number-field";
 import { Switch } from "@erda/ui/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@erda/ui/components/ui/tabs";
+import { listItem } from "@erda/ui/lib/motion";
 import { Users } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 import { useId } from "react";
 
 function RatioInputs({ ratios, onChange }: { ratios: number[]; onChange: (index: number, value: number) => void }) {
@@ -60,16 +62,24 @@ export function PartyModule({
             ))}
           </TabsList>
         </Tabs>
-        <label htmlFor={switchId} className="flex items-center justify-between gap-2 px-0.5 text-[12px]">
-          <span>비율로 나누기</span>
-          <Switch size="sm" id={switchId} checked={byRatio} onCheckedChange={(on) => onByRatio(on)} />
-        </label>
-        {byRatio ? (
-          <>
-            <RatioInputs ratios={ratios} onChange={onRatio} />
-            <div className="px-0.5 text-[11px] text-muted-foreground">실수령 기준 비율이에요. 예: 6 : 4, 70 : 30</div>
-          </>
-        ) : null}
+        <div>
+          <label htmlFor={switchId} className="flex items-center justify-between gap-2 px-0.5 text-[12px]">
+            <span>비율로 나누기</span>
+            <Switch size="sm" id={switchId} checked={byRatio} onCheckedChange={(on) => onByRatio(on)} />
+          </label>
+          <AnimatePresence initial={false}>
+            {byRatio ? (
+              <m.div key="ratio" {...listItem}>
+                <div className="flex flex-col gap-2.5 pt-2.5">
+                  <RatioInputs ratios={ratios} onChange={onRatio} />
+                  <div className="px-0.5 text-[11px] text-muted-foreground">
+                    실수령 기준 비율이에요. 예: 6 : 4, 70 : 30
+                  </div>
+                </div>
+              </m.div>
+            ) : null}
+          </AnimatePresence>
+        </div>
       </div>
     </Module>
   );
