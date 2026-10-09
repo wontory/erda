@@ -9,6 +9,8 @@ import { pages } from "#/app/nav/stack.ts";
 import { FavoritesModule } from "#/app/pages/character/parts/favorites-module.tsx";
 import { SearchField } from "#/app/pages/shared/search-field.tsx";
 import { resultsPageFor } from "#/app/pages/shared/search.ts";
+import { useFavorites } from "#/features/character/use-favorites.ts";
+import { useMainCharacter } from "#/features/character/use-main-character.ts";
 import { useSetting } from "#/features/settings/use-settings.ts";
 import { openSettingsAction } from "#/lib/tauri.ts";
 
@@ -52,8 +54,10 @@ function HomeSearch() {
 export function HomePage() {
   const [apiKey, , loaded] = useSetting("settings.apiKey");
   const { push } = useNav();
+  const { loaded: favoritesLoaded } = useFavorites();
+  const { nameLoaded } = useMainCharacter();
   const header = <ScreenHeader title="Erda" onSettings={() => void openSettingsAction()} />;
-  if (!loaded) return header;
+  if (!loaded || !favoritesLoaded || !nameLoaded) return header;
   return (
     <>
       {header}
