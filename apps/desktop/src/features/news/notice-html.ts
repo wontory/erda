@@ -13,7 +13,6 @@ purify.addHook("afterSanitizeAttributes", (node) => {
     node.setAttribute("decoding", "async");
     return;
   }
-  // Only images keep their dimensions, so tables can't overflow the view.
   node.removeAttribute("width");
   node.removeAttribute("height");
   if (node instanceof HTMLAnchorElement) {

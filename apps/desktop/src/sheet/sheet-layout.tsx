@@ -40,8 +40,6 @@ export function SheetHeader({ children }: { children: ReactNode }) {
   );
 }
 
-// Fades the content into the header and footer only while more of it is
-// scrolled out of view on that side, growing with the remaining distance.
 const SCROLL_FADE =
   "mask-linear-[to_bottom,transparent_0,black_min(24px,var(--scroll-area-overflow-y-start,0px)),black_calc(100%_-_min(24px,var(--scroll-area-overflow-y-end,0px))),transparent_100%] mask-no-repeat";
 

@@ -15,7 +15,6 @@ export const fadeScale = {
   transition: transitionBase,
 } as const;
 
-// Clips only while the height moves, so focus rings stay visible at rest.
 export const listItem = {
   initial: { opacity: 0, y: -4, height: 0, overflow: "hidden" },
   animate: { opacity: 1, y: 0, height: "auto", overflow: "hidden", transitionEnd: { overflow: "visible" } },
@@ -31,9 +30,6 @@ export const fade = {
   exit: { opacity: 0, transition: exitFast },
 } as const;
 
-// A block in a gapped column: siblings glide into place via `layout`, so the
-// gap never snaps the way a height collapse would. Pair with
-// `<AnimatePresence mode="popLayout" initial={false}>`.
 export const stackItem = {
   layout: "position",
   initial: { opacity: 0, scale: 0.98 },
