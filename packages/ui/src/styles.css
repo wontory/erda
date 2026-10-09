@@ -163,6 +163,13 @@ html[data-platform="windows"] {
   --panel-radius: 8px;
 }
 
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -199,7 +206,8 @@ html[data-platform="windows"] {
   }
   @media (prefers-reduced-transparency: reduce) {
     body[data-window="main"],
-    body[data-window="inspector"] {
+    body[data-window="inspector"],
+    body[data-window="sheet"] {
       background: var(--background);
     }
   }
