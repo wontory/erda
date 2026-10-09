@@ -75,7 +75,7 @@ function EquippedList({
     body = <p className="px-2 py-1 text-muted-foreground">잠재능력을 바꿀 수 있는 장비가 없어요.</p>;
   else
     body = (
-      <ScrollArea viewportClassName="max-h-56">
+      <ScrollArea className="h-full">
         <ul className="flex flex-col gap-0.5">
           {candidates.map((c) => {
             const active = selected?.name === c.item.name && selected.part === c.item.part;
@@ -120,7 +120,13 @@ function EquippedList({
   return (
     <div className="flex flex-col gap-1.5">
       <span>{owner ? `${owner}의 장비` : "내 장비"}</span>
-      <div className="rounded-lg border bg-foreground/3 p-1">{body}</div>
+      <div className={cn("rounded-lg border bg-foreground/3 p-1", owner && "h-56")}>
+        {owner && (isPending || error || candidates.length === 0) ? (
+          <div className="flex h-full items-center justify-center text-center">{body}</div>
+        ) : (
+          body
+        )}
+      </div>
     </div>
   );
 }
