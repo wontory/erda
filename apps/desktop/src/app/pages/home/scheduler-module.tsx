@@ -67,7 +67,13 @@ export function SchedulerModule({ onOpen }: { onOpen: () => void }) {
       title="스케줄러"
       icon={CalendarCheck}
       onOpen={onOpen}
-      trailing={<TrailingText>{view.mode === "scheduler" ? "연동" : "직접"}</TrailingText>}
+      trailing={
+        <TrailingText>
+          <span className={view.resolving ? "invisible" : undefined}>
+            {view.mode === "scheduler" ? "연동" : "직접"}
+          </span>
+        </TrailingText>
+      }
     >
       <AutoHeight>
         <Swap id={view.status === "ready" ? "ready" : "status"}>
