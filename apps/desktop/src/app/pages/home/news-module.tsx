@@ -1,8 +1,12 @@
 import { latest, maintenanceBanner, periodCaption, sundayMaple, type NewsEntry } from "@erda/core";
+import { AutoHeight } from "@erda/ui/components/auto-height";
 import { ErrorRow } from "@erda/ui/components/error-row";
 import { Module } from "@erda/ui/components/module";
+import { Swap } from "@erda/ui/components/swap";
+import { listItem } from "@erda/ui/lib/motion";
 import { cn } from "@erda/ui/lib/utils";
 import { Newspaper, Sun } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 
 import { NewsTile } from "#/app/pages/news/parts/news-tile.tsx";
 import { TrailingText } from "#/app/pages/shared/trailing-text.tsx";
@@ -95,17 +99,38 @@ export function NewsModule({ onOpen, onOpenEntry }: { onOpen: () => void; onOpen
       {news.keyMissing ? (
         <div className="text-[11px] text-muted-foreground">API 키가 필요해요</div>
       ) : (
-        <div className="flex flex-col gap-1.5">
-          {banner ? <MaintenanceBanner entry={banner} onOpen={() => onOpenEntry(banner.id)} /> : null}
-          {sunday ? <SundayMapleBanner entry={sunday} onOpen={() => onOpenEntry(sunday.id)} /> : null}
-          {top.length === 0 ? (
-            <NoPreview news={news} />
-          ) : (
-            top.map((e) => (
-              <NewsPreviewRow key={e.id} entry={e} unread={!news.seenSet.has(e.id)} onOpen={() => onOpenEntry(e.id)} />
-            ))
-          )}
-        </div>
+        <AutoHeight>
+          <AnimatePresence initial={false}>
+            {banner ? (
+              <m.div key="maintenance" {...listItem}>
+                <div className="pb-1.5">
+                  <MaintenanceBanner entry={banner} onOpen={() => onOpenEntry(banner.id)} />
+                </div>
+              </m.div>
+            ) : null}
+            {sunday ? (
+              <m.div key="sunday" {...listItem}>
+                <div className="pb-1.5">
+                  <SundayMapleBanner entry={sunday} onOpen={() => onOpenEntry(sunday.id)} />
+                </div>
+              </m.div>
+            ) : null}
+          </AnimatePresence>
+          <Swap id={top.length === 0 ? "empty" : "rows"} className="flex flex-col gap-1.5">
+            {top.length === 0 ? (
+              <NoPreview news={news} />
+            ) : (
+              top.map((e) => (
+                <NewsPreviewRow
+                  key={e.id}
+                  entry={e}
+                  unread={!news.seenSet.has(e.id)}
+                  onOpen={() => onOpenEntry(e.id)}
+                />
+              ))
+            )}
+          </Swap>
+        </AutoHeight>
       )}
     </Module>
   );

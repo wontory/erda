@@ -1,8 +1,12 @@
 import { KoreanNumber, type BossSummary, type HomeworkItem } from "@erda/core";
+import { AutoHeight } from "@erda/ui/components/auto-height";
 import { Module } from "@erda/ui/components/module";
+import { Swap } from "@erda/ui/components/swap";
 import { Progress } from "@erda/ui/components/ui/progress";
 import { Separator } from "@erda/ui/components/ui/separator";
+import { listItem } from "@erda/ui/lib/motion";
 import { CalendarCheck } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 
 import { RollingValue } from "#/app/pages/shared/rolling-value.tsx";
 import { TrailingText } from "#/app/pages/shared/trailing-text.tsx";
@@ -65,19 +69,25 @@ export function SchedulerModule({ onOpen }: { onOpen: () => void }) {
       onOpen={onOpen}
       trailing={<TrailingText>{view.mode === "scheduler" ? "연동" : "직접"}</TrailingText>}
     >
-      {view.status === "ready" ? (
-        <>
-          <BossRevenue summary={view.summary} />
-          {view.homework.length > 0 ? (
+      <AutoHeight>
+        <Swap id={view.status === "ready" ? "ready" : "status"}>
+          {view.status === "ready" ? (
             <>
-              <Separator className="my-2.5" />
-              <WeeklyHomework items={view.homework} />
+              <BossRevenue summary={view.summary} />
+              <AnimatePresence initial={false}>
+                {view.homework.length > 0 ? (
+                  <m.div key="homework" {...listItem}>
+                    <Separator className="my-2.5" />
+                    <WeeklyHomework items={view.homework} />
+                  </m.div>
+                ) : null}
+              </AnimatePresence>
             </>
-          ) : null}
-        </>
-      ) : (
-        <div className="text-[11px] text-muted-foreground">{statusText(view)}</div>
-      )}
+          ) : (
+            <div className="text-[11px] text-muted-foreground">{statusText(view)}</div>
+          )}
+        </Swap>
+      </AutoHeight>
     </Module>
   );
 }

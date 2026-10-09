@@ -2,6 +2,7 @@ import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "
 import { Search, X } from "lucide-react";
 import { useRef, type ComponentProps, type RefObject } from "react";
 
+const CLEAR = "animate-in fade-in zoom-in-95 duration-100 ease-out motion-reduce:zoom-in-100";
 const GLASS = "h-8 rounded-[10px] border-transparent bg-glass-card dark:bg-glass-card";
 
 type InputProps = Omit<
@@ -16,7 +17,7 @@ export function SearchField({
   inputRef,
   className = GLASS,
   icon = true,
-  clearClassName,
+  clearClassName = CLEAR,
   ...inputProps
 }: InputProps & {
   value: string;

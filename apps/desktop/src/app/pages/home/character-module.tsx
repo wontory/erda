@@ -1,9 +1,11 @@
 import { describeError } from "@erda/api/errors";
 import type { CharacterSummary } from "@erda/core";
+import { AutoHeight } from "@erda/ui/components/auto-height";
 import { ErrorRow } from "@erda/ui/components/error-row";
 import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Module } from "@erda/ui/components/module";
 import { Sprite } from "@erda/ui/components/sprite";
+import { Swap } from "@erda/ui/components/swap";
 import { Button } from "@erda/ui/components/ui/button";
 import { Progress } from "@erda/ui/components/ui/progress";
 import { WorldIcon } from "@erda/ui/components/world-icon";
@@ -50,43 +52,37 @@ export function CharacterModule({ onOpen }: { onOpen: () => void }) {
   const main = useMainCharacter();
   if (!main.nameLoaded) return null;
   const s = main.summary;
-  if (!s && main.isPending) {
-    return (
-      <Module title="캐릭터" icon={User}>
-        <LoadingRow label="본캐 불러오는 중…" />
-      </Module>
-    );
-  }
-  if (!s && main.error) {
-    return (
-      <Module title="캐릭터" icon={User}>
-        <ErrorRow
-          message={describeError(main.error)}
-          onRetry={() => void runAction(() => main.refresh(), "본캐를 다시 불러오지 못했어요")}
-        />
-      </Module>
-    );
-  }
-  if (!s) {
-    return (
-      <Module title="캐릭터" icon={User}>
-        <EmptyState
-          icon={User}
-          title="본캐가 없어요"
-          description="설정 › 캐릭터에서 닉네임을 정해 주세요"
-          action={
-            <Button variant="outline" onClick={() => void openSettingsAction()}>
-              설정 열기
-            </Button>
-          }
-        />
-      </Module>
-    );
-  }
+  const view = s ? "summary" : main.isPending ? "loading" : main.error ? "error" : "empty";
   return (
-    <Module title="캐릭터" icon={User} onOpen={onOpen}>
-      <CharacterHeadline summary={s} />
-      <KeyMetrics summary={s} className="mt-3" />
+    <Module title="캐릭터" icon={User} onOpen={s ? onOpen : undefined}>
+      <AutoHeight>
+        <Swap id={view}>
+          {s ? (
+            <>
+              <CharacterHeadline summary={s} />
+              <KeyMetrics summary={s} className="mt-3" />
+            </>
+          ) : main.isPending ? (
+            <LoadingRow label="본캐 불러오는 중…" />
+          ) : main.error ? (
+            <ErrorRow
+              message={describeError(main.error)}
+              onRetry={() => void runAction(() => main.refresh(), "본캐를 다시 불러오지 못했어요")}
+            />
+          ) : (
+            <EmptyState
+              icon={User}
+              title="본캐가 없어요"
+              description="설정 › 캐릭터에서 닉네임을 정해 주세요"
+              action={
+                <Button variant="outline" onClick={() => void openSettingsAction()}>
+                  설정 열기
+                </Button>
+              }
+            />
+          )}
+        </Swap>
+      </AutoHeight>
     </Module>
   );
 }
