@@ -2,6 +2,7 @@ import { PRICE_BASE_DATE } from "@erda/core";
 import { Button } from "@erda/ui/components/ui/button";
 import { Field, FieldTitle } from "@erda/ui/components/ui/field";
 import { fade } from "@erda/ui/lib/motion";
+import { cn } from "@erda/ui/lib/utils";
 import { getVersion } from "@tauri-apps/api/app";
 import { AnimatePresence, m } from "motion/react";
 import { useEffect, useState, type ReactNode } from "react";
@@ -49,7 +50,7 @@ function UpdateRow() {
             <m.span
               key="status"
               {...fade}
-              className={state.status === "error" ? "text-destructive" : "text-muted-foreground"}
+              className={cn("tabular-nums", state.status === "error" ? "text-destructive" : "text-muted-foreground")}
             >
               {status}
             </m.span>
