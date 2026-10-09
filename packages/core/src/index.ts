@@ -40,3 +40,6 @@ export * from "#/simulators/catalog.ts";
 export * from "#/simulators/data/starforce-rules.ts";
 export * from "#/simulators/starforce.ts";
 export * from "#/simulators/starforce-item.ts";
+export * from "#/simulators/data/potential-rules.ts";
+export * from "#/simulators/potential.ts";
+export * from "#/simulators/potential-item.ts";
