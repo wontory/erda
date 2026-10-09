@@ -21,6 +21,8 @@
     "allow-hide-panel-cmd",
     "allow-inspector-show",
     "allow-inspector-hide",
+    "allow-sheet-show",
+    "allow-sheet-hide",
     "allow-nexon-request",
     "allow-nexon-character-look",
     "allow-nexon-calls-today",

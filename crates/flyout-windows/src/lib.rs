@@ -1,6 +1,6 @@
 use std::{sync::Arc, time::Duration};
 
-use flyout::{BlurGuard, Dismiss, Edge, Flyout, Point, Toggle, HUD_LABEL, INSPECTOR_LABEL, PANEL_LABEL};
+use flyout::{BlurGuard, Dismiss, Edge, Flyout, Point, Toggle, HUD_LABEL, INSPECTOR_LABEL, PANEL_LABEL, SHEET_LABEL};
 use tauri::{AppHandle, Manager, WindowEvent};
 use window_vibrancy::{apply_acrylic, apply_blur};
 
@@ -206,6 +206,39 @@ impl Flyout for WindowsFlyout {
     fn hide_inspector(&self, app: &AppHandle) {
         if let Some(window) = window(app, INSPECTOR_LABEL, "hide_inspector") {
             set_shown_without_activation(&window, false);
+        }
+    }
+
+    fn setup_sheet(&self, app: &AppHandle, on_blur: Dismiss) -> tauri::Result<()> {
+        let Some(window) = window(app, SHEET_LABEL, "setup_sheet") else {
+            return Ok(());
+        };
+        apply_backdrop(&window);
+        let handle = app.clone();
+        window.on_window_event(move |event| {
+            if let WindowEvent::Focused(false) = event {
+                on_blur(&handle);
+            }
+        });
+        Ok(())
+    }
+
+    fn show_sheet(&self, app: &AppHandle) {
+        if let Some(window) = window(app, SHEET_LABEL, "show_sheet") {
+            warn_on_err(window.show(), "sheet show");
+            warn_on_err(window.set_focus(), "sheet set_focus");
+        }
+    }
+
+    fn hide_sheet(&self, app: &AppHandle) {
+        if let Some(window) = window(app, SHEET_LABEL, "hide_sheet") {
+            warn_on_err(window.hide(), "sheet hide");
+        }
+    }
+
+    fn focus_panel(&self, app: &AppHandle) {
+        if let Some(window) = window(app, PANEL_LABEL, "focus_panel") {
+            warn_on_err(window.set_focus(), "focus_panel set_focus");
         }
     }
 

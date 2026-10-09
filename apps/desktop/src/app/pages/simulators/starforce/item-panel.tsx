@@ -33,7 +33,7 @@ export function ItemSlot({
     <m.div
       key={pulse?.id ?? "still"}
       animate={slotMotion(charging, pulse)}
-      className={`relative grid size-20 shrink-0 place-items-center rounded-xl border bg-foreground/4 transition-[border-color,box-shadow] duration-300 ${
+      className={`relative grid size-20 shrink-0 place-items-center rounded-[calc(var(--radius-2xl)-13px)] border bg-foreground/4 transition-[border-color,box-shadow] duration-300 ${
         charging
           ? "border-(--sf-gold) shadow-[0_0_18px_color-mix(in_oklab,var(--sf-gold)_55%,transparent)]"
           : destroyed

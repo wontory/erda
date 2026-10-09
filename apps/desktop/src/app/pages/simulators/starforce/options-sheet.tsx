@@ -1,10 +1,10 @@
 import { MVP_GRADES, MVP_LABELS, SHINING_STARFORCE, type StarforceOptions } from "@erda/core";
 import { Button } from "@erda/ui/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@erda/ui/components/ui/dialog";
 import { Switch } from "@erda/ui/components/ui/switch";
 import { useId } from "react";
 
 import { MesoField } from "#/app/pages/calculators/shared/meso-field.tsx";
+import { SheetBody, SheetHeader, SheetLayout, SheetTitle } from "#/sheet/sheet-layout.tsx";
 
 type Flag = Exclude<keyof StarforceOptions, "mvp">;
 
@@ -19,39 +19,34 @@ const EVENT_FLAGS: ReadonlyArray<readonly [Flag, string]> = [
 function FlagRow({ label, checked, onChange }: { label: string; checked: boolean; onChange: (on: boolean) => void }) {
   const id = useId();
   return (
-    <label htmlFor={id} className="flex items-center justify-between gap-2 text-[12px]">
+    <label htmlFor={id} className="flex h-8 items-center justify-between gap-2 text-[13px]">
       <span>{label}</span>
-      <Switch id={id} checked={checked} onCheckedChange={(on) => onChange(on)} />
+      <Switch id={id} size="sm" checked={checked} onCheckedChange={(on) => onChange(on)} />
     </label>
   );
 }
 
-export function OptionsDialog({
-  open,
+export function OptionsSheet({
   options,
   sparePrice,
-  onOpenChange,
   onOptions,
   onSparePrice,
 }: {
-  open: boolean;
   options: StarforceOptions;
   sparePrice: number;
-  onOpenChange: (open: boolean) => void;
   onOptions: (options: StarforceOptions) => void;
   onSparePrice: (price: number) => void;
 }) {
   const set = (patch: Partial<StarforceOptions>) => onOptions({ ...options, ...patch });
   const shining = Object.entries(SHINING_STARFORCE).every(([k, v]) => options[k as Flag] === v);
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-sm">
-        <DialogHeader>
-          <DialogTitle>이벤트·할인</DialogTitle>
-        </DialogHeader>
-        <div className="flex flex-col gap-3">
+    <SheetLayout>
+      <SheetHeader>
+        <SheetTitle>이벤트·할인</SheetTitle>
+      </SheetHeader>
+      <SheetBody>
+        <div className="flex flex-col gap-3 py-0.5">
           <Button
-            size="sm"
             variant={shining ? "default" : "outline"}
             onClick={() =>
               set(shining ? { discount30: false, destroyReduction: false, restoreDiscount: false } : SHINING_STARFORCE)
@@ -68,12 +63,7 @@ export function OptionsDialog({
             <span>MVP 등급</span>
             <div className="grid grid-cols-4 gap-1">
               {MVP_GRADES.map((g) => (
-                <Button
-                  key={g}
-                  size="xs"
-                  variant={options.mvp === g ? "default" : "outline"}
-                  onClick={() => set({ mvp: g })}
-                >
+                <Button key={g} variant={options.mvp === g ? "default" : "outline"} onClick={() => set({ mvp: g })}>
                   {MVP_LABELS[g]}
                 </Button>
               ))}
@@ -82,7 +72,7 @@ export function OptionsDialog({
           <FlagRow label="프리미엄 PC방" checked={options.pcRoom} onChange={(pcRoom) => set({ pcRoom })} />
           <MesoField label="스페어 장비 가격" value={sparePrice} onChange={onSparePrice} />
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetBody>
+    </SheetLayout>
   );
 }

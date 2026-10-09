@@ -1,40 +1,42 @@
-import { describeError } from "@erda/api/errors";
 import { clampLevel, maxStar, type StarforceCandidate, type StarforceItem } from "@erda/core";
 import { GameIcon } from "@erda/ui/components/game-icon";
 import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Button } from "@erda/ui/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@erda/ui/components/ui/dialog";
 import { NumberField, NumberFieldGroup, NumberFieldInput } from "@erda/ui/components/ui/number-field";
 import { ScrollArea } from "@erda/ui/components/ui/scroll-area";
 import { cn } from "@erda/ui/lib/utils";
 import { Check } from "lucide-react";
 import { useState } from "react";
 
+import type { EquippedView } from "#/features/sheet/protocol.ts";
+import {
+  SheetBody,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetLayout,
+  SheetTitle,
+} from "#/sheet/sheet-layout.tsx";
+
 import { StarCount } from "./star-count.tsx";
-import { useEquippedCandidates } from "./use-equipped-candidates.ts";
 
 const LEVEL_PRESETS = [140, 150, 160, 200, 250];
 
 function EquippedList({
+  equipped,
   selected,
   onPick,
 }: {
+  equipped: EquippedView<StarforceCandidate>;
   selected: StarforceItem | null;
   onPick: (candidate: StarforceCandidate) => void;
 }) {
-  const { owner, candidates, isPending, error } = useEquippedCandidates();
+  const { owner, candidates, isPending, error } = equipped;
   let body;
   if (!owner)
     body = <p className="px-2 py-1 text-muted-foreground">설정 › 캐릭터에서 본캐를 정하면 장비를 고를 수 있어요.</p>;
   else if (isPending) body = <LoadingRow label="장비 불러오는 중…" />;
-  else if (error) body = <p className="px-2 py-1 text-destructive">{describeError(error)}</p>;
+  else if (error) body = <p className="px-2 py-1 text-destructive">{error}</p>;
   else if (candidates.length === 0)
     body = <p className="px-2 py-1 text-muted-foreground">강화할 수 있는 장비가 없어요.</p>;
   else
@@ -77,19 +79,19 @@ function EquippedList({
   );
 }
 
-export function ItemDialog({
-  open,
+export function ItemSheet({
   item,
   level,
   startStar,
-  onOpenChange,
+  equipped,
+  onClose,
   onApply,
 }: {
-  open: boolean;
   item: StarforceItem | null;
   level: number;
   startStar: number;
-  onOpenChange: (open: boolean) => void;
+  equipped: EquippedView<StarforceCandidate>;
+  onClose: () => void;
   onApply: (item: StarforceItem | null, level: number, startStar: number) => void;
 }) {
   const [draftItem, setDraftItem] = useState(item);
@@ -101,14 +103,15 @@ export function ItemDialog({
     setDraftItem(null);
   };
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-sm">
-        <DialogHeader>
-          <DialogTitle>장비 설정</DialogTitle>
-          <DialogDescription>바꾸면 강화 기록이 초기화돼요.</DialogDescription>
-        </DialogHeader>
+    <SheetLayout>
+      <SheetHeader>
+        <SheetTitle>장비 설정</SheetTitle>
+        <SheetDescription>바꾸면 강화 기록이 초기화돼요.</SheetDescription>
+      </SheetHeader>
+      <SheetBody>
         <div className="flex flex-col gap-3 text-[12px]">
           <EquippedList
+            equipped={equipped}
             selected={draftItem}
             onPick={(c) => {
               setDraftItem(c.item);
@@ -122,7 +125,6 @@ export function ItemDialog({
               {LEVEL_PRESETS.map((l) => (
                 <Button
                   key={l}
-                  size="xs"
                   variant={!draftItem && draftLevel === l ? "default" : "outline"}
                   onClick={() => setLevel(l)}
                 >
@@ -159,19 +161,18 @@ export function ItemDialog({
             </NumberField>
           </div>
         </div>
-        <DialogFooter>
-          <Button
-            size="sm"
-            onClick={() => {
-              const l = clampLevel(draftLevel);
-              onApply(draftItem, l, Math.min(Math.max(0, draftStar), maxStar(l)));
-              onOpenChange(false);
-            }}
-          >
-            적용
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </SheetBody>
+      <SheetFooter>
+        <Button
+          onClick={() => {
+            const l = clampLevel(draftLevel);
+            onApply(draftItem, l, Math.min(Math.max(0, draftStar), maxStar(l)));
+            onClose();
+          }}
+        >
+          적용
+        </Button>
+      </SheetFooter>
+    </SheetLayout>
   );
 }

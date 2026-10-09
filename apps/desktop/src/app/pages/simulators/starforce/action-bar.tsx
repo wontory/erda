@@ -42,7 +42,13 @@ export function ActionBar({
       <Button size="lg" className="h-10 flex-1 text-[14px]" disabled={!canEnhance || busy} onClick={onEnhance}>
         강화하기
       </Button>
-      <Button size="lg" variant="outline" className="h-10" disabled={!canEnhance || busy} onClick={onOpenAuto}>
+      <Button
+        size="lg"
+        variant="outline"
+        className="h-10 text-[14px]"
+        disabled={!canEnhance || busy}
+        onClick={onOpenAuto}
+      >
         <FastForward />
         자동
       </Button>

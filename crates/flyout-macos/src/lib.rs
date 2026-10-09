@@ -8,7 +8,7 @@ use std::{
     time::Duration,
 };
 
-use flyout::{BlurGuard, Dismiss, Flyout, Toggle, HUD_LABEL, INSPECTOR_LABEL, PANEL_LABEL, TRAY_ID};
+use flyout::{BlurGuard, Dismiss, Flyout, Toggle, HUD_LABEL, INSPECTOR_LABEL, PANEL_LABEL, SHEET_LABEL, TRAY_ID};
 use objc2_app_kit::NSView;
 use tauri::{AppHandle, Manager};
 use tauri_nspanel::{CollectionBehavior, ManagerExt, PanelHandle, PanelLevel, StyleMask, WebviewWindowExt};
@@ -62,6 +62,31 @@ mod inspector_panel {
 }
 use inspector_panel::InspectorPanel;
 
+mod sheet_panel {
+    #![allow(clippy::unused_unit)]
+    use tauri_nspanel::tauri_panel;
+
+    tauri_panel! {
+        panel!(SheetPanel {
+            config: {
+                can_become_key_window: true,
+                can_become_main_window: false,
+                is_floating_panel: true
+            }
+        })
+        panel_event!(SheetPanelEvents {
+            window_did_resign_key(notification: &NSNotification) -> ()
+        })
+    }
+
+    pub(super) fn on_resign_key(panel: &tauri_nspanel::PanelHandle<tauri::Wry>, on_resign: impl Fn() + 'static) {
+        let events = SheetPanelEvents::new();
+        events.window_did_resign_key(move |_| on_resign());
+        panel.set_event_handler(Some(events.as_ref()));
+    }
+}
+use sheet_panel::SheetPanel;
+
 mod hud_panel {
     use tauri_nspanel::tauri_panel;
 
@@ -84,6 +109,7 @@ pub fn plugin<R: tauri::Runtime>() -> tauri::plugin::TauriPlugin<R> {
 pub struct MacFlyout {
     refresh_shadow: AtomicBool,
     refresh_inspector_shadow: AtomicBool,
+    refresh_sheet_shadow: AtomicBool,
     guard: Arc<BlurGuard>,
 }
 
@@ -92,6 +118,7 @@ impl Default for MacFlyout {
         Self {
             refresh_shadow: AtomicBool::new(false),
             refresh_inspector_shadow: AtomicBool::new(false),
+            refresh_sheet_shadow: AtomicBool::new(false),
             guard: Arc::new(BlurGuard::new(BLUR_GUARD)),
         }
     }
@@ -296,6 +323,35 @@ impl Flyout for MacFlyout {
 
     fn hide_inspector(&self, app: &AppHandle) {
         with_panel(app, INSPECTOR_LABEL, "hide_inspector", |panel| panel.hide());
+    }
+
+    fn setup_sheet(&self, app: &AppHandle, on_blur: Dismiss) -> tauri::Result<()> {
+        let Some(window) = window(app, SHEET_LABEL, "setup_sheet") else {
+            return Ok(());
+        };
+        self.refresh_sheet_shadow.store(glaze(&window), Ordering::Relaxed);
+        let panel = window.to_panel::<SheetPanel>()?;
+        configure_panel(&panel, PanelLevel::Status)?;
+        let handle = app.clone();
+        sheet_panel::on_resign_key(&panel, move || on_blur(&handle));
+        Ok(())
+    }
+
+    fn show_sheet(&self, app: &AppHandle) {
+        if !with_panel(app, SHEET_LABEL, "show_sheet", |panel| panel.show_and_make_key()) {
+            return;
+        }
+        if let Some(window) = app.get_webview_window(SHEET_LABEL) {
+            refresh_shadow_once(&window, &self.refresh_sheet_shadow);
+        }
+    }
+
+    fn hide_sheet(&self, app: &AppHandle) {
+        with_panel(app, SHEET_LABEL, "hide_sheet", |panel| panel.hide());
+    }
+
+    fn focus_panel(&self, app: &AppHandle) {
+        with_panel(app, PANEL_LABEL, "focus_panel", |panel| panel.show_and_make_key());
     }
 
     fn setup_hud(&self, app: &AppHandle) -> tauri::Result<()> {

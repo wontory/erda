@@ -11,6 +11,7 @@ use tauri::{AppHandle, Manager, Monitor, PhysicalPosition, PhysicalSize, Webview
 pub const PANEL_LABEL: &str = "main";
 pub const TRAY_ID: &str = "main";
 pub const INSPECTOR_LABEL: &str = "inspector";
+pub const SHEET_LABEL: &str = "sheet";
 pub const HUD_LABEL: &str = "hud";
 pub const HUD_WIDTH: f64 = 400.0;
 pub const PANEL_SIZE: (f64, f64) = (400.0, 640.0);
@@ -274,6 +275,10 @@ pub trait Flyout: Send + Sync {
     fn setup_inspector(&self, app: &AppHandle) -> tauri::Result<()>;
     fn show_inspector(&self, app: &AppHandle);
     fn hide_inspector(&self, app: &AppHandle);
+    fn setup_sheet(&self, app: &AppHandle, on_blur: Dismiss) -> tauri::Result<()>;
+    fn show_sheet(&self, app: &AppHandle);
+    fn hide_sheet(&self, app: &AppHandle);
+    fn focus_panel(&self, app: &AppHandle);
     fn setup_hud(&self, app: &AppHandle) -> tauri::Result<()>;
     fn show_hud(&self, app: &AppHandle);
     fn hide_hud(&self, app: &AppHandle);

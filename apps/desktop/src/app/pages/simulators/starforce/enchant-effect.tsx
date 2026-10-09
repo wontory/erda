@@ -38,7 +38,7 @@ function Rays({ strength }: { strength: number }) {
 function Charging() {
   return (
     <m.span
-      className="absolute -inset-2 rounded-[calc(var(--radius-xl)+7px)] border-2 border-(--sf-gold)"
+      className="absolute -inset-2 rounded-[calc(var(--radius-2xl)-5px)] border-2 border-(--sf-gold)"
       initial={{ scale: 1.3, opacity: 0 }}
       animate={{ scale: 1, opacity: [0, 0.9, 0.55] }}
       exit={{ opacity: 0, transition: { duration: 0.1 } }}
@@ -58,7 +58,7 @@ function Burst({ outcome }: { outcome: EnhanceOutcome }) {
           transition={{ duration: 0.55, ease: EASE_OUT_EXPO }}
         />
         <m.span
-          className="absolute inset-0 rounded-[calc(var(--radius-xl)-1px)] border-2 border-(--sf-gold)"
+          className="absolute inset-0 rounded-[calc(var(--radius-2xl)-14px)] border-2 border-(--sf-gold)"
           initial={{ scale: 1, opacity: 0.9 }}
           animate={{ scale: 1.8, opacity: 0 }}
           transition={{ duration: 0.65, ease: EASE_OUT_EXPO }}
@@ -95,7 +95,7 @@ function Burst({ outcome }: { outcome: EnhanceOutcome }) {
   if (outcome === "protected") {
     return (
       <m.span
-        className="absolute inset-0 rounded-[calc(var(--radius-xl)-1px)] bg-primary/20"
+        className="absolute inset-0 rounded-[calc(var(--radius-2xl)-14px)] bg-primary/20"
         initial={{ opacity: 1 }}
         animate={{ opacity: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
@@ -104,7 +104,7 @@ function Burst({ outcome }: { outcome: EnhanceOutcome }) {
   }
   return (
     <m.span
-      className="absolute inset-0 rounded-[calc(var(--radius-xl)-1px)] bg-foreground/20"
+      className="absolute inset-0 rounded-[calc(var(--radius-2xl)-14px)] bg-foreground/20"
       initial={{ opacity: 1 }}
       animate={{ opacity: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}

@@ -14,7 +14,13 @@ export default defineConfig({
   build: {
     target: ["safari16", "chrome105"],
     rollupOptions: {
-      input: { main: page("index"), hud: page("hud"), settings: page("settings"), inspector: page("inspector") },
+      input: {
+        main: page("index"),
+        hud: page("hud"),
+        settings: page("settings"),
+        inspector: page("inspector"),
+        sheet: page("sheet"),
+      },
     },
   },
 });
