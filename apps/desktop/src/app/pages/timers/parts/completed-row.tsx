@@ -21,10 +21,10 @@ export function CompletedRow({ item }: { item: CompletedTimer }) {
         <ItemDescription>{`완료 ${endClock(item.finishedMs)}`}</ItemDescription>
       </ItemContent>
       <ItemActions>
-        <Button data-row-focus variant="outline" size="xs" aria-label={`${name} 재시작`} onClick={restart}>
+        <Button data-row-focus variant="outline" aria-label={`${name} 재시작`} onClick={restart}>
           재시작
         </Button>
-        <Button variant="ghost" size="xs" aria-label={`${name} 닫기`} onClick={dismiss}>
+        <Button variant="ghost" aria-label={`${name} 닫기`} onClick={dismiss}>
           닫기
         </Button>
       </ItemActions>

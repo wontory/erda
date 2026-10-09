@@ -28,7 +28,7 @@ export function FilterMenu({
   const current = value === "all" ? "전체" : NEWS_META[value].title;
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="ghost" size="sm" aria-label={`필터: ${current}`} />}>
+      <DropdownMenuTrigger render={<Button variant="ghost" aria-label={`필터: ${current}`} />}>
         <ListFilter />
         {current}
       </DropdownMenuTrigger>

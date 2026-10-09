@@ -45,7 +45,7 @@ export function PresetPicker({
   }
   return (
     <Select value={value} onValueChange={(v) => onChange(String(v))}>
-      <SelectTrigger className="h-7 w-32" aria-label="프리셋">
+      <SelectTrigger className="w-32" aria-label="프리셋">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

@@ -46,7 +46,7 @@ function SkillGradeSelect({ grade, onChange }: { grade: Grade; onChange: (grade:
         if (g) onChange(g);
       }}
     >
-      <SelectTrigger className="h-7 w-32" aria-label="스킬 차수">
+      <SelectTrigger className="w-32" aria-label="스킬 차수">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>

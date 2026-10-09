@@ -30,7 +30,7 @@ export function ItemUsage({ kind, agg }: { kind: HistoryKind; agg: HistoryAggreg
         </Item>
       ))}
       {agg.items.length > PREVIEW_COUNT ? (
-        <Button variant="ghost" size="xs" onClick={() => setAll((v) => !v)}>
+        <Button variant="ghost" onClick={() => setAll((v) => !v)}>
           {all ? "접기" : `전체 보기 (${agg.items.length}종)`}
         </Button>
       ) : null}

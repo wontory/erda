@@ -49,7 +49,7 @@ function SwitchRow({
         <div className="flex shrink-0 items-center gap-2">
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="icon"
             aria-label={`${label} 미리 듣기`}
             title="미리 듣기"
             onClick={() =>
@@ -90,7 +90,7 @@ function GroupRow({
       </div>
       <Button
         variant="ghost"
-        size="icon-xs"
+        size="icon"
         aria-label={`${group.name} 위로`}
         focusableWhenDisabled
         className="aria-disabled:opacity-50"
@@ -101,7 +101,7 @@ function GroupRow({
       </Button>
       <Button
         variant="ghost"
-        size="icon-xs"
+        size="icon"
         aria-label={`${group.name} 아래로`}
         focusableWhenDisabled
         className="aria-disabled:opacity-50"
@@ -110,10 +110,10 @@ function GroupRow({
       >
         <ArrowDown />
       </Button>
-      <Button variant="outline" size="xs" aria-label={`${group.name} 편집`} onClick={onEdit}>
+      <Button variant="outline" aria-label={`${group.name} 편집`} onClick={onEdit}>
         편집
       </Button>
-      <Button variant="ghost" size="xs" aria-label={`${group.name} 삭제`} onClick={onDelete}>
+      <Button variant="ghost" aria-label={`${group.name} 삭제`} onClick={onDelete}>
         삭제
       </Button>
     </div>
@@ -189,7 +189,7 @@ export function TimerPage() {
         label="타이머 그룹"
         description={loaded ? (groups.length === 0 ? "없음" : `${groups.length}개`) : undefined}
       >
-        <Button variant="outline" size="sm" onClick={() => setEditing(newGroup())}>
+        <Button variant="outline" onClick={() => setEditing(newGroup())}>
           새 그룹
         </Button>
       </SettingRow>

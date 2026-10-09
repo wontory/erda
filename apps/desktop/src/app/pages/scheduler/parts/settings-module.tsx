@@ -14,7 +14,7 @@ export function SettingsModule({ useScheduler, onChange }: { useScheduler: boole
             본캐가 게임에 등록한 보스와 퀘스트를 가져와요. 넥슨 데이터는 평균 15분 뒤에 반영돼요.
           </span>
         </span>
-        <Switch id={switchId} checked={useScheduler} onCheckedChange={(on) => onChange(on)} />
+        <Switch size="sm" id={switchId} checked={useScheduler} onCheckedChange={(on) => onChange(on)} />
       </label>
     </Module>
   );

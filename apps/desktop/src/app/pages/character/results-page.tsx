@@ -54,7 +54,7 @@ function ResultsSearch({ query }: { query: string }) {
 function AllWorldsHint({ onSearch }: { onSearch: () => void }) {
   return (
     <div className="flex flex-col items-start gap-1 px-1">
-      <Button variant="outline" size="xs" onClick={onSearch}>
+      <Button variant="outline" onClick={onSearch}>
         <Globe />
         모든 월드에서 길드 찾기
       </Button>
@@ -81,7 +81,7 @@ function RecentModule({
       title="최근 검색"
       icon={Clock}
       trailing={
-        <Button variant="ghost" size="xs" onClick={onClear}>
+        <Button variant="ghost" onClick={onClear}>
           지우기
         </Button>
       }
@@ -96,7 +96,7 @@ function RecentModule({
               image={r.image}
               onClick={() => onOpen(r.ocid, r.name)}
               trailing={
-                <Button variant="ghost" size="icon-xs" aria-label={`${r.name} 제거`} onClick={() => onRemove(r.ocid)}>
+                <Button variant="ghost" size="icon" aria-label={`${r.name} 제거`} onClick={() => onRemove(r.ocid)}>
                   <X />
                 </Button>
               }

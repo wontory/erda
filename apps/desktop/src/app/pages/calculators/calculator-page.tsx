@@ -19,7 +19,7 @@ export function CalculatorPage({ calculator }: { calculator: CalculatorId }) {
     <>
       <ScreenHeader
         title={CALCULATOR_META[calculator].title}
-        subtitle="계산기"
+        parent="계산기"
         onBack={pop}
         onSettings={() => void openSettingsAction()}
       />

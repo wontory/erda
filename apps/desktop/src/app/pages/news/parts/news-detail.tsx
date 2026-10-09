@@ -19,13 +19,7 @@ export function NewsDetail({ entry }: { entry: NewsEntry }) {
       ) : detail.content ? (
         <div ref={bindLinks} className={BODY_CLASS} dangerouslySetInnerHTML={{ __html: detail.content.html }} />
       ) : null}
-      <Button
-        variant="ghost"
-        size="xs"
-        className="mt-1"
-        onClick={() => void openExternal(entry.url)}
-        disabled={!entry.url}
-      >
+      <Button variant="ghost" className="mt-1" onClick={() => void openExternal(entry.url)} disabled={!entry.url}>
         <ExternalLink />
         웹에서 열기
       </Button>

@@ -29,7 +29,7 @@ export function ManualList({
           title="고른 보스가 없어요"
           description="편집에서 이 주기에 잡는 보스를 골라 주세요"
           action={
-            <Button size="sm" variant="outline" onClick={onEdit}>
+            <Button variant="outline" onClick={onEdit}>
               편집
             </Button>
           }

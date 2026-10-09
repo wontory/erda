@@ -58,8 +58,10 @@ export function SettingSwitch({
   checked: boolean | null;
   onCheckedChange: (checked: boolean) => void;
 }) {
-  if (checked === null) return <span className="h-[18.4px] w-8 shrink-0" aria-hidden />;
-  return <Switch id={id} aria-labelledby={labelId} checked={checked} onCheckedChange={(v) => onCheckedChange(v)} />;
+  if (checked === null) return <span className="h-[14px] w-6 shrink-0" aria-hidden />;
+  return (
+    <Switch size="sm" id={id} aria-labelledby={labelId} checked={checked} onCheckedChange={(v) => onCheckedChange(v)} />
+  );
 }
 
 export function SettingNumber({

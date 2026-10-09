@@ -34,7 +34,7 @@ function CallsToday({ onBudget }: { onBudget: () => void }) {
       <span className={cn("text-[12px] tabular-nums", calls.over ? "text-warning" : "text-muted-foreground")}>
         오늘 호출 {calls.calls === null ? "—" : count(calls.calls)} / {count(calls.budget)}회
       </span>
-      <Button variant="ghost" size="xs" onClick={onBudget}>
+      <Button variant="ghost" onClick={onBudget}>
         예산 설정
       </Button>
     </div>

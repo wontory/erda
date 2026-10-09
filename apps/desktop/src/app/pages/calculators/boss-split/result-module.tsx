@@ -47,7 +47,7 @@ function ShareRow({
       </div>
       <Button
         variant="ghost"
-        size="icon-sm"
+        size="icon"
         aria-label={`${label} 금액 복사`}
         title="복사"
         onClick={() => void runAction(() => copyMeso(share.amount), "복사하지 못했어요")}

@@ -46,8 +46,8 @@ function CancelAllDialog({
           <DialogDescription>실행 중인 타이머를 모두 멈춰요. 되돌릴 수 없어요.</DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <DialogClose render={<Button variant="outline" size="sm" />}>닫기</DialogClose>
-          <Button variant="destructive" size="sm" disabled={pending} onClick={onConfirm}>
+          <DialogClose render={<Button variant="outline" />}>닫기</DialogClose>
+          <Button variant="destructive" disabled={pending} onClick={onConfirm}>
             모두 취소
           </Button>
         </DialogFooter>
@@ -78,7 +78,7 @@ export function RunningModule() {
       titleClassName={n > 0 ? "text-primary" : undefined}
       trailing={
         n > 0 ? (
-          <Button variant="ghost" size="xs" onClick={askCancelAll}>
+          <Button variant="ghost" onClick={askCancelAll}>
             모두 취소
           </Button>
         ) : undefined

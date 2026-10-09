@@ -46,11 +46,11 @@ function UpdateRow() {
           <span className={state.status === "error" ? "text-destructive" : "text-muted-foreground"}>{status}</span>
         ) : null}
         {update ? (
-          <Button size="sm" disabled={busy} onClick={() => void install(update)}>
+          <Button disabled={busy} onClick={() => void install(update)}>
             업데이트 후 재시작
           </Button>
         ) : (
-          <Button variant="outline" size="sm" disabled={busy} onClick={() => void check()}>
+          <Button variant="outline" disabled={busy} onClick={() => void check()}>
             업데이트 확인
           </Button>
         )}
@@ -77,10 +77,10 @@ export function AboutPage() {
       </InfoRow>
       <InfoRow label="링크">
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => openExternal(NEXON_OPEN_API_URL)}>
+          <Button variant="outline" onClick={() => openExternal(NEXON_OPEN_API_URL)}>
             Nexon Open API
           </Button>
-          <Button variant="outline" size="sm" onClick={() => openExternal(MAPLESTORY_URL)}>
+          <Button variant="outline" onClick={() => openExternal(MAPLESTORY_URL)}>
             maplestory.nexon.com
           </Button>
         </div>

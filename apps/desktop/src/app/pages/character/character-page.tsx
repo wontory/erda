@@ -49,7 +49,7 @@ export function CharacterPage() {
               icon={User}
               title="본캐가 없어요"
               action={
-                <Button size="sm" variant="outline" onClick={() => openSettingsAction()}>
+                <Button variant="outline" onClick={() => openSettingsAction()}>
                   설정 열기
                 </Button>
               }

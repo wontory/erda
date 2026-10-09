@@ -59,7 +59,7 @@ function AchievementList({ shown, limit, onMore }: { shown: Achievement[]; limit
         </Item>
       ))}
       {shown.length > limit ? (
-        <Button variant="outline" size="sm" className="mt-1 w-full" onClick={onMore}>
+        <Button variant="outline" className="mt-1 w-full" onClick={onMore}>
           더 보기 ({shown.length - limit}개 남음)
         </Button>
       ) : null}

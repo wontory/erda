@@ -96,7 +96,6 @@ function EntryRow({
         onChange={(s) => onChange((g) => patchEntry(g, e.id, { seconds: s }))}
       />
       <Toggle
-        size="sm"
         pressed={e.repeats}
         onPressedChange={(on) => onChange((g) => patchEntry(g, e.id, { repeats: on }))}
         aria-label={`${label} 반복`}
@@ -106,7 +105,7 @@ function EntryRow({
       </Toggle>
       <Button
         variant="ghost"
-        size="icon-xs"
+        size="icon"
         aria-label={`${label} 위로`}
         focusableWhenDisabled
         className="aria-disabled:opacity-50"
@@ -117,7 +116,7 @@ function EntryRow({
       </Button>
       <Button
         variant="ghost"
-        size="icon-xs"
+        size="icon"
         aria-label={`${label} 아래로`}
         focusableWhenDisabled
         className="aria-disabled:opacity-50"
@@ -126,7 +125,7 @@ function EntryRow({
       >
         <ArrowDown />
       </Button>
-      <Button variant="ghost" size="icon-xs" aria-label={`${label} 제거`} onClick={onRemove}>
+      <Button variant="ghost" size="icon" aria-label={`${label} 제거`} onClick={onRemove}>
         <X />
       </Button>
     </div>
@@ -136,9 +135,7 @@ function EntryRow({
 function AddTimerMenu({ onAdd }: { onAdd: (entry: TimerGroupEntry) => void }) {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button type="button" variant="outline" size="sm" />}>
-        타이머 추가
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger render={<Button type="button" variant="outline" />}>타이머 추가</DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="p-0">
         <ScrollArea viewportClassName="max-h-72 p-1">
           {TIMER_PRESETS.map((p) => (
@@ -223,10 +220,10 @@ function Editor({ initial, onClose, onSave }: GroupHandlers & { initial: TimerGr
         <DialogFooter className="sm:justify-between">
           <AddTimerMenu onAdd={(entry) => setDraft(addEntry(draft, entry))} />
           <div className="flex gap-2">
-            <Button type="button" variant="ghost" size="sm" onClick={onClose}>
+            <Button type="button" variant="ghost" onClick={onClose}>
               취소
             </Button>
-            <Button type="submit" size="sm" disabled={!groupValid(draft) || saving}>
+            <Button type="submit" disabled={!groupValid(draft) || saving}>
               저장
             </Button>
           </div>

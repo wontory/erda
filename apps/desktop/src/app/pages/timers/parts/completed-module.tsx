@@ -30,7 +30,7 @@ export function CompletedModule() {
               title="완료"
               icon={CheckCircle2}
               trailing={
-                <Button variant="ghost" size="xs" disabled={dismissAll.pending} onClick={() => void onDismissAll()}>
+                <Button variant="ghost" disabled={dismissAll.pending} onClick={() => void onDismissAll()}>
                   모두 닫기
                 </Button>
               }
