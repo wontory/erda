@@ -47,6 +47,7 @@ export function createStoreCache<K extends string>({ getStore, parse, readFailed
       .catch((error) => {
         watching.delete(key);
         console.error(readFailedMessage, key, error);
+        if (!values.has(key)) put(key, parse(key, undefined));
       });
   };
 
