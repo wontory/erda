@@ -4,10 +4,6 @@ import type { ReactNode, Ref } from "react";
 
 import { stackItem } from "#/lib/motion.ts";
 
-// One block of a gapped column. Render every block of the column through this,
-// keyed, inside `<AnimatePresence mode="popLayout" initial={false}>`, so blocks
-// that come and go fade while the rest glide into place. A block whose content
-// renders nothing collapses out of the gap.
 export function StackItem({
   ref,
   className,

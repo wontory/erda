@@ -4,7 +4,6 @@ import { fileURLToPath } from "node:url";
 
 import { parse, stringify } from "yaml";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyRecord = Record<string, any>;
 
 const API_KEY_HEADER = "x-nxopen-api-key";
