@@ -2,8 +2,10 @@ import { TIMER_PRESETS, describeGroup, formatRemaining, type TimerGroup } from "
 import { TimerIcon } from "@erda/ui/components/timer-icon";
 import { Button } from "@erda/ui/components/ui/button";
 import { Separator } from "@erda/ui/components/ui/separator";
+import { listItem } from "@erda/ui/lib/motion";
 import { invoke } from "@tauri-apps/api/core";
 import { ArrowDown, ArrowUp, Volume2 } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 import { useId, useState } from "react";
 
 import { useSetting } from "#/features/settings/use-settings.ts";
@@ -193,19 +195,24 @@ export function TimerPage() {
           새 그룹
         </Button>
       </SettingRow>
-      <div className="flex flex-col gap-1 pb-2.5">
-        {loaded &&
-          groups.map((g, i) => (
-            <GroupRow
-              key={g.id}
-              group={g}
-              first={i === 0}
-              last={i === groups.length - 1}
-              onMove={(delta) => runAction(() => move(g.id, delta), MOVE_FAILED)}
-              onEdit={() => setEditing(g)}
-              onDelete={() => askDelete(g)}
-            />
-          ))}
+      <div className={groups.length > 0 ? "pb-1.5" : "pb-2.5"}>
+        <AnimatePresence initial={false}>
+          {loaded &&
+            groups.map((g, i) => (
+              <m.div key={g.id} layout="position" {...listItem}>
+                <div className="pb-1">
+                  <GroupRow
+                    group={g}
+                    first={i === 0}
+                    last={i === groups.length - 1}
+                    onMove={(delta) => runAction(() => move(g.id, delta), MOVE_FAILED)}
+                    onEdit={() => setEditing(g)}
+                    onDelete={() => askDelete(g)}
+                  />
+                </div>
+              </m.div>
+            ))}
+        </AnimatePresence>
       </div>
       <Separator />
       <SettingRow label="프리셋" description="프리셋은 바꿀 수 없어요. 조합은 그룹으로 만들어 주세요">

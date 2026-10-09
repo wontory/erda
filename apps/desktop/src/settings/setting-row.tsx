@@ -7,6 +7,8 @@ import {
   NumberFieldInput,
 } from "@erda/ui/components/ui/number-field";
 import { Switch } from "@erda/ui/components/ui/switch";
+import { listItem } from "@erda/ui/lib/motion";
+import { AnimatePresence, m } from "motion/react";
 import type { ReactNode } from "react";
 
 import { DESCRIPTION, LABEL, ROW } from "./field.ts";
@@ -36,11 +38,17 @@ export function SettingRow({
         ) : (
           <FieldTitle className={LABEL}>{label}</FieldTitle>
         )}
-        {description ? (
-          <FieldDescription className={descriptionClassName ? `${DESCRIPTION} ${descriptionClassName}` : DESCRIPTION}>
-            {description}
-          </FieldDescription>
-        ) : null}
+        <AnimatePresence initial={false}>
+          {description ? (
+            <m.div key="description" {...listItem}>
+              <FieldDescription
+                className={descriptionClassName ? `${DESCRIPTION} ${descriptionClassName}` : DESCRIPTION}
+              >
+                {description}
+              </FieldDescription>
+            </m.div>
+          ) : null}
+        </AnimatePresence>
       </FieldContent>
       {children}
     </Field>
