@@ -21,7 +21,7 @@ export function UnionSummarySection({ ocid }: { ocid: string }) {
     <Module>
       <AutoHeight>
         <Swap id={view}>
-          {query.isPending ? <LoadingRow /> : null}
+          {query.isPending ? <LoadingRow minHeight={72} /> : null}
           {query.error ? <ErrorRow message={describeError(query.error)} onRetry={() => query.refetch()} /> : null}
           {query.data !== undefined && !query.error ? (
             <>

@@ -92,8 +92,10 @@ function MemberRow({
         <ItemTitle>{name}</ItemTitle>
         {isMaster ? <ItemDescription>마스터</ItemDescription> : null}
       </ItemContent>
-      {opening === name ? <Spinner className="size-3.5" /> : null}
-      {opening ? null : <ChevronRight size={14} className="text-muted-foreground" aria-hidden />}
+      <span className="grid shrink-0 place-items-center *:col-start-1 *:row-start-1">
+        <ChevronRight size={14} className={`text-muted-foreground ${opening ? "invisible" : ""}`} aria-hidden />
+        {opening === name ? <Spinner className="size-3.5" /> : null}
+      </span>
     </Item>
   );
 }
