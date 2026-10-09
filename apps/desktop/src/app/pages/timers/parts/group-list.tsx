@@ -1,4 +1,5 @@
 import { describeGroup, type TimerGroup } from "@erda/core";
+import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Swap } from "@erda/ui/components/swap";
 import { Button } from "@erda/ui/components/ui/button";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@erda/ui/components/ui/item";
@@ -40,6 +41,7 @@ export function GroupList({
   return (
     <div className="relative flex flex-col">
       <Swap id={!loaded ? "loading" : groups.length === 0 ? "empty" : "rows"}>
+        {loaded ? null : <LoadingRow minHeight={43} />}
         {loaded && groups.length === 0 ? (
           <EmptyState icon={Layers} title="그룹 없음" description="설정 › 타이머에서 그룹을 만들어 주세요" />
         ) : null}

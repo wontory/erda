@@ -17,7 +17,7 @@ export function NewsDetail({ entry }: { entry: NewsEntry }) {
     <div className="mt-3">
       <AutoHeight>
         <Swap id={view}>
-          {detail.isLoading ? <LoadingRow label="본문 불러오는 중…" /> : null}
+          {detail.isLoading ? <LoadingRow label="본문 불러오는 중…" minHeight={240} /> : null}
           {detail.error ? (
             <ErrorRow message={describeError(detail.error)} onRetry={() => void detail.refetch()} />
           ) : null}

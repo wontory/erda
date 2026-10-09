@@ -182,10 +182,10 @@ export function SectionPage({ ocid, name, page }: { ocid: string; name: string; 
               </Module>
             </StackItem>
           ) : null}
-          {needsSummary && summary.isPending && !summary.error ? (
+          {page === "stats" && summary.isPending && !summary.error ? (
             <StackItem key="loading">
               <Module>
-                <LoadingRow />
+                <LoadingRow minHeight={356} />
               </Module>
             </StackItem>
           ) : null}

@@ -50,7 +50,7 @@ export function GuildPage({ world, name }: { world: string; name: string }) {
           {guild.isPending ? (
             <StackItem key="loading">
               <Module>
-                <LoadingRow />
+                <LoadingRow minHeight={92} />
               </Module>
             </StackItem>
           ) : null}

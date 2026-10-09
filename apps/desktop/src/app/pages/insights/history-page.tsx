@@ -14,9 +14,7 @@ import { RefreshButton } from "@erda/ui/components/refresh-button";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
 import { Swap } from "@erda/ui/components/swap";
 import { Button } from "@erda/ui/components/ui/button";
-import { listItem } from "@erda/ui/lib/motion";
 import { cn } from "@erda/ui/lib/utils";
-import { AnimatePresence, m } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
 
 import { useNav } from "#/app/nav/context.ts";
@@ -117,19 +115,13 @@ export function HistoryPage({ kind }: { kind: HistoryKind }) {
       <output
         className={cn("block px-4 text-[11px]", phase === "error" ? "text-destructive" : "text-muted-foreground")}
       >
-        <AnimatePresence initial={false}>
-          {status ? (
-            <m.span key="status" {...listItem} className="block">
-              <span className="block pb-2.5">{status}</span>
-            </m.span>
-          ) : null}
-        </AnimatePresence>
+        {phase === "idle" ? null : <span className={cn("block pb-2.5", !status && "invisible")}>{status ?? "…"}</span>}
       </output>
       <div className="px-3 pb-3">
         <AutoHeight>
           <Swap id={view}>
             {!h.archive || !h.aggregate ? (
-              <LoadingRow label="기록 불러오는 중…" />
+              <LoadingRow label="기록 불러오는 중…" minHeight={471} />
             ) : h.aggregate.total === 0 ? (
               <EmptyState icon={historyIcon(kind)} title={copy.title} description={copy.description} />
             ) : (

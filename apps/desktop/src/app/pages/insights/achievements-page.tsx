@@ -32,7 +32,7 @@ function rankView(
   rank: ReturnType<typeof useAchievementRank>,
   decided: boolean,
 ): { id: string; node: ReactNode } {
-  if (!decided || (main.ocid && rank.isLoading)) return { id: "loading", node: <LoadingRow /> };
+  if (!decided || (main.ocid && rank.isLoading)) return { id: "loading", node: <LoadingRow minHeight={32} /> };
   if (main.error && !main.ocid) return { id: "error", node: <ErrorRow message={describeError(main.error)} /> };
   if (!main.ocid) return { id: "no-main", node: <EmptyState icon={Trophy} title="본캐를 정하면 순위가 보여요" /> };
   if (rank.error) return { id: "error", node: <ErrorRow message={describeError(rank.error)} /> };
@@ -110,7 +110,7 @@ export function AchievementsPage() {
   const all = useMemo(() => q.data ?? [], [q.data]);
   const shown = useMemo(() => filterAchievements(all, query), [all, query]);
   const view = q.isLoading ? "loading" : q.error ? "error" : shown.length === 0 ? "empty" : "list";
-  const header = query.trim() ? `${shown.length} / ${all.length}` : `${all.length}개`;
+  const header = q.isLoading ? "…" : query.trim() ? `${shown.length} / ${all.length}` : `${all.length}개`;
   return (
     <>
       <ScreenHeader title="업적" onBack={pop} onSettings={() => openSettingsAction()} />
@@ -131,7 +131,7 @@ export function AchievementsPage() {
           <AutoHeight>
             <Swap id={view}>
               {q.isLoading ? (
-                <LoadingRow />
+                <LoadingRow minHeight={430} />
               ) : q.error ? (
                 <ErrorRow message={describeError(q.error)} onRetry={() => q.refetch()} />
               ) : shown.length === 0 ? (

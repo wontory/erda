@@ -7,6 +7,8 @@ import { Heart } from "lucide-react";
 
 import { GuildMark } from "./guild-mark.tsx";
 
+export const PROFILE_LOADING_HEIGHT = 147;
+
 type OpenGuild = (world: string, guild: string) => void;
 
 function GuildLink({ world, guild, onOpenGuild }: { world: string; guild: string; onOpenGuild?: OpenGuild }) {

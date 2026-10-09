@@ -5,6 +5,8 @@ import { cn } from "@erda/ui/lib/utils";
 
 import { DifficultyTile } from "./difficulty-tile.tsx";
 
+export const BOSS_LIST_LOADING_HEIGHT = 258;
+
 export function BossRowView({ row, onToggle, dimmed }: { row: BossRow; onToggle?: () => void; dimmed?: boolean }) {
   const subtitle = row.party > 1 ? `${row.difficulty} · ${row.party}인` : row.difficulty;
   return (

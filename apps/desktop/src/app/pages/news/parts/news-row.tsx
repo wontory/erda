@@ -1,4 +1,5 @@
 import { isMaintenance, isOngoing, periodCaption, type NewsEntry } from "@erda/core";
+import { cn } from "@erda/ui/lib/utils";
 import { ChevronRight } from "lucide-react";
 
 import { NewsTile } from "./news-tile.tsx";
@@ -26,12 +27,11 @@ export function NewsRow({
       <NewsTile category={entry.category} maintenance={banner} />
       <span className="min-w-0 flex-1">
         <span className="line-clamp-2 block leading-snug font-semibold">
-          {unread ? (
-            <>
-              <span aria-hidden className="mr-1.5 inline-block size-1.5 rounded-full bg-primary align-middle" />
-              <span className="sr-only">안 읽음</span>
-            </>
-          ) : null}
+          <span
+            aria-hidden
+            className={cn("mr-1.5 inline-block size-1.5 rounded-full bg-primary align-middle", !unread && "invisible")}
+          />
+          {unread ? <span className="sr-only">안 읽음</span> : null}
           {entry.title}
         </span>
         <span className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[11px] text-muted-foreground">

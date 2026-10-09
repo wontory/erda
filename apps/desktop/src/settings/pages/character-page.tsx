@@ -91,7 +91,13 @@ function MainCharacterRow() {
         <>
           {main.summary
             ? `${main.summary.name} · Lv.${main.summary.level} · ${main.summary.world}`
-            : "비워 두면 내 계정에서 레벨이 가장 높은 캐릭터를 자동으로 골라요"}
+            : main.name
+              ? main.isPending
+                ? `${main.name} · …`
+                : main.name
+              : main.nameLoaded
+                ? "비워 두면 내 계정에서 레벨이 가장 높은 캐릭터를 자동으로 골라요"
+                : "…"}
           <AnimatePresence initial={false}>
             {main.error ? (
               <m.span key="error" {...listItem} className="block text-destructive">

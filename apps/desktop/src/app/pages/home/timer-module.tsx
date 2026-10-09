@@ -6,6 +6,7 @@ import { Swap } from "@erda/ui/components/swap";
 import { TimerIcon } from "@erda/ui/components/timer-icon";
 import { Badge } from "@erda/ui/components/ui/badge";
 import { timerTint } from "@erda/ui/lib/timer-tint";
+import { cn } from "@erda/ui/lib/utils";
 import { Timer } from "lucide-react";
 
 import { TrailingText } from "#/app/pages/shared/trailing-text.tsx";
@@ -45,7 +46,7 @@ function PresetChip({ preset, onStart }: { preset: TimerPreset; onStart: () => v
 
 export function TimerModule({ onOpen }: { onOpen: () => void }) {
   const timers = useTimers();
-  const { presets } = useRecentPresets();
+  const { presets, loaded: presetsLoaded } = useRecentPresets();
   const start = useStartTimers();
   const { run } = useAction();
   const n = timers.active.length;
@@ -66,7 +67,7 @@ export function TimerModule({ onOpen }: { onOpen: () => void }) {
           )}
         </Swap>
       </AutoHeight>
-      <div className="mt-2 flex flex-wrap gap-1.5">
+      <div className={cn("mt-2 flex flex-wrap gap-1.5", !presetsLoaded && "invisible")}>
         {presets.map((p) => (
           <PresetChip
             key={p.id}

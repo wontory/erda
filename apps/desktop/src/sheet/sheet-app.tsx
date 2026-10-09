@@ -7,7 +7,6 @@ import type {
   StarforceItem,
   StarforceOptions,
 } from "@erda/core";
-import { LoadingRow } from "@erda/ui/components/loading-row";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
 import { emitTo } from "@tauri-apps/api/event";
@@ -48,7 +47,6 @@ function PotentialAuto({
   close: () => void;
 }) {
   const data = usePotentialData();
-  if (!data.data) return <LoadingRow label="옵션표 불러오는 중…" />;
   return (
     <PotentialAutoSheet
       data={data.data}

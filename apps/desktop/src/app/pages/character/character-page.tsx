@@ -11,6 +11,7 @@ import { AnimatePresence } from "motion/react";
 
 import { useNav } from "#/app/nav/context.ts";
 import { CharacterBody } from "#/app/pages/character/parts/character-body.tsx";
+import { PROFILE_LOADING_HEIGHT } from "#/app/pages/character/parts/profile-module.tsx";
 import { EmptyState } from "#/app/pages/shared/empty-state.tsx";
 import { useRefreshing } from "#/app/pages/shared/use-refreshing.ts";
 import { useMainCharacter } from "#/features/character/use-main-character.ts";
@@ -24,7 +25,7 @@ export function CharacterPage() {
   const s = main.summary;
   const loadingMain = (
     <Module>
-      <LoadingRow label="본캐 불러오는 중…" />
+      <LoadingRow label="본캐 불러오는 중…" minHeight={PROFILE_LOADING_HEIGHT} />
     </Module>
   );
   const missing = main.nameLoaded && !s;

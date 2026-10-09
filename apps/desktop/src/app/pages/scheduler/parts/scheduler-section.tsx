@@ -12,7 +12,7 @@ import { AnimatePresence, m } from "motion/react";
 import { EmptyState } from "#/app/pages/shared/empty-state.tsx";
 import type { BossStatus } from "#/features/boss/view.ts";
 
-import { BossRowView } from "./boss-row-view.tsx";
+import { BOSS_LIST_LOADING_HEIGHT, BossRowView } from "./boss-row-view.tsx";
 
 function UnregisteredBosses({ rows }: { rows: BossRow[] }) {
   return (
@@ -92,7 +92,9 @@ export function SchedulerSection({
     <Module title="등록한 보스" icon={Crown}>
       <AutoHeight>
         <Swap id={status}>
-          {status === "loading" ? <LoadingRow label="스케줄러 불러오는 중…" /> : null}
+          {status === "loading" ? (
+            <LoadingRow label="스케줄러 불러오는 중…" minHeight={BOSS_LIST_LOADING_HEIGHT} />
+          ) : null}
           {status === "error" ? (
             <ErrorRow message={errorMessage ?? "스케줄러를 불러오지 못했어요"} onRetry={onRetry} />
           ) : null}

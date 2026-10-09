@@ -8,7 +8,7 @@ import { Crown } from "lucide-react";
 
 import { EmptyState } from "#/app/pages/shared/empty-state.tsx";
 
-import { BossRowView } from "./boss-row-view.tsx";
+import { BOSS_LIST_LOADING_HEIGHT, BossRowView } from "./boss-row-view.tsx";
 
 export function ManualList({
   rows,
@@ -26,7 +26,7 @@ export function ManualList({
       <AutoHeight>
         <Swap id={loading ? "loading" : rows.length === 0 ? "empty" : "rows"}>
           {loading ? (
-            <LoadingRow />
+            <LoadingRow minHeight={BOSS_LIST_LOADING_HEIGHT} />
           ) : rows.length === 0 ? (
             <EmptyState
               icon={Crown}

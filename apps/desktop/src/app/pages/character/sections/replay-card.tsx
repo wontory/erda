@@ -56,7 +56,7 @@ export function ReplayCard({ replay, result }: { replay: Replay; result: ReplayR
     <Module title={title}>
       <AutoHeight>
         <Swap id={view}>
-          {view === "loading" ? <LoadingRow /> : null}
+          {view === "loading" ? <LoadingRow minHeight={245} /> : null}
           {view === "error" ? <div className="text-[12px] text-destructive">{describeError(result.error)}</div> : null}
           {view === "data" ? <ReplayBody data={result.data} /> : null}
         </Swap>

@@ -43,6 +43,7 @@ export function Section<T>({
   icon,
   fetcher,
   extraKey,
+  enabled = true,
   trailing,
   isEmpty,
   children,
@@ -52,14 +53,15 @@ export function Section<T>({
   icon: LucideIcon;
   fetcher: (policy: NexonCachePolicy) => Promise<T>;
   extraKey?: string;
+  enabled?: boolean;
   trailing?: ReactNode;
   isEmpty?: (data: T) => boolean;
   children: (data: T) => ReactNode;
 }) {
   const [ref, inView] = useInView<HTMLDivElement>();
-  const query = useExtra<T>(id, ocid, fetcher, { enabled: inView, extraKey });
+  const query = useExtra<T>(id, ocid, fetcher, { enabled: inView && enabled, extraKey });
   const meta = SECTION_META[id];
-  const data = query.data;
+  const data = enabled ? query.data : undefined;
   const retry = () => query.refetch();
   return (
     <div ref={ref}>
@@ -67,7 +69,7 @@ export function Section<T>({
         <SectionHeader title={meta.title} color={meta.color} icon={icon} trailing={trailing} />
         <AutoHeight>
           <Swap id={data !== undefined ? "data" : query.error ? "error" : "loading"}>
-            {data === undefined && (!inView || query.isPending) ? (
+            {data === undefined && (!inView || !enabled || query.isPending) ? (
               <LoadingRow minHeight={LOADING_HEIGHT[id] ?? DEFAULT_LOADING_HEIGHT} />
             ) : null}
             {query.error ? <ErrorRow message={describeError(query.error)} onRetry={retry} /> : null}

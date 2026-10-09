@@ -59,12 +59,11 @@ function NewsPreviewRow({ entry, unread, onOpen }: { entry: NewsEntry; unread: b
       <NewsTile category={entry.category} size={18} />
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[12px]">
-          {unread ? (
-            <>
-              <span aria-hidden className="mr-1 inline-block size-1.5 rounded-full bg-primary align-middle" />
-              <span className="sr-only">안 읽음</span>
-            </>
-          ) : null}
+          <span
+            aria-hidden
+            className={cn("mr-1 inline-block size-1.5 rounded-full bg-primary align-middle", !unread && "invisible")}
+          />
+          {unread ? <span className="sr-only">안 읽음</span> : null}
           {entry.title}
         </span>
         <span className="block text-[11px] text-muted-foreground">{periodCaption(entry)}</span>
@@ -75,7 +74,8 @@ function NewsPreviewRow({ entry, unread, onOpen }: { entry: NewsEntry; unread: b
 
 function NoPreview({ news }: { news: Notices }) {
   if (news.error) return <ErrorRow message={news.error} onRetry={news.retry} />;
-  if (news.loading || !news.loaded) return <div className="text-[11px] text-muted-foreground">소식 불러오는 중…</div>;
+  if (news.loading || !news.loaded)
+    return <div className="min-h-[78px] text-[11px] text-muted-foreground">소식 불러오는 중…</div>;
   return (
     <div className={cn("text-[11px]", news.lastError ? "text-danger" : "text-muted-foreground")}>
       {news.lastError ?? "표시할 글이 없어요"}

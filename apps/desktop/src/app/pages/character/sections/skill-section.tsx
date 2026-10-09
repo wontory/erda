@@ -1,6 +1,7 @@
 import { getCharacterSkill } from "@erda/api/generated/endpoints/character/character";
 import { GameIcon } from "@erda/ui/components/game-icon";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@erda/ui/components/ui/select";
+import { cn } from "@erda/ui/lib/utils";
 import { Sparkles } from "lucide-react";
 
 import { SKILL_GRADES, useSkillGrade } from "#/features/character/use-skill-grade.ts";
@@ -37,7 +38,15 @@ export function SkillRow({
   );
 }
 
-function SkillGradeSelect({ grade, onChange }: { grade: Grade; onChange: (grade: Grade) => void }) {
+function SkillGradeSelect({
+  grade,
+  loaded,
+  onChange,
+}: {
+  grade: Grade;
+  loaded: boolean;
+  onChange: (grade: Grade) => void;
+}) {
   return (
     <Select
       value={grade}
@@ -46,7 +55,7 @@ function SkillGradeSelect({ grade, onChange }: { grade: Grade; onChange: (grade:
         if (g) onChange(g);
       }}
     >
-      <SelectTrigger className="w-32" aria-label="스킬 차수">
+      <SelectTrigger className={cn("w-32", !loaded && "invisible")} aria-label="스킬 차수">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -61,17 +70,19 @@ function SkillGradeSelect({ grade, onChange }: { grade: Grade; onChange: (grade:
 }
 
 export function SkillSection({ ocid }: { ocid: string }) {
-  const [grade, setGrade] = useSkillGrade();
+  const [grade, setGrade, gradeLoaded] = useSkillGrade();
   return (
     <Section
       id="skill"
       ocid={ocid}
       icon={Sparkles}
       extraKey={grade}
+      enabled={gradeLoaded}
       fetcher={(p) => getCharacterSkill({ ocid, character_skill_grade: grade }, { nexonCache: p })}
       trailing={
         <SkillGradeSelect
           grade={grade}
+          loaded={gradeLoaded}
           onChange={(g) => void runAction(() => setGrade(g), "스킬 차수를 저장하지 못했어요")}
         />
       }

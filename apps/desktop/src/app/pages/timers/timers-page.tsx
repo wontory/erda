@@ -1,4 +1,5 @@
 import { AutoHeight } from "@erda/ui/components/auto-height";
+import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Module } from "@erda/ui/components/module";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@erda/ui/components/ui/tabs";
@@ -24,7 +25,7 @@ const START_FAILED = "타이머를 시작하지 못했어요";
 export function TimersPage() {
   const { pop } = useNav();
   const { groups, loaded: groupsLoaded } = useTimerGroups();
-  const [mode, setMode] = useStartMode();
+  const [mode, setMode, modeLoaded] = useStartMode();
   const [buffRepeat, setBuffRepeat] = useState(false);
   const start = useStartTimers();
   const { run } = useAction();
@@ -36,34 +37,38 @@ export function TimersPage() {
         <RunningModule />
         <CompletedModule />
         <Module title="시작하기" icon={Play}>
-          <Tabs value={mode} onValueChange={(m) => changeMode(m as StartMode)} className="gap-2.5">
-            <TabsList className="w-full">
-              {MODES.map((m) => (
-                <TabsTrigger key={m} value={m}>
-                  {m}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            <AutoHeight>
-              <TabsContent value="프리셋">
-                <PresetGrid
-                  buffRepeat={buffRepeat}
-                  onBuffRepeat={setBuffRepeat}
-                  onStart={(p) => void run(() => start.startPreset(p, buffRepeat), START_FAILED)}
-                />
-              </TabsContent>
-              <TabsContent value="그룹">
-                <GroupList
-                  groups={groups}
-                  loaded={groupsLoaded}
-                  onStart={(g) => void run(() => start.startGroup(g), START_FAILED)}
-                />
-              </TabsContent>
-              <TabsContent value="직접">
-                <CustomForm onStart={start.startCustom} />
-              </TabsContent>
-            </AutoHeight>
-          </Tabs>
+          {modeLoaded ? (
+            <Tabs value={mode} onValueChange={(m) => changeMode(m as StartMode)} className="gap-2.5">
+              <TabsList className="w-full">
+                {MODES.map((m) => (
+                  <TabsTrigger key={m} value={m}>
+                    {m}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              <AutoHeight>
+                <TabsContent value="프리셋">
+                  <PresetGrid
+                    buffRepeat={buffRepeat}
+                    onBuffRepeat={setBuffRepeat}
+                    onStart={(p) => void run(() => start.startPreset(p, buffRepeat), START_FAILED)}
+                  />
+                </TabsContent>
+                <TabsContent value="그룹">
+                  <GroupList
+                    groups={groups}
+                    loaded={groupsLoaded}
+                    onStart={(g) => void run(() => start.startGroup(g), START_FAILED)}
+                  />
+                </TabsContent>
+                <TabsContent value="직접">
+                  <CustomForm onStart={start.startCustom} />
+                </TabsContent>
+              </AutoHeight>
+            </Tabs>
+          ) : (
+            <LoadingRow minHeight={613} />
+          )}
         </Module>
       </div>
     </>

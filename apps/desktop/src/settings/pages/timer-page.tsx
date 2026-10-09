@@ -189,7 +189,7 @@ export function TimerPage() {
       <Separator />
       <SettingRow
         label="타이머 그룹"
-        description={loaded ? (groups.length === 0 ? "없음" : `${groups.length}개`) : undefined}
+        description={loaded ? (groups.length === 0 ? "없음" : `${groups.length}개`) : "…"}
       >
         <Button variant="outline" onClick={() => setEditing(newGroup())}>
           새 그룹

@@ -1,15 +1,17 @@
 import { CYCLES, CYCLE_META, bossById, bossesOf, type BossCycle, type BossEntry, type BossRow } from "@erda/core";
 import { LoadingRow } from "@erda/ui/components/loading-row";
+import { Module } from "@erda/ui/components/module";
 import { RefreshButton } from "@erda/ui/components/refresh-button";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
 import { StackItem } from "@erda/ui/components/stack-item";
 import { Button } from "@erda/ui/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@erda/ui/components/ui/tabs";
-import { Check, Pencil } from "lucide-react";
+import { Check, Crown, Pencil } from "lucide-react";
 import { AnimatePresence } from "motion/react";
 import { useState } from "react";
 
 import { useNav } from "#/app/nav/context.ts";
+import { BOSS_LIST_LOADING_HEIGHT } from "#/app/pages/scheduler/parts/boss-row-view.tsx";
 import { BossSummaryModule } from "#/app/pages/scheduler/parts/boss-summary-module.tsx";
 import { EditList } from "#/app/pages/scheduler/parts/edit-list.tsx";
 import { ManualList } from "#/app/pages/scheduler/parts/manual-list.tsx";
@@ -102,7 +104,13 @@ export function SchedulerPage() {
           </StackItem>
           {view.resolving ? (
             <StackItem key="resolving">
-              <LoadingRow />
+              <Module
+                title={view.schedulerSettingLoaded && view.useScheduler ? "등록한 보스" : "보스"}
+                titleClassName={view.schedulerSettingLoaded ? undefined : "invisible"}
+                icon={Crown}
+              >
+                <LoadingRow minHeight={BOSS_LIST_LOADING_HEIGHT} />
+              </Module>
             </StackItem>
           ) : scheduler && editing ? (
             <StackItem key="edit">

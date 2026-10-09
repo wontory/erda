@@ -28,7 +28,7 @@ export function FavoritesModule({ onOpen, limit }: { onOpen: (ocid: string, name
   return (
     <Module title="즐겨찾기" icon={Star}>
       <ScrollArea orientation="horizontal">
-        <div className="relative flex w-max gap-1.5 in-data-has-overflow-x:pb-2">
+        <div className="relative flex w-max gap-1.5 pb-2">
           <AnimatePresence mode="popLayout" initial={false}>
             {shown.map((f) => (
               <m.div key={f.ocid} {...chip} className="shrink-0">

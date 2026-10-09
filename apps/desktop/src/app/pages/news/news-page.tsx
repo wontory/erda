@@ -55,7 +55,7 @@ function KeyMissing() {
 
 function FeedFallback({ news, onRefresh }: { news: Notices; onRefresh: () => void }) {
   if (news.error) return <ErrorRow message={news.error} onRetry={news.retry} />;
-  if (!news.loaded || news.loading) return <LoadingRow label="소식 불러오는 중…" />;
+  if (!news.loaded || news.loading) return <LoadingRow label="소식 불러오는 중…" minHeight={236} />;
   if (news.lastError) return <ErrorRow message={news.lastError} onRetry={onRefresh} />;
   return <EmptyState icon={Newspaper} title="표시할 글이 없어요" />;
 }

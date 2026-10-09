@@ -138,6 +138,7 @@ export function ResultsPage({ query }: { query: string }) {
         : nothing
           ? "empty"
           : "none";
+  const guildsView = guilds.isPending ? "loading" : guildHits.length > 0 ? "hits" : "hint";
   const noHistory = favorites.length === 0 && recent.length === 0 && account.length === 0;
   return (
     <>
@@ -148,7 +149,7 @@ export function ResultsPage({ query }: { query: string }) {
             <Module title="캐릭터" icon={Search}>
               <AutoHeight>
                 <Swap id={characterView}>
-                  {character.isPending ? <LoadingRow label={`‘${query}’ 검색 중…`} /> : null}
+                  {character.isPending ? <LoadingRow label={`‘${query}’ 검색 중…`} minHeight={50} /> : null}
                   {character.error ? (
                     <ErrorRow message={describeError(character.error)} onRetry={() => character.refetch()} />
                   ) : null}
@@ -176,13 +177,6 @@ export function ResultsPage({ query }: { query: string }) {
               </AutoHeight>
             </Module>
           </StackItem>
-          {guilds.isPending ? (
-            <StackItem key="guilds-loading">
-              <Module>
-                <LoadingRow label={allWorlds ? "모든 월드에서 길드 찾는 중…" : "길드 찾는 중…"} />
-              </Module>
-            </StackItem>
-          ) : null}
           {guilds.error ? (
             <StackItem key="guilds-error">
               <Module title="길드">
@@ -190,22 +184,29 @@ export function ResultsPage({ query }: { query: string }) {
               </Module>
             </StackItem>
           ) : null}
-          {guildHits.length > 0 ? (
+          {guilds.isPending || guildHits.length > 0 || !allWorlds ? (
             <StackItem key="guilds">
-              <Module title={`길드 · ${guildHits.length}곳`}>
-                {guildHits.map((h) => (
-                  <GuildHitRow
-                    key={`${h.world}|${h.name}`}
-                    hit={h}
-                    onClick={() => push(pages.guild(h.world, h.name))}
-                  />
-                ))}
-              </Module>
-            </StackItem>
-          ) : null}
-          {!allWorlds && !guilds.isPending ? (
-            <StackItem key="all-worlds">
-              <AllWorldsHint onSearch={() => setAllWorlds(true)} />
+              <AutoHeight>
+                <Swap id={guildsView} className="flex flex-col gap-2.5">
+                  {guilds.isPending ? (
+                    <Module>
+                      <LoadingRow label={allWorlds ? "모든 월드에서 길드 찾는 중…" : "길드 찾는 중…"} />
+                    </Module>
+                  ) : null}
+                  {guildHits.length > 0 ? (
+                    <Module title={`길드 · ${guildHits.length}곳`}>
+                      {guildHits.map((h) => (
+                        <GuildHitRow
+                          key={`${h.world}|${h.name}`}
+                          hit={h}
+                          onClick={() => push(pages.guild(h.world, h.name))}
+                        />
+                      ))}
+                    </Module>
+                  ) : null}
+                  {!allWorlds && !guilds.isPending ? <AllWorldsHint onSearch={() => setAllWorlds(true)} /> : null}
+                </Swap>
+              </AutoHeight>
             </StackItem>
           ) : null}
           {favorites.length > 0 ? (

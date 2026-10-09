@@ -1,5 +1,6 @@
 import { KoreanNumber, type BossSummary, type HomeworkItem } from "@erda/core";
 import { AutoHeight } from "@erda/ui/components/auto-height";
+import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Module } from "@erda/ui/components/module";
 import { Swap } from "@erda/ui/components/swap";
 import { Progress } from "@erda/ui/components/ui/progress";
@@ -76,7 +77,7 @@ export function SchedulerModule({ onOpen }: { onOpen: () => void }) {
       }
     >
       <AutoHeight>
-        <Swap id={view.status === "ready" ? "ready" : "status"}>
+        <Swap id={view.status === "ready" || view.status === "loading" ? view.status : "status"}>
           {view.status === "ready" ? (
             <>
               <BossRevenue summary={view.summary} />
@@ -89,6 +90,8 @@ export function SchedulerModule({ onOpen }: { onOpen: () => void }) {
                 ) : null}
               </AnimatePresence>
             </>
+          ) : view.status === "loading" ? (
+            <LoadingRow label={statusText(view)} minHeight={51} />
           ) : (
             <div className="text-[11px] text-muted-foreground">{statusText(view)}</div>
           )}

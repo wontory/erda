@@ -57,7 +57,7 @@ export function ArticlePage({ entryId }: { entryId: string }) {
             {entry ? (
               <Article entry={entry} now={now} />
             ) : !news.loaded || news.loading ? (
-              <LoadingRow label="소식 불러오는 중…" />
+              <LoadingRow label="소식 불러오는 중…" minHeight={351} />
             ) : (
               <Module>
                 <EmptyState icon={Newspaper} title="글을 찾을 수 없어요" description="목록에서 내려간 글이에요" />

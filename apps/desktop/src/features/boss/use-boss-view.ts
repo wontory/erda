@@ -51,6 +51,7 @@ export function useBossView(cycle: BossCycle) {
     ...view,
     schedulerAvailable,
     resolving,
+    schedulerSettingLoaded,
     useScheduler,
     setUseScheduler,
     boss,

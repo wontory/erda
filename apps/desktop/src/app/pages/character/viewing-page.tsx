@@ -13,6 +13,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { useNav } from "#/app/nav/context.ts";
 import { CharacterBody } from "#/app/pages/character/parts/character-body.tsx";
+import { PROFILE_LOADING_HEIGHT } from "#/app/pages/character/parts/profile-module.tsx";
 import { useRefreshing } from "#/app/pages/shared/use-refreshing.ts";
 import { useCharacterSummary, useRefreshSummary } from "#/features/character/use-character-summary.ts";
 import { useFavorites } from "#/features/character/use-favorites.ts";
@@ -98,7 +99,7 @@ export function ViewingPage({ ocid, name }: { ocid: string; name: string }) {
           {summary.isPending ? (
             <StackItem key="loading">
               <Module>
-                <LoadingRow label={`${name} 불러오는 중…`} />
+                <LoadingRow label={`${name} 불러오는 중…`} minHeight={PROFILE_LOADING_HEIGHT} />
               </Module>
             </StackItem>
           ) : null}
