@@ -13,12 +13,16 @@ import {
   type PotentialKind,
   type PotentialSettings,
 } from "@erda/core";
+import { AutoHeight } from "@erda/ui/components/auto-height";
 import { ErrorRow } from "@erda/ui/components/error-row";
 import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Module } from "@erda/ui/components/module";
+import { StackItem } from "@erda/ui/components/stack-item";
+import { Swap } from "@erda/ui/components/swap";
 import { Button } from "@erda/ui/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@erda/ui/components/ui/tabs";
-import { useReducedMotion } from "motion/react";
+import { listItem } from "@erda/ui/lib/motion";
+import { AnimatePresence, m, useReducedMotion } from "motion/react";
 import { useMemo, useState } from "react";
 
 import { SideSheet } from "#/features/sheet/side-sheet.tsx";
@@ -39,9 +43,21 @@ import { usePotentialSettings } from "./use-potential-settings.ts";
 export function PotentialSimulator() {
   const { settings, loaded, patch } = usePotentialSettings();
   const data = usePotentialData();
-  if (data.error) return <ErrorRow message={describeError(data.error)} onRetry={() => void data.refetch()} />;
-  if (!loaded || !data.data) return <LoadingRow label="옵션표 불러오는 중…" />;
-  return <PotentialScreen data={data.data} settings={settings} patch={patch} />;
+  const ready = loaded && data.data;
+  const view = data.error ? "error" : ready ? "screen" : "loading";
+  return (
+    <div className="relative">
+      <Swap id={view}>
+        {data.error ? (
+          <ErrorRow message={describeError(data.error)} onRetry={() => void data.refetch()} />
+        ) : ready ? (
+          <PotentialScreen data={ready} settings={settings} patch={patch} />
+        ) : (
+          <LoadingRow label="옵션표 불러오는 중…" />
+        )}
+      </Swap>
+    </div>
+  );
 }
 
 function draftOf(settings: PotentialSettings): ItemDraft {
@@ -121,59 +137,61 @@ function PotentialScreen({
           </Tabs>
           {state ? (
             <>
-              <div className="grid grid-cols-2 gap-2">
-                <RollCard
-                  title="BEFORE"
-                  roll={state.current}
-                  action={
-                    session.auto ? null : (
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        disabled={state.pending.length === 0}
-                        onClick={() => session.choose("before")}
-                      >
-                        BEFORE 유지
-                      </Button>
-                    )
-                  }
-                />
-                {Array.from({ length: Math.max(1, state.pending.length) }, (_, i) => {
-                  const roll = state.pending[i] ?? null;
-                  if (session.concealed.includes(i)) {
+              <AutoHeight>
+                <div className="grid grid-cols-2 gap-2">
+                  <RollCard
+                    title="BEFORE"
+                    roll={state.current}
+                    action={
+                      session.auto ? null : (
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          disabled={state.pending.length === 0}
+                          onClick={() => session.choose("before")}
+                        >
+                          BEFORE 유지
+                        </Button>
+                      )
+                    }
+                  />
+                  {Array.from({ length: Math.max(1, state.pending.length) }, (_, i) => {
+                    const roll = state.pending[i] ?? null;
+                    if (session.concealed.includes(i)) {
+                      return (
+                        <ConcealedCard
+                          key={`concealed-${i}`}
+                          animate={settings.effects && !reduced}
+                          onReveal={() => {
+                            setFlipped(i);
+                            session.reveal(i);
+                          }}
+                        />
+                      );
+                    }
+                    const flash = flipped === i && settings.effects && !reduced;
                     return (
-                      <ConcealedCard
-                        key={`concealed-${i}`}
-                        animate={settings.effects && !reduced}
-                        onReveal={() => {
-                          setFlipped(i);
-                          session.reveal(i);
-                        }}
-                      />
+                      <div key={i} className="relative flex min-w-0 *:flex-1">
+                        <RollCard
+                          title="AFTER"
+                          roll={roll}
+                          revealId={last?.id}
+                          animate={animate}
+                          gradeUp={burst !== null && !!roll?.upgraded}
+                          action={
+                            session.auto ? null : (
+                              <Button className="w-full" disabled={!roll} onClick={() => session.choose(i)}>
+                                AFTER 적용
+                              </Button>
+                            )
+                          }
+                        />
+                        {flash ? <RevealFlash onDone={() => setFlipped(null)} /> : null}
+                      </div>
                     );
-                  }
-                  const flash = flipped === i && settings.effects && !reduced;
-                  return (
-                    <div key={i} className="relative flex min-w-0 *:flex-1">
-                      <RollCard
-                        title="AFTER"
-                        roll={roll}
-                        revealId={last?.id}
-                        animate={animate}
-                        gradeUp={burst !== null && !!roll?.upgraded}
-                        action={
-                          session.auto ? null : (
-                            <Button className="w-full" disabled={!roll} onClick={() => session.choose(i)}>
-                              AFTER 적용
-                            </Button>
-                          )
-                        }
-                      />
-                      {flash ? <RevealFlash onDone={() => setFlipped(null)} /> : null}
-                    </div>
-                  );
-                })}
-              </div>
+                  })}
+                </div>
+              </AutoHeight>
               <OddsRow
                 odds={upgradeOdds(kind, state.current.grade, state.pity)}
                 pity={state.pity}
@@ -192,24 +210,36 @@ function PotentialScreen({
             onOpenAuto={() => setDialog("auto")}
             onRestart={() => session.restart(settings)}
           />
-          {session.stoppedAtLimit ? (
-            <p className="m-0 text-[12px] text-muted-foreground">
-              자동 재설정은 한 번에 {AUTO_LIMIT.toLocaleString()}회까지만 돌려요. 목표를 바꿔 보세요.
-            </p>
-          ) : null}
+          <AnimatePresence initial={false}>
+            {session.stoppedAtLimit ? (
+              <m.div key="limit" {...listItem} className="-mt-3">
+                <p className="m-0 pt-3 text-[12px] text-muted-foreground">
+                  자동 재설정은 한 번에 {AUTO_LIMIT.toLocaleString()}회까지만 돌려요. 목표를 바꿔 보세요.
+                </p>
+              </m.div>
+            ) : null}
+          </AnimatePresence>
         </div>
       </Module>
-      {state ? <LedgerModule kind={kind} ledger={state.ledger} /> : null}
-      <SettingsModule
-        item={settings.item}
-        part={config.part}
-        level={config.level}
-        soulStep={config.soulStep}
-        onEditItem={() => setDialog("item")}
-        effects={settings.effects}
-        onEffects={(effects) => patch({ effects })}
-        onOpenInfo={() => setDialog("info")}
-      />
+      <AnimatePresence mode="popLayout" initial={false}>
+        {state ? (
+          <StackItem key="ledger">
+            <LedgerModule kind={kind} ledger={state.ledger} />
+          </StackItem>
+        ) : null}
+        <StackItem key="settings">
+          <SettingsModule
+            item={settings.item}
+            part={config.part}
+            level={config.level}
+            soulStep={config.soulStep}
+            onEditItem={() => setDialog("item")}
+            effects={settings.effects}
+            onEffects={(effects) => patch({ effects })}
+            onOpenInfo={() => setDialog("info")}
+          />
+        </StackItem>
+      </AnimatePresence>
       {dialog === "item" ? (
         <ItemSheetHost initial={draftOf(settings)} onApply={apply} onClose={() => setDialog(null)} />
       ) : null}
