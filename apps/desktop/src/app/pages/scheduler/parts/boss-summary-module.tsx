@@ -2,7 +2,9 @@ import { CYCLE_META, KoreanNumber, TimeFormat, nextReset, type BossCycle } from 
 import { Metric } from "@erda/ui/components/metric";
 import { Module } from "@erda/ui/components/module";
 import { Progress } from "@erda/ui/components/ui/progress";
+import { listItem } from "@erda/ui/lib/motion";
 import { Coins } from "lucide-react";
+import { AnimatePresence, m } from "motion/react";
 
 import { RollingValue } from "#/app/pages/shared/rolling-value.tsx";
 import type { BossView } from "#/features/boss/view.ts";
@@ -39,11 +41,15 @@ export function BossSummaryModule({ view, cycle, now }: { view: BossView; cycle:
         value={ready ? summary.cleared : 0}
         max={ready ? summary.total : 1}
       />
-      {ready && view.weeklyLimit ? (
-        <div className="mt-1.5 text-[11px] text-muted-foreground">
-          주간 보스 {view.weeklyLimit.count}/{view.weeklyLimit.limit}
-        </div>
-      ) : null}
+      <AnimatePresence initial={false}>
+        {ready && view.weeklyLimit ? (
+          <m.div key="limit" {...listItem}>
+            <div className="pt-1.5 text-[11px] text-muted-foreground">
+              주간 보스 {view.weeklyLimit.count}/{view.weeklyLimit.limit}
+            </div>
+          </m.div>
+        ) : null}
+      </AnimatePresence>
       <div className="mt-1.5 flex justify-between text-[11px] text-muted-foreground">
         <span>{CYCLE_META[cycle].resetLabel}</span>
         <span>초기화 {TimeFormat.relative(nextReset(cycle, now), now)}</span>

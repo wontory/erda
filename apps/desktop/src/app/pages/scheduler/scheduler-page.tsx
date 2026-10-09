@@ -1,9 +1,11 @@
 import { CYCLES, CYCLE_META, bossById, bossesOf, type BossCycle, type BossEntry, type BossRow } from "@erda/core";
 import { RefreshButton } from "@erda/ui/components/refresh-button";
 import { ScreenHeader } from "@erda/ui/components/screen-header";
+import { StackItem } from "@erda/ui/components/stack-item";
 import { Button } from "@erda/ui/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@erda/ui/components/ui/tabs";
 import { Check, Pencil } from "lucide-react";
+import { AnimatePresence } from "motion/react";
 import { useState } from "react";
 
 import { useNav } from "#/app/nav/context.ts";
@@ -90,47 +92,65 @@ export function SchedulerPage() {
         onSettings={() => void openSettingsAction()}
       />
       <div className="flex flex-col gap-2.5 px-3 pb-3">
-        <CycleTabs value={cycle} onChange={setCycle} />
-        <BossSummaryModule view={view} cycle={cycle} now={view.now} />
-        {scheduler && editing ? (
-          <EditList
-            entries={catalogEntries(view.rows)}
-            state={boss.state}
-            emptyMessage="이 주기에 등록한 보스 중 가격표에 있는 보스가 없어요"
-            onParty={onParty}
-            onPrice={onPrice}
-          />
-        ) : scheduler ? (
-          <>
-            <SchedulerSection
-              status={view.status}
-              errorMessage={view.errorMessage}
-              staleError={view.staleError}
-              rows={view.rows}
-              unregistered={view.unregistered}
-              onRetry={refresh}
-            />
-            <QuestModule cycle={cycle} items={view.homework} />
-          </>
-        ) : editing ? (
-          <EditList
-            entries={bossesOf(cycle)}
-            state={boss.state}
-            onToggleSelected={(id) => save(() => boss.toggleSelected(id))}
-            onParty={onParty}
-            onPrice={onPrice}
-          />
-        ) : (
-          <ManualList
-            rows={view.rows}
-            loading={view.status === "loading"}
-            onToggle={(id) => save(() => boss.toggleClear(id))}
-            onEdit={() => setEditing(true)}
-          />
-        )}
-        {view.schedulerAvailable ? (
-          <SettingsModule useScheduler={view.useScheduler} onChange={changeUseScheduler} />
-        ) : null}
+        <AnimatePresence mode="popLayout" initial={false}>
+          <StackItem key="tabs">
+            <CycleTabs value={cycle} onChange={setCycle} />
+          </StackItem>
+          <StackItem key="summary">
+            <BossSummaryModule view={view} cycle={cycle} now={view.now} />
+          </StackItem>
+          {scheduler && editing ? (
+            <StackItem key="edit">
+              <EditList
+                entries={catalogEntries(view.rows)}
+                state={boss.state}
+                emptyMessage="이 주기에 등록한 보스 중 가격표에 있는 보스가 없어요"
+                onParty={onParty}
+                onPrice={onPrice}
+              />
+            </StackItem>
+          ) : scheduler ? (
+            [
+              <StackItem key="scheduler">
+                <SchedulerSection
+                  status={view.status}
+                  errorMessage={view.errorMessage}
+                  staleError={view.staleError}
+                  rows={view.rows}
+                  unregistered={view.unregistered}
+                  onRetry={refresh}
+                />
+              </StackItem>,
+              <StackItem key="quest">
+                <QuestModule cycle={cycle} items={view.homework} />
+              </StackItem>,
+            ]
+          ) : editing ? (
+            <StackItem key="edit">
+              <EditList
+                entries={bossesOf(cycle)}
+                state={boss.state}
+                onToggleSelected={(id) => save(() => boss.toggleSelected(id))}
+                onParty={onParty}
+                onPrice={onPrice}
+              />
+            </StackItem>
+          ) : (
+            <StackItem key="manual">
+              <ManualList
+                rows={view.rows}
+                loading={view.status === "loading"}
+                onToggle={(id) => save(() => boss.toggleClear(id))}
+                onEdit={() => setEditing(true)}
+              />
+            </StackItem>
+          )}
+          {view.schedulerAvailable ? (
+            <StackItem key="settings">
+              <SettingsModule useScheduler={view.useScheduler} onChange={changeUseScheduler} />
+            </StackItem>
+          ) : null}
+        </AnimatePresence>
       </div>
     </>
   );
