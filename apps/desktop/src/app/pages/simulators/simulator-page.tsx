@@ -4,12 +4,15 @@ import { ScreenHeader } from "@erda/ui/components/screen-header";
 import { useNav } from "#/app/nav/context.ts";
 import { openSettingsAction } from "#/lib/tauri.ts";
 
+import { PotentialSimulator } from "./potential/potential-simulator.tsx";
 import { StarforceSimulator } from "./starforce/starforce-simulator.tsx";
 
 function SimulatorBody({ simulator }: { simulator: SimulatorId }) {
   switch (simulator) {
     case "starforce":
       return <StarforceSimulator />;
+    case "potential":
+      return <PotentialSimulator />;
   }
 }
 
@@ -19,7 +22,7 @@ export function SimulatorPage({ simulator }: { simulator: SimulatorId }) {
     <>
       <ScreenHeader
         title={SIMULATOR_META[simulator].title}
-        subtitle="시뮬레이터"
+        parent="시뮬레이터"
         onBack={pop}
         onSettings={() => void openSettingsAction()}
       />

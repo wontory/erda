@@ -15,4 +15,5 @@ export const DATA_KEYS = {
   bossState: "boss.state",
   bossUseScheduler: "boss.useScheduler",
   starforceSettings: "simulators.starforce",
+  potentialSettings: "simulators.potential",
 } as const;

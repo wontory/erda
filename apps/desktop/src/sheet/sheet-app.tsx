@@ -1,9 +1,22 @@
-import type { StarforceCandidate, StarforceItem, StarforceOptions } from "@erda/core";
+import type {
+  PotentialCandidate,
+  PotentialGoal,
+  PotentialGrade,
+  PotentialTarget,
+  StarforceCandidate,
+  StarforceItem,
+  StarforceOptions,
+} from "@erda/core";
+import { LoadingRow } from "@erda/ui/components/loading-row";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { invoke } from "@tauri-apps/api/core";
 import { emitTo } from "@tauri-apps/api/event";
 import { useEffect, useRef, useState } from "react";
 
+import { AutoSheet as PotentialAutoSheet } from "#/app/pages/simulators/potential/auto-sheet.tsx";
+import { InfoSheet as PotentialInfoSheet } from "#/app/pages/simulators/potential/info-sheet.tsx";
+import { ItemSheet as PotentialItemSheet, type ItemDraft } from "#/app/pages/simulators/potential/item-sheet.tsx";
+import { usePotentialData } from "#/app/pages/simulators/potential/use-potential-data.ts";
 import { AutoSheet as StarforceAutoSheet } from "#/app/pages/simulators/starforce/auto-sheet.tsx";
 import { InfoSheet as StarforceInfoSheet } from "#/app/pages/simulators/starforce/info-sheet.tsx";
 import { ItemSheet as StarforceItemSheet } from "#/app/pages/simulators/starforce/item-sheet.tsx";
@@ -25,9 +38,38 @@ const enqueue = (task: () => Promise<unknown>) => {
   queue = queue.then(task).catch(console.error);
 };
 
+function PotentialAuto({
+  props,
+  send,
+  close,
+}: {
+  props: { target: PotentialTarget; current: PotentialGrade; goal: PotentialGoal };
+  send: Send;
+  close: () => void;
+}) {
+  const data = usePotentialData();
+  if (!data.data) return <LoadingRow label="옵션표 불러오는 중…" />;
+  return (
+    <PotentialAutoSheet
+      data={data.data}
+      {...props}
+      onClose={close}
+      onStart={(goal, times) => send("start", { goal, times })}
+    />
+  );
+}
+
 function SheetView({ content, send, close }: { content: SheetContent; send: Send; close: () => void }) {
   const props = content.props as never;
   switch (content.kind) {
+    case "potential-item": {
+      const p = props as { initial: ItemDraft; equipped: EquippedView<PotentialCandidate> };
+      return <PotentialItemSheet {...p} onClose={close} onApply={(draft) => send("apply", draft)} />;
+    }
+    case "potential-auto":
+      return <PotentialAuto props={props} send={send} close={close} />;
+    case "potential-info":
+      return <PotentialInfoSheet {...(props as { dataDate: string })} />;
     case "starforce-item": {
       const p = props as {
         item: StarforceItem | null;
