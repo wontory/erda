@@ -1,6 +1,9 @@
 import { z } from "zod";
 
 export const SHEET_KINDS = [
+  "potential-item",
+  "potential-auto",
+  "potential-info",
   "starforce-item",
   "starforce-options",
   "starforce-auto",
