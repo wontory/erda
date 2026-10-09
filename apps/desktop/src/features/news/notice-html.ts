@@ -11,7 +11,12 @@ purify.addHook("afterSanitizeAttributes", (node) => {
     node.setAttribute("src", src.href);
     node.setAttribute("loading", "lazy");
     node.setAttribute("decoding", "async");
-  } else if (node instanceof HTMLAnchorElement) {
+    return;
+  }
+  // Only images keep their dimensions, so tables can't overflow the view.
+  node.removeAttribute("width");
+  node.removeAttribute("height");
+  if (node instanceof HTMLAnchorElement) {
     const href = toHttps(node.getAttribute("href"));
     if (href) node.setAttribute("href", href.href);
     else node.removeAttribute("href");
@@ -71,7 +76,7 @@ export function sanitizeNoticeHtml(dirty: string): NoticeHtml {
       "th",
       "td",
     ],
-    ALLOWED_ATTR: ["href", "src", "alt", "colspan", "rowspan"],
+    ALLOWED_ATTR: ["href", "src", "alt", "colspan", "rowspan", "width", "height"],
     RETURN_DOM_FRAGMENT: true,
   });
   const empty = !fragment.textContent?.trim() && !fragment.querySelector("img");
