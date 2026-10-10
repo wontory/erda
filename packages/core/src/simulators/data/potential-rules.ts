@@ -21,24 +21,6 @@ export const POTENTIAL_KIND_LABELS: Record<PotentialKind, string> = {
   soul: "소울",
 };
 
-export const UPGRADE_PPM: Record<
-  PotentialKind,
-  readonly [rareToEpic: number, epicToUnique: number, uniqueToLegendary: number]
-> = {
-  main: [150_000, 35_000, 14_000],
-  additional: [23_810, 9_804, 7_000],
-  soul: [15_000, 5_875, 3_322],
-};
-
-export const UPGRADE_CEILINGS: Record<
-  PotentialKind,
-  readonly [rareToEpic: number, epicToUnique: number, uniqueToLegendary: number]
-> = {
-  main: [10, 42, 107],
-  additional: [62, 152, 214],
-  soul: [100, 256, 451],
-};
-
 type GradeMeso = readonly [rare: number, epic: number, unique: number, legendary: number];
 
 export const RESET_MESO_BANDS: ReadonlyArray<readonly [minLevel: number, main: GradeMeso, additional: GradeMeso]> = [
@@ -83,3 +65,93 @@ export const LINE_LIMITS: ReadonlyArray<{ pattern: RegExp; max: number }> = [
   { pattern: /^피격 시 \d+% 확률로 데미지의 \d+% 무시$/, max: 2 },
   { pattern: /^피격 시 \d+% 확률로 \d+초간 무적$/, max: 2 },
 ];
+
+export type PotentialTable = "main" | "additional" | "gold" | "silver" | "bronze";
+
+export const POTENTIAL_METHODS = ["meso", "black", "gold", "silver", "white", "bronze", "prime"] as const;
+export type PotentialMethod = (typeof POTENTIAL_METHODS)[number];
+
+export interface MethodRule {
+  label: string;
+  table: PotentialTable | "soul";
+  upgradePpm: readonly number[];
+  ceilings: readonly number[] | null;
+  minGrade: PotentialGrade;
+  maxGrade: PotentialGrade;
+  fixFirst: boolean;
+  meso: boolean;
+}
+
+const MAIN_UPGRADE = { upgradePpm: [150_000, 35_000, 14_000], ceilings: [10, 42, 107] };
+const PRIME = {
+  upgradePpm: [],
+  ceilings: null,
+  minGrade: "legendary",
+  maxGrade: "legendary",
+  fixFirst: true,
+  meso: false,
+} as const;
+const ANY_GRADE = { minGrade: "rare", maxGrade: "legendary", fixFirst: false } as const;
+
+export const METHOD_RULES: Readonly<Record<PotentialKind, Readonly<Partial<Record<PotentialMethod, MethodRule>>>>> = {
+  main: {
+    meso: { label: "메소", table: "main", ...MAIN_UPGRADE, ...ANY_GRADE, meso: true },
+    black: { label: "블랙 큐브", table: "main", ...MAIN_UPGRADE, ...ANY_GRADE, meso: false },
+    gold: {
+      label: "골드 큐브",
+      table: "gold",
+      upgradePpm: [79_994, 16_959, 1_996],
+      ceilings: null,
+      ...ANY_GRADE,
+      meso: false,
+    },
+    silver: {
+      label: "실버 큐브",
+      table: "silver",
+      upgradePpm: [47_619, 11_858],
+      ceilings: null,
+      ...ANY_GRADE,
+      maxGrade: "unique",
+      meso: false,
+    },
+    prime: { label: "프라임 큐브", table: "main", ...PRIME },
+  },
+  additional: {
+    meso: {
+      label: "메소",
+      table: "additional",
+      upgradePpm: [23_810, 9_804, 7_000],
+      ceilings: [62, 152, 214],
+      ...ANY_GRADE,
+      meso: true,
+    },
+    white: {
+      label: "화이트 에디셔널 큐브",
+      table: "additional",
+      upgradePpm: [47_619, 19_608, 7_000],
+      ceilings: [31, 76, 214],
+      ...ANY_GRADE,
+      meso: false,
+    },
+    bronze: {
+      label: "브론즈 에디셔널 큐브",
+      table: "bronze",
+      upgradePpm: [4_000],
+      ceilings: null,
+      ...ANY_GRADE,
+      maxGrade: "epic",
+      meso: false,
+    },
+    prime: { label: "프라임 에디셔널 큐브", table: "additional", ...PRIME },
+  },
+  soul: {
+    meso: {
+      label: "메소",
+      table: "soul",
+      upgradePpm: [15_000, 5_875, 3_322],
+      ceilings: [100, 256, 451],
+      ...ANY_GRADE,
+      meso: true,
+    },
+  },
+};
