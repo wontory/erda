@@ -3,7 +3,7 @@ import { IconTile } from "@erda/ui/components/icon-tile";
 import { Module } from "@erda/ui/components/module";
 import { Item, ItemActions, ItemContent, ItemMedia, ItemTitle } from "@erda/ui/components/ui/item";
 import { Switch } from "@erda/ui/components/ui/switch";
-import { CircleHelp, Settings2, Sparkles, Sword } from "lucide-react";
+import { CircleHelp, Clover, Settings2, Sparkles, Sword } from "lucide-react";
 import { useId } from "react";
 
 import { LinkRow } from "#/app/pages/shared/link-row.tsx";
@@ -16,6 +16,8 @@ export function SettingsModule({
   onEditItem,
   effects,
   onEffects,
+  miracle,
+  onMiracle,
   onOpenInfo,
 }: {
   item: PotentialItem | null;
@@ -25,9 +27,12 @@ export function SettingsModule({
   onEditItem: () => void;
   effects: boolean;
   onEffects: (on: boolean) => void;
+  miracle: boolean;
+  onMiracle: (on: boolean) => void;
   onOpenInfo: () => void;
 }) {
   const id = useId();
+  const miracleId = useId();
   return (
     <Module title="설정" icon={Settings2}>
       <LinkRow
@@ -36,6 +41,17 @@ export function SettingsModule({
         value={`${item ? item.part : POTENTIAL_PARTS[part - 1]} · Lv.${level}${part === WEAPON_PART ? ` · 증폭 ${soulStep}단계` : ""}`}
         onClick={onEditItem}
       />
+      <Item size="row" render={(props) => <label htmlFor={miracleId} {...props} />}>
+        <ItemMedia>
+          <IconTile icon={Clover} color="bg-emerald-500" />
+        </ItemMedia>
+        <ItemContent className="min-w-0">
+          <ItemTitle>미라클 타임</ItemTitle>
+        </ItemContent>
+        <ItemActions>
+          <Switch id={miracleId} size="sm" checked={miracle} onCheckedChange={(on) => onMiracle(on)} />
+        </ItemActions>
+      </Item>
       <Item size="row" render={(props) => <label htmlFor={id} {...props} />}>
         <ItemMedia>
           <IconTile icon={Sparkles} color="bg-purple-500" />

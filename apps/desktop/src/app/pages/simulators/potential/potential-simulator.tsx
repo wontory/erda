@@ -1,8 +1,16 @@
 import { describeError } from "@erda/api/errors";
 import {
+  POTENTIAL_GRADE_LABELS,
   POTENTIAL_KINDS,
   POTENTIAL_KIND_LABELS,
+  canAutoFrom,
+  canUseMethod,
+  lineTables,
+  formatMeso,
   hasPendingUpgrade,
+  methodRule,
+  methodsOf,
+  pityOf,
   matchLines,
   resetMeso,
   tripleAllowed,
@@ -11,6 +19,7 @@ import {
   type PotentialData,
   type PotentialGoal,
   type PotentialKind,
+  type PotentialMethod,
   type PotentialSettings,
 } from "@erda/core";
 import { AutoHeight } from "@erda/ui/components/auto-height";
@@ -19,6 +28,7 @@ import { LoadingRow } from "@erda/ui/components/loading-row";
 import { Module } from "@erda/ui/components/module";
 import { StackItem } from "@erda/ui/components/stack-item";
 import { Swap } from "@erda/ui/components/swap";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@erda/ui/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@erda/ui/components/ui/tabs";
 import { useStableHeight } from "@erda/ui/hooks/use-stable-height";
 import { listItem } from "@erda/ui/lib/motion";
@@ -81,23 +91,36 @@ function PotentialScreen({
   const reduced = useReducedMotion() ?? false;
   const [kindWanted, setKindWanted] = useState(settings.kind);
   const session = usePotentialSession(data, settings, kindWanted);
-  const { kind, config, state, last } = session;
-  const target = useMemo(() => targetOf(config, kind), [config, kind]);
+  const { kind, method, config, state, last } = session;
+  const target = useMemo(() => targetOf(config, kind, method), [config, kind, method]);
+  const rule = methodRule(target);
+  const methods = methodsOf(kind);
+  const pity = state ? pityOf(state, method) : 0;
+  const usable =
+    state !== null &&
+    canUseMethod(target, state.current.grade) &&
+    lineTables(data, target, state.current.grade) !== null;
+  const canAuto = state !== null && usable && canAutoFrom(target, state.current.grade);
   const busy = session.auto || session.autoElsewhere;
   const animate = settings.effects && !reduced && !session.auto && last !== null;
-  const burst = animate && last?.upgraded ? last.id : null;
   const [flipped, setFlipped] = useState<number | null>(null);
+  const [revealed, setRevealed] = useState<{ index: number; id: number; pending: unknown } | null>(null);
+  const revealBurst =
+    settings.effects && !reduced && revealed !== null && revealed.pending === state?.pending ? revealed : null;
+  const burst = animate && last?.upgraded ? last.id : revealBurst ? -revealBurst.id : null;
   const cards = Math.max(1, state?.pending.length ?? 0);
   const gridRef = useStableHeight<HTMLDivElement>(`${kind}:${config.part}:${config.level}:${cards}`);
   const selectKind = (k: PotentialKind) => {
     setKindWanted(k);
     patch({ kind: k });
   };
+  const selectMethod = (m: PotentialMethod) => patch({ methods: { ...settings.methods, [kind]: m } });
+  const methodItems = methods.map((m) => ({ value: m, label: methodRule({ kind, method: m })?.label ?? m }));
 
   const apply = (d: ItemDraft) => {
     const start = {} as PotentialSettings["start"];
     for (const k of POTENTIAL_KINDS) {
-      const t = { kind: k, part: d.part, level: d.level, soulStep: d.soulStep };
+      const t = { kind: k, part: d.part, level: d.level, soulStep: d.soulStep, method: "meso" } as const;
       start[k] = { grade: d.start[k].grade, lines: matchLines(data, t, d.start[k].grade, d.start[k].texts) };
     }
     const next: PotentialSettings = {
@@ -137,6 +160,28 @@ function PotentialScreen({
               ))}
             </TabsList>
           </Tabs>
+          {methods.length > 1 ? (
+            <Select
+              items={methodItems}
+              value={method}
+              onValueChange={(v) => {
+                const m = methods.find((o) => o === v);
+                if (m) selectMethod(m);
+              }}
+              disabled={busy || dialog === "auto"}
+            >
+              <SelectTrigger className="w-full" aria-label="재설정 방식">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {methodItems.map((m) => (
+                  <SelectItem key={m.value} value={m.value}>
+                    {m.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : null}
           {state ? (
             <>
               <AutoHeight>
@@ -156,6 +201,9 @@ function PotentialScreen({
                           animate={settings.effects && !reduced}
                           onReveal={() => {
                             setFlipped(i);
+                            if (roll?.upgraded) {
+                              setRevealed((r) => ({ index: i, id: (r?.id ?? 0) + 1, pending: state.pending }));
+                            }
                             session.reveal(i);
                           }}
                         />
@@ -169,7 +217,7 @@ function PotentialScreen({
                           roll={roll}
                           revealId={last?.id}
                           animate={animate}
-                          gradeUp={burst !== null && !!roll?.upgraded}
+                          gradeUp={revealBurst ? revealBurst.index === i : burst !== null && !!roll?.upgraded}
                           selectLabel="AFTER 적용"
                           onSelect={session.auto || !roll ? undefined : () => session.choose(i)}
                         />
@@ -179,18 +227,34 @@ function PotentialScreen({
                   })}
                 </div>
               </AutoHeight>
-              <OddsRow
-                odds={upgradeOdds(kind, state.current.grade, state.pity)}
-                pity={state.pity}
-                cost={resetMeso(target, state.current.grade)}
-              />
+              <div className="relative">
+                <OddsRow
+                  className={usable ? undefined : "invisible"}
+                  odds={upgradeOdds(target, state.current.grade, pity, settings.miracle)}
+                  topLabel={state.current.grade === "legendary" ? "최고 등급" : "큐브 최고 등급"}
+                  pity={pity}
+                  cost={rule?.meso ? formatMeso(BigInt(resetMeso(target, state.current.grade))) : "큐브 1개"}
+                />
+                {usable ? null : (
+                  <p className="absolute inset-0 m-0 flex items-center text-[12px] text-muted-foreground">
+                    {rule && !canUseMethod(target, state.current.grade)
+                      ? `${rule.label}는 ${
+                          rule.minGrade === rule.maxGrade
+                            ? POTENTIAL_GRADE_LABELS[rule.minGrade]
+                            : `${POTENTIAL_GRADE_LABELS[rule.minGrade]}~${POTENTIAL_GRADE_LABELS[rule.maxGrade]}`
+                        } 장비에만 쓸 수 있어요.`
+                      : "이 방식은 이 부위와 레벨에 공개된 옵션표가 없어요."}
+                  </p>
+                )}
+              </div>
             </>
           ) : (
             <p className="m-0 text-[12px] text-muted-foreground">이 부위와 레벨에는 공개된 옵션표가 없어요.</p>
           )}
           <ActionBar
-            canReset={state !== null && !session.autoElsewhere && !hasPendingUpgrade(state)}
-            tripleBlocked={state !== null && !tripleAllowed(kind, state.current.grade, state.pity)}
+            canReset={state !== null && usable && !session.autoElsewhere && !hasPendingUpgrade(state)}
+            canAuto={canAuto}
+            tripleBlocked={state !== null && !tripleAllowed(target, state.current.grade, pity)}
             auto={session.auto}
             onReset={session.reset}
             onStopAuto={session.stopAuto}
@@ -223,6 +287,8 @@ function PotentialScreen({
             onEditItem={() => setDialog("item")}
             effects={settings.effects}
             onEffects={(effects) => patch({ effects })}
+            miracle={settings.miracle}
+            onMiracle={(miracle) => patch({ miracle })}
             onOpenInfo={() => setDialog("info")}
           />
         </StackItem>

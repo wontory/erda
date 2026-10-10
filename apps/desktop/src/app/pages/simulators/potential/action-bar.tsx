@@ -4,6 +4,7 @@ import { FastForward, RotateCcw, Square } from "lucide-react";
 
 export function ActionBar({
   canReset,
+  canAuto,
   tripleBlocked,
   auto,
   onReset,
@@ -12,6 +13,7 @@ export function ActionBar({
   onRestart,
 }: {
   canReset: boolean;
+  canAuto: boolean;
   tripleBlocked: boolean;
   auto: boolean;
   onReset: (times: number) => void;
@@ -54,7 +56,13 @@ export function ActionBar({
       >
         {TRIPLE_RESET_TIMES}회 재설정
       </Button>
-      <Button size="lg" variant="outline" className="h-10 text-[14px]" disabled={!canReset} onClick={onOpenAuto}>
+      <Button
+        size="lg"
+        variant="outline"
+        className="h-10 text-[14px]"
+        disabled={!canReset || !canAuto}
+        onClick={onOpenAuto}
+      >
         <FastForward />
         자동
       </Button>
