@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import * as data from "./data/potential-tables.ts";
 import {
+  EMPTY_POTENTIAL_LEDGER,
   autoStep,
+  canAutoFrom,
+  canUseMethod,
+  methodsOf,
   canStartAuto,
   meetsTarget,
   tripleAllowed,
@@ -25,7 +29,8 @@ import {
 } from "./potential.ts";
 import { PPM } from "./starforce.ts";
 
-const WEAPON_200: PotentialTarget = { kind: "main", part: 1, level: 200, soulStep: 1 };
+const MESO_MAIN = { kind: "main", method: "meso" } as const;
+const WEAPON_200: PotentialTarget = { kind: "main", part: 1, level: 200, soulStep: 1, method: "meso" };
 const low: Rng = () => 0;
 const high: Rng = (bound) => bound - 1;
 
@@ -61,18 +66,22 @@ describe("lineTables", () => {
   });
 
   it("uses the closest band below for levels without listed items", () => {
-    const hat = { kind: "main", part: 6, level: 85, soulStep: 1 } as const;
+    const hat = { kind: "main", part: 6, level: 85, soulStep: 1, method: "meso" } as const;
     expect(lineTables(data, hat, "rare")).toEqual(lineTables(data, { ...hat, level: 80 }, "rare"));
   });
 
   it("has no table below a part's first listed level", () => {
-    expect(lineTables(data, { kind: "main", part: 2, level: 30, soulStep: 1 }, "legendary")).toBeNull();
-    expect(lineTables(data, { kind: "main", part: 2, level: 100, soulStep: 1 }, "legendary")).not.toBeNull();
+    expect(lineTables(data, { kind: "main", part: 2, level: 30, soulStep: 1, method: "meso" }, "legendary")).toBeNull();
+    expect(
+      lineTables(data, { kind: "main", part: 2, level: 100, soulStep: 1, method: "meso" }, "legendary"),
+    ).not.toBeNull();
   });
 
   it("offers soul potential only on weapons", () => {
-    expect(lineTables(data, { kind: "soul", part: 6, level: 200, soulStep: 1 }, "rare")).toBeNull();
-    expect(lineTables(data, { kind: "soul", part: 1, level: 200, soulStep: 4 }, "legendary")).not.toBeNull();
+    expect(lineTables(data, { kind: "soul", part: 6, level: 200, soulStep: 1, method: "meso" }, "rare")).toBeNull();
+    expect(
+      lineTables(data, { kind: "soul", part: 1, level: 200, soulStep: 4, method: "meso" }, "legendary"),
+    ).not.toBeNull();
   });
 });
 
@@ -112,10 +121,28 @@ describe("costs and odds", () => {
   });
 
   it("guarantees the upgrade on the ceiling attempt", () => {
-    expect(upgradeOdds("main", "rare", 0)).toEqual({ ppm: 150_000, ceiling: 10, guaranteed: false });
-    expect(upgradeOdds("main", "rare", 9)).toEqual({ ppm: PPM, ceiling: 10, guaranteed: true });
-    expect(upgradeOdds("additional", "unique", 0)?.ppm).toBe(7_000);
-    expect(upgradeOdds("main", "legendary", 0)).toBeNull();
+    expect(upgradeOdds({ kind: "main", method: "meso" }, "rare", 0)).toEqual({
+      ppm: 150_000,
+      ceiling: 10,
+      guaranteed: false,
+    });
+    expect(upgradeOdds({ kind: "main", method: "meso" }, "rare", 9)).toEqual({
+      ppm: PPM,
+      ceiling: 10,
+      guaranteed: true,
+    });
+    expect(upgradeOdds({ kind: "additional", method: "meso" }, "unique", 0)?.ppm).toBe(7_000);
+    expect(upgradeOdds({ kind: "main", method: "meso" }, "legendary", 0)).toBeNull();
+  });
+
+  it("doubles the upgrade odds during miracle time and keeps the ceiling", () => {
+    expect(upgradeOdds({ kind: "main", method: "meso" }, "epic", 0, true)).toEqual({
+      ppm: 70_000,
+      ceiling: 42,
+      guaranteed: false,
+    });
+    expect(upgradeOdds({ kind: "soul", method: "meso" }, "unique", 0, true)?.ppm).toBe(6_644);
+    expect(upgradeOdds({ kind: "main", method: "meso" }, "rare", 9, true)?.ppm).toBe(PPM);
   });
 });
 
@@ -132,16 +159,16 @@ describe("resetPotential", () => {
 
   it("counts resets, upgrades, meso and the pity counter", () => {
     const failed = resetPotential(start(), data, WEAPON_200, high)!;
-    expect(failed.pity).toBe(1);
-    expect(failed.ledger).toEqual({ resets: 1, upgrades: 0, meso: 18_000_000n });
+    expect(failed.pity).toEqual({ meso: 1 });
+    expect(failed.ledger).toEqual({ resets: 1, upgrades: 0, meso: 18_000_000n, cubes: {} });
     const upgraded = resetPotential(failed, data, WEAPON_200, low)!;
     expect(upgraded.pending[0].grade).toBe("unique");
-    expect(upgraded.pity).toBe(0);
-    expect(upgraded.ledger).toEqual({ resets: 2, upgrades: 1, meso: 36_000_000n });
+    expect(upgraded.pity).toEqual({ meso: 0 });
+    expect(upgraded.ledger).toEqual({ resets: 2, upgrades: 1, meso: 36_000_000n, cubes: {} });
   });
 
   it("upgrades on the ceiling attempt even with a failing roll", () => {
-    const state = { ...start(), pity: 41 };
+    const state = { ...start(), pity: { meso: 41 } };
     const r = resetPotential(state, data, WEAPON_200, high)!;
     expect(r.pending[0]).toMatchObject({ grade: "unique", upgraded: true, guaranteed: true });
   });
@@ -150,17 +177,45 @@ describe("resetPotential", () => {
     const r = resetPotential(start(), data, WEAPON_200, high, 3)!;
     expect(r.pending).toHaveLength(3);
     expect(r.pending.every((p) => p.grade === "epic")).toBe(true);
-    expect(r.pity).toBe(3);
-    expect(r.ledger).toEqual({ resets: 3, upgrades: 0, meso: 54_000_000n });
+    expect(r.pity).toEqual({ meso: 3 });
+    expect(r.ledger).toEqual({ resets: 3, upgrades: 0, meso: 54_000_000n, cubes: {} });
     expect(choosePotential(r, 2).current.lines).toEqual(r.pending[2].lines);
     expect(choosePotential(r, "before").pending).toEqual([]);
   });
 
+  it("upgrades on a miracle time roll that would fail otherwise", () => {
+    const rng = () => sequence(50_000);
+    expect(resetPotential(start(), data, WEAPON_200, rng())!.pending[0].upgraded).toBe(false);
+    expect(resetPotential(start(), data, WEAPON_200, rng(), 1, true)!.pending[0]).toMatchObject({
+      grade: "unique",
+      upgraded: true,
+    });
+  });
+
+  it("counts cubes instead of meso and keeps a pity counter per method", () => {
+    const black = { ...WEAPON_200, method: "black" } as const;
+    const failed = resetPotential(resetPotential(start(), data, WEAPON_200, high)!, data, black, high)!;
+    expect(failed.pity).toEqual({ meso: 1, black: 1 });
+    expect(failed.ledger).toEqual({ resets: 2, upgrades: 0, meso: 18_000_000n, cubes: { black: 1 } });
+    const upgraded = resetPotential(failed, data, black, low)!;
+    expect(upgraded.pity).toEqual({ black: 0 });
+  });
+
+  it("keeps the first line with a prime cube and only rolls legendary items", () => {
+    const prime = { ...WEAPON_200, method: "prime" } as const;
+    expect(resetPotential(start(), data, prime, high)).toBeNull();
+    const legendary = initialPotentialState(data, WEAPON_200, { grade: "legendary", lines: [] }, low)!;
+    const r = resetPotential(legendary, data, prime, sequence(7, 3, 5))!;
+    expect(r.pending[0]).toMatchObject({ grade: "legendary", upgraded: false });
+    expect(r.pending[0].lines[0]).toEqual(legendary.current.lines[0]);
+    expect(r.ledger.cubes).toEqual({ prime: 1 });
+  });
+
   it("counts the ceiling across the three results", () => {
-    const r = resetPotential({ ...start(), pity: 40 }, data, WEAPON_200, high, 3)!;
+    const r = resetPotential({ ...start(), pity: { meso: 40 } }, data, WEAPON_200, high, 3)!;
     expect(r.pending.map((p) => p.grade)).toEqual(["epic", "unique", "epic"]);
     expect(r.pending[1].guaranteed).toBe(true);
-    expect(r.pity).toBe(1);
+    expect(r.pity).toEqual({ meso: 1 });
   });
 });
 
@@ -218,8 +273,8 @@ describe("auto targets", () => {
     const base: PotentialState = {
       current: { grade: "legendary", lines: [] },
       pending: [],
-      pity: 0,
-      ledger: { resets: 0, upgrades: 0, meso: 0n },
+      pity: {},
+      ledger: EMPTY_POTENTIAL_LEDGER,
     };
     const goal: PotentialGoal = { grade: "legendary", targets: [["STR +12%", null, null]] };
     const plain = {
@@ -237,8 +292,8 @@ describe("auto targets", () => {
     const base: PotentialState = {
       current: { grade: "rare", lines: [] },
       pending: [],
-      pity: 0,
-      ledger: { resets: 0, upgrades: 0, meso: 0n },
+      pity: {},
+      ledger: EMPTY_POTENTIAL_LEDGER,
     };
     const goal: PotentialGoal = { grade: "unique", targets: [] };
     const epic = { grade: "epic", lines: [], upgraded: true, guaranteed: false } as const;
@@ -255,8 +310,8 @@ describe("auto targets", () => {
     const base: PotentialState = {
       current: { grade: "unique", lines: [] },
       pending: [],
-      pity: 0,
-      ledger: { resets: 0, upgrades: 0, meso: 0n },
+      pity: {},
+      ledger: EMPTY_POTENTIAL_LEDGER,
     };
     const goal: PotentialGoal = { grade: "legendary", targets: [["STR +12%", null, null]] };
     const miss = {
@@ -281,12 +336,58 @@ describe("auto targets", () => {
   });
 });
 
+describe("reset methods", () => {
+  it("uses each cube's official odds, ceilings and grade range", () => {
+    expect(upgradeOdds({ kind: "main", method: "black" }, "epic", 41)).toEqual({
+      ppm: PPM,
+      ceiling: 42,
+      guaranteed: true,
+    });
+    expect(upgradeOdds({ kind: "main", method: "gold" }, "unique", 500)).toEqual({
+      ppm: 1_996,
+      ceiling: null,
+      guaranteed: false,
+    });
+    expect(upgradeOdds({ kind: "main", method: "silver" }, "unique", 0)).toBeNull();
+    expect(upgradeOdds({ kind: "additional", method: "white" }, "rare", 0)).toEqual({
+      ppm: 47_619,
+      ceiling: 31,
+      guaranteed: false,
+    });
+    expect(upgradeOdds({ kind: "additional", method: "bronze" }, "rare", 0, true)?.ppm).toBe(8_000);
+    expect(canUseMethod({ kind: "main", method: "silver" }, "legendary")).toBe(false);
+    expect(canUseMethod({ kind: "additional", method: "bronze" }, "epic")).toBe(true);
+    expect(canUseMethod({ kind: "soul", method: "black" }, "rare")).toBe(false);
+    expect(methodsOf("additional")).toEqual(["meso", "white", "bronze", "prime"]);
+  });
+
+  it("reads the gold, silver and bronze cube tables", () => {
+    const gold = lineTables(data, { ...WEAPON_200, method: "gold" }, "legendary")!;
+    const black = lineTables(data, WEAPON_200, "legendary")!;
+    expect(gold).not.toBeNull();
+    expect(gold[0]).not.toEqual(black[0]);
+    expect(lineTables(data, { ...WEAPON_200, method: "silver" }, "unique")).not.toBeNull();
+    expect(lineTables(data, { ...WEAPON_200, method: "silver" }, "legendary")).toBeNull();
+    expect(lineTables(data, { ...WEAPON_200, kind: "additional", method: "bronze" }, "epic")).not.toBeNull();
+    expect(lineTables(data, { ...WEAPON_200, kind: "additional", method: "bronze" }, "unique")).toBeNull();
+  });
+
+  it("stops auto reset goals above the cube's best grade", () => {
+    expect(canStartAuto("rare", { grade: "legendary", targets: [] }, "unique")).toBe(false);
+    expect(canStartAuto("rare", { grade: "unique", targets: [] }, "unique")).toBe(true);
+    expect(canAutoFrom({ kind: "main", method: "silver" }, "unique")).toBe(false);
+    expect(canAutoFrom({ kind: "main", method: "gold" }, "legendary")).toBe(true);
+  });
+});
+
 describe("tripleAllowed", () => {
   it("blocks three resets when the guaranteed upgrade is fewer than three resets away", () => {
-    expect(tripleAllowed("main", "rare", 0)).toBe(true);
-    expect(tripleAllowed("main", "rare", 7)).toBe(true);
-    expect(tripleAllowed("main", "rare", 8)).toBe(false);
-    expect(tripleAllowed("main", "legendary", 0)).toBe(true);
+    expect(tripleAllowed(MESO_MAIN, "rare", 0)).toBe(true);
+    expect(tripleAllowed(MESO_MAIN, "rare", 7)).toBe(true);
+    expect(tripleAllowed(MESO_MAIN, "rare", 8)).toBe(false);
+    expect(tripleAllowed(MESO_MAIN, "legendary", 0)).toBe(true);
+    expect(tripleAllowed({ kind: "main", method: "black" }, "rare", 8)).toBe(false);
+    expect(tripleAllowed({ kind: "main", method: "gold" }, "rare", 500)).toBe(true);
   });
 });
 

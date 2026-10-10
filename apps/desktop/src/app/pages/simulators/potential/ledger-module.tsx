@@ -1,4 +1,11 @@
-import { POTENTIAL_KIND_LABELS, formatMeso, type PotentialKind, type PotentialLedger } from "@erda/core";
+import {
+  POTENTIAL_KIND_LABELS,
+  POTENTIAL_METHODS,
+  formatMeso,
+  methodRule,
+  type PotentialKind,
+  type PotentialLedger,
+} from "@erda/core";
 import { Metric } from "@erda/ui/components/metric";
 import { Module } from "@erda/ui/components/module";
 import { History } from "lucide-react";
@@ -13,11 +20,25 @@ export function LedgerModule({ kind, ledger }: { kind: PotentialKind; ledger: Po
           <Metric title="재설정" value={<RollingValue value={String(ledger.resets)} />} />
           <Metric title="등급 상승" value={<RollingValue value={String(ledger.upgrades)} />} />
         </div>
-        <div className="flex items-baseline justify-between gap-2 rounded-lg bg-foreground/4 px-2.5 py-2">
-          <span className="text-[12px] text-muted-foreground">총 사용 메소</span>
-          <span className="text-[15px] font-semibold text-warning tabular-nums">
-            <RollingValue value={formatMeso(ledger.meso)} />
-          </span>
+        <div className="flex flex-col gap-1.5 rounded-lg bg-foreground/4 px-2.5 py-2">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-[12px] text-muted-foreground">총 사용 메소</span>
+            <span className="text-[15px] font-semibold text-warning tabular-nums">
+              <RollingValue value={formatMeso(ledger.meso)} />
+            </span>
+          </div>
+          {POTENTIAL_METHODS.flatMap((m) => {
+            const used = ledger.cubes[m];
+            if (!used) return [];
+            return [
+              <div key={m} className="flex items-baseline justify-between gap-2">
+                <span className="text-[12px] text-muted-foreground">{methodRule({ kind, method: m })?.label}</span>
+                <span className="text-[13px] font-semibold tabular-nums">
+                  <RollingValue value={`${used.toLocaleString()}개`} />
+                </span>
+              </div>,
+            ];
+          })}
         </div>
       </div>
     </Module>

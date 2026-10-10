@@ -2,18 +2,21 @@ import { z } from "zod";
 
 import {
   LINE_LIMITS,
+  METHOD_RULES,
   POTENTIAL_GRADES,
   POTENTIAL_KINDS,
   POTENTIAL_MAX_LEVEL,
+  POTENTIAL_METHODS,
   POTENTIAL_PARTS,
   RESET_MESO_BANDS,
   SOUL_RESET_MESO,
   SOUL_STEPS,
-  UPGRADE_CEILINGS,
-  UPGRADE_PPM,
   WEAPON_PART,
+  type MethodRule,
   type PotentialGrade,
   type PotentialKind,
+  type PotentialMethod,
+  type PotentialTable,
 } from "#/simulators/data/potential-rules.ts";
 import { PPM } from "#/simulators/starforce.ts";
 
@@ -21,7 +24,7 @@ export interface PotentialData {
   POTENTIAL_DATA_DATE: string;
   POTENTIAL_OPTIONS: readonly string[];
   POTENTIAL_TABLES: readonly (readonly number[])[];
-  POTENTIAL_BANDS: Readonly<Record<"main" | "additional", readonly (readonly (readonly (readonly number[])[])[])[]>>;
+  POTENTIAL_BANDS: Readonly<Record<PotentialTable, readonly (readonly (readonly (readonly number[])[])[])[]>>;
   SOUL_POTENTIAL_TABLES: readonly (readonly (readonly number[])[])[];
 }
 
@@ -32,6 +35,7 @@ export interface PotentialTarget {
   part: number;
   level: number;
   soulStep: number;
+  method: PotentialMethod;
 }
 
 export interface OptionEntry {
@@ -59,6 +63,19 @@ export const lineGrade = (grade: PotentialGrade, line: PotentialLine): Potential
 
 export const supportsKind = (kind: PotentialKind, part: number): boolean => kind !== "soul" || part === WEAPON_PART;
 
+export const methodRule = (target: Pick<PotentialTarget, "kind" | "method">): MethodRule | null =>
+  METHOD_RULES[target.kind][target.method] ?? null;
+
+export const methodsOf = (kind: PotentialKind): PotentialMethod[] =>
+  POTENTIAL_METHODS.filter((m) => METHOD_RULES[kind][m] !== undefined);
+
+export function canUseMethod(target: Pick<PotentialTarget, "kind" | "method">, grade: PotentialGrade): boolean {
+  const rule = methodRule(target);
+  if (!rule) return false;
+  const g = gradeIndex(grade);
+  return g >= gradeIndex(rule.minGrade) && g <= gradeIndex(rule.maxGrade);
+}
+
 export const clampPotentialLevel = (level: number): number =>
   Math.min(POTENTIAL_MAX_LEVEL, Math.max(0, Math.trunc(level)));
 
@@ -78,13 +95,14 @@ function decodeTable(data: PotentialData, id: number): OptionEntry[] {
 }
 
 export function lineTables(data: PotentialData, target: PotentialTarget, grade: PotentialGrade): LineTables | null {
-  if (!supportsKind(target.kind, target.part)) return null;
+  const rule = methodRule(target);
+  if (!rule || !supportsKind(target.kind, target.part)) return null;
   const g = gradeIndex(grade);
   let ids: readonly number[] | undefined;
-  if (target.kind === "soul") {
+  if (rule.table === "soul") {
     ids = data.SOUL_POTENTIAL_TABLES[g]?.[target.soulStep - 1];
   } else {
-    const bands = data.POTENTIAL_BANDS[target.kind][target.part - 1]?.[g] ?? [];
+    const bands = data.POTENTIAL_BANDS[rule.table][target.part - 1]?.[g] ?? [];
     let band: readonly number[] | undefined;
     for (const b of bands) if (b[0] <= target.level) band = b;
     ids = band?.slice(1);
@@ -116,10 +134,15 @@ function pick(entries: readonly OptionEntry[], picked: readonly PotentialLine[],
 const sameLines = (a: readonly PotentialLine[], b: readonly PotentialLine[]): boolean =>
   a.length === b.length && a.every((l, i) => l.text === b[i].text);
 
-export function rollLines(tables: LineTables, rng: Rng, previous?: readonly PotentialLine[]): PotentialLine[] {
+export function rollLines(
+  tables: LineTables,
+  rng: Rng,
+  previous?: readonly PotentialLine[],
+  fixed?: PotentialLine,
+): PotentialLine[] {
   for (let tries = 0; ; tries++) {
-    const lines: PotentialLine[] = [];
-    for (const table of tables) lines.push(pick(table, lines, rng));
+    const lines: PotentialLine[] = fixed ? [fixed] : [];
+    for (const table of tables.slice(lines.length)) lines.push(pick(table, lines, rng));
     if (!previous || tries >= 100 || !sameLines(lines, previous)) return lines;
   }
 }
@@ -133,25 +156,36 @@ export function resetMeso(target: PotentialTarget, grade: PotentialGrade): numbe
 
 export interface UpgradeOdds {
   ppm: number;
-  ceiling: number;
+  ceiling: number | null;
   guaranteed: boolean;
 }
 
-export function upgradeOdds(kind: PotentialKind, grade: PotentialGrade, pity: number): UpgradeOdds | null {
+export const MIRACLE_MULTIPLIER = 2;
+
+export function upgradeOdds(
+  target: Pick<PotentialTarget, "kind" | "method">,
+  grade: PotentialGrade,
+  pity: number,
+  miracle = false,
+): UpgradeOdds | null {
+  const rule = methodRule(target);
   const g = gradeIndex(grade);
-  if (g >= POTENTIAL_GRADES.length - 1) return null;
-  const ceiling = UPGRADE_CEILINGS[kind][g];
-  const guaranteed = pity + 1 >= ceiling;
-  return { ppm: guaranteed ? PPM : UPGRADE_PPM[kind][g], ceiling, guaranteed };
+  const base = rule?.upgradePpm[g];
+  if (base === undefined) return null;
+  const ceiling = rule?.ceilings?.[g] ?? null;
+  const guaranteed = ceiling !== null && pity + 1 >= ceiling;
+  const ppm = Math.min(PPM, base * (miracle ? MIRACLE_MULTIPLIER : 1));
+  return { ppm: guaranteed ? PPM : ppm, ceiling, guaranteed };
 }
 
 export interface PotentialLedger {
   resets: number;
   upgrades: number;
   meso: bigint;
+  cubes: Readonly<Partial<Record<PotentialMethod, number>>>;
 }
 
-export const EMPTY_POTENTIAL_LEDGER: PotentialLedger = { resets: 0, upgrades: 0, meso: 0n };
+export const EMPTY_POTENTIAL_LEDGER: PotentialLedger = { resets: 0, upgrades: 0, meso: 0n, cubes: {} };
 
 export interface PendingRoll extends PotentialRoll {
   upgraded: boolean;
@@ -161,9 +195,11 @@ export interface PendingRoll extends PotentialRoll {
 export interface PotentialState {
   current: PotentialRoll;
   pending: readonly PendingRoll[];
-  pity: number;
+  pity: Readonly<Partial<Record<PotentialMethod, number>>>;
   ledger: PotentialLedger;
 }
+
+export const pityOf = (state: PotentialState, method: PotentialMethod): number => state.pity[method] ?? 0;
 
 export function initialPotentialState(
   data: PotentialData,
@@ -174,7 +210,7 @@ export function initialPotentialState(
   const tables = lineTables(data, target, start.grade);
   if (!tables) return null;
   const lines = start.lines.length > 0 ? start.lines : rollLines(tables, rng);
-  return { current: { grade: start.grade, lines }, pending: [], pity: 0, ledger: EMPTY_POTENTIAL_LEDGER };
+  return { current: { grade: start.grade, lines }, pending: [], pity: {}, ledger: EMPTY_POTENTIAL_LEDGER };
 }
 
 export function resetPotential(
@@ -183,30 +219,38 @@ export function resetPotential(
   target: PotentialTarget,
   rng: Rng,
   times = 1,
+  miracle = false,
 ): PotentialState | null {
   const from = state.current.grade;
+  const rule = methodRule(target);
+  if (!rule || !canUseMethod(target, from)) return null;
+  const fixed = rule.fixFirst ? state.current.lines[0] : undefined;
   const pending: PendingRoll[] = [];
-  let pity = state.pity;
+  let pity = pityOf(state, target.method);
   let upgrades = 0;
   for (let i = 0; i < times; i++) {
-    const odds = upgradeOdds(target.kind, from, pity);
+    const odds = upgradeOdds(target, from, pity, miracle);
     const upgraded = odds !== null && rng(PPM) < odds.ppm;
     const grade = upgraded ? POTENTIAL_GRADES[gradeIndex(from) + 1] : from;
     const tables = lineTables(data, target, grade);
     if (!tables) return null;
-    const lines = rollLines(tables, rng, upgraded ? undefined : state.current.lines);
+    const lines = rollLines(tables, rng, upgraded ? undefined : state.current.lines, fixed);
     pending.push({ grade, lines, upgraded, guaranteed: upgraded && odds.guaranteed });
     pity = odds === null || upgraded ? 0 : pity + 1;
     if (upgraded) upgrades++;
   }
+  const { ledger } = state;
   return {
     current: state.current,
     pending,
-    pity,
+    pity: upgrades > 0 ? { [target.method]: pity } : { ...state.pity, [target.method]: pity },
     ledger: {
-      resets: state.ledger.resets + times,
-      upgrades: state.ledger.upgrades + upgrades,
-      meso: state.ledger.meso + BigInt(resetMeso(target, from)) * BigInt(times),
+      resets: ledger.resets + times,
+      upgrades: ledger.upgrades + upgrades,
+      meso: rule.meso ? ledger.meso + BigInt(resetMeso(target, from)) * BigInt(times) : ledger.meso,
+      cubes: rule.meso
+        ? ledger.cubes
+        : { ...ledger.cubes, [target.method]: (ledger.cubes[target.method] ?? 0) + times },
     },
   };
 }
@@ -294,16 +338,21 @@ export const usesTargets = (grade: PotentialGrade): boolean => grade === LEGENDA
 
 const withTargets = (goal: PotentialGoal): boolean => usesTargets(goal.grade) && hasTargets(goal);
 
-export const canStartAuto = (current: PotentialGrade, goal: PotentialGoal): boolean =>
-  withTargets(goal) || gradeIndex(goal.grade) > gradeIndex(current);
+export const canStartAuto = (current: PotentialGrade, goal: PotentialGoal, max: PotentialGrade = LEGENDARY): boolean =>
+  gradeIndex(goal.grade) <= gradeIndex(max) && (withTargets(goal) || gradeIndex(goal.grade) > gradeIndex(current));
 
 export const reachesGoal = (roll: PotentialRoll, goal: PotentialGoal): boolean =>
   withTargets(goal)
     ? usesTargets(roll.grade) && meetsGoal(roll, goal)
     : gradeIndex(roll.grade) >= gradeIndex(goal.grade);
 
-export function autoShouldStop(state: PotentialState, goal: PotentialGoal): boolean {
-  if (state.pending.length === 0) return !canStartAuto(state.current.grade, goal);
+export function canAutoFrom(target: Pick<PotentialTarget, "kind" | "method">, current: PotentialGrade): boolean {
+  const max = methodRule(target)?.maxGrade;
+  return !!max && (gradeIndex(max) > gradeIndex(current) || usesTargets(max));
+}
+
+export function autoShouldStop(state: PotentialState, goal: PotentialGoal, max: PotentialGrade = LEGENDARY): boolean {
+  if (state.pending.length === 0) return !canStartAuto(state.current.grade, goal, max);
   return state.pending.some((p) => reachesGoal(p, goal));
 }
 
@@ -312,8 +361,8 @@ export interface AutoStep {
   done: boolean;
 }
 
-export function autoStep(state: PotentialState, goal: PotentialGoal): AutoStep {
-  if (autoShouldStop(state, goal)) return { state, done: true };
+export function autoStep(state: PotentialState, goal: PotentialGoal, max: PotentialGrade = LEGENDARY): AutoStep {
+  if (autoShouldStop(state, goal, max)) return { state, done: true };
   let best = -1;
   state.pending.forEach((p, i) => {
     if (p.upgraded && (best < 0 || gradeIndex(p.grade) > gradeIndex(state.pending[best].grade))) best = i;
@@ -358,6 +407,7 @@ export type PotentialItem = z.infer<typeof potentialItemSchema>;
 
 const DEFAULT_GOAL: PotentialGoal = { grade: "legendary", targets: [] };
 const goalField = potentialGoalSchema.catch(DEFAULT_GOAL);
+const methodField = z.enum(POTENTIAL_METHODS).catch("meso");
 
 export const potentialSettingsSchema = z.object({
   item: potentialItemSchema.nullable().default(null),
@@ -367,7 +417,11 @@ export const potentialSettingsSchema = z.object({
   soulStep: z.number().int().min(1).max(SOUL_STEPS.length),
   start: z.object({ main: potentialRollSchema, additional: potentialRollSchema, soul: potentialRollSchema }),
   goals: z.object({ main: goalField, additional: goalField, soul: goalField }),
+  methods: z
+    .object({ main: methodField, additional: methodField, soul: methodField })
+    .catch({ main: "meso", additional: "meso", soul: "meso" }),
   effects: z.boolean(),
+  miracle: z.boolean().default(false),
 });
 export type PotentialSettings = z.infer<typeof potentialSettingsSchema>;
 
@@ -383,12 +437,22 @@ export const DEFAULT_POTENTIAL_SETTINGS: PotentialSettings = {
     soul: { grade: "rare", lines: [] },
   },
   goals: { main: DEFAULT_GOAL, additional: DEFAULT_GOAL, soul: DEFAULT_GOAL },
+  methods: { main: "meso", additional: "meso", soul: "meso" },
   effects: true,
+  miracle: false,
 };
+
+export const methodOf = (settings: PotentialSettings, kind: PotentialKind): PotentialMethod =>
+  METHOD_RULES[kind][settings.methods[kind]] ? settings.methods[kind] : "meso";
 
 export const TRIPLE_RESET_TIMES = 3;
 
-export function tripleAllowed(kind: PotentialKind, grade: PotentialGrade, pity: number): boolean {
-  const odds = upgradeOdds(kind, grade, pity);
-  return odds === null || odds.ceiling - pity >= TRIPLE_RESET_TIMES;
+export function tripleAllowed(
+  target: Pick<PotentialTarget, "kind" | "method">,
+  grade: PotentialGrade,
+  pity: number,
+): boolean {
+  if (!methodRule(target)) return false;
+  const odds = upgradeOdds(target, grade, pity);
+  return odds?.ceiling == null || odds.ceiling - pity >= TRIPLE_RESET_TIMES;
 }

@@ -9,6 +9,7 @@ import {
   usesTargets,
   isEmptyTarget,
   lineTables,
+  methodRule,
   parseStat,
   statTotals,
   type AutoTarget,
@@ -110,10 +111,13 @@ export function AutoSheet({
   onClose: () => void;
   onStart: (goal: PotentialGoal, times: number) => void;
 }) {
-  const above = POTENTIAL_GRADES.filter((g) => gradeIndex(g) > gradeIndex(current));
-  const higher = above.length > 0 ? above : POTENTIAL_GRADES.filter(usesTargets);
+  const rule = methodRule(target);
+  const max = rule?.maxGrade ?? "legendary";
+  const reachable = POTENTIAL_GRADES.filter((g) => gradeIndex(g) <= gradeIndex(max));
+  const above = reachable.filter((g) => gradeIndex(g) > gradeIndex(current));
+  const higher = above.length > 0 ? above : reachable.filter(usesTargets);
   const [grade, setGrade] = useState<PotentialGrade>(() =>
-    higher.includes(goal.grade) ? goal.grade : higher[higher.length - 1],
+    higher.includes(goal.grade) ? goal.grade : (higher.at(-1) ?? current),
   );
   const legendary = usesTargets(grade);
   const [targets, setTargets] = useState(() => padTargets(goal.targets));
@@ -125,7 +129,7 @@ export function AutoSheet({
     ]);
   }, [data, target]);
   const next: PotentialGoal = { grade, targets };
-  const ready = !!data && canStartAuto(current, next);
+  const ready = !!data && higher.length > 0 && canStartAuto(current, next, max);
   const gradeItems = higher.map((g) => ({ value: g, label: POTENTIAL_GRADE_LABELS[g] }));
   const start = (times: number) => {
     onStart(next, times);

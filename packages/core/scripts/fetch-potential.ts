@@ -3,8 +3,10 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const BASE = "https://maplestory.nexon.com/Guide/OtherProbability/cube/";
-const RESET_ITEMS = { main: 5062010, additional: 5062500 } as const;
+const RESET_ITEMS = { main: 5062010, additional: 5062500, gold: 2711004, silver: 2711003, bronze: 2730002 } as const;
+const MAX_GRADES: Record<keyof typeof RESET_ITEMS, number> = { main: 4, additional: 4, gold: 4, silver: 3, bronze: 2 };
 const GRADES = [1, 2, 3, 4];
+const gradesOf = (table: keyof typeof RESET_ITEMS) => GRADES.filter((g) => g <= MAX_GRADES[table]);
 const PARTS = Array.from({ length: 20 }, (_, i) => i + 1);
 const SOUL_STEPS = [1, 2, 3, 4];
 const LEVELS = [...new Set([0, 1, ...Array.from({ length: 26 }, (_, d) => [d * 10, d * 10 + 1]).flat()])]
@@ -124,8 +126,10 @@ function encodeLines(lines: Lines): [number, number, number] | null {
 type Band = [minLevel: number, line1: number, line2: number, line3: number];
 
 async function main() {
-  const jobs = Object.values(RESET_ITEMS).flatMap((item) =>
-    GRADES.flatMap((grade) => PARTS.flatMap((part) => LEVELS.map((level) => ({ item, grade, part, level })))),
+  const jobs = Object.entries(RESET_ITEMS).flatMap(([table, item]) =>
+    gradesOf(table as keyof typeof RESET_ITEMS).flatMap((grade) =>
+      PARTS.flatMap((part) => LEVELS.map((level) => ({ item, grade, part, level }))),
+    ),
   );
   const pages = await pool(jobs, (j) =>
     post("GetSearchProbList", { nCubeItemID: j.item, nGrade: j.grade, nPartsType: j.part, nReqLev: j.level }),
@@ -133,10 +137,10 @@ async function main() {
   const parsed = new Map(jobs.map((j, i) => [`${j.item}/${j.grade}/${j.part}/${j.level}`, parse(pages[i])]));
 
   const bands = Object.fromEntries(
-    Object.entries(RESET_ITEMS).map(([kind, item]) => [
-      kind,
+    Object.entries(RESET_ITEMS).map(([table, item]) => [
+      table,
       PARTS.map((part) =>
-        GRADES.map((grade) => {
+        gradesOf(table as keyof typeof RESET_ITEMS).map((grade) => {
           const list: Band[] = [];
           for (const level of LEVELS) {
             const ids = encodeLines(parsed.get(`${item}/${grade}/${part}/${level}`)!);
@@ -165,10 +169,12 @@ async function main() {
 
   const date = new Date().toISOString().slice(0, 10);
   const body = [
+    `import type { PotentialTable } from "#/simulators/data/potential-rules.ts";`,
+    "",
     `export const POTENTIAL_DATA_DATE = "${date}";`,
     `export const POTENTIAL_OPTIONS: readonly string[] = ${JSON.stringify(options)};`,
     `export const POTENTIAL_TABLES: readonly (readonly number[])[] = ${JSON.stringify(tables)};`,
-    `export const POTENTIAL_BANDS: Readonly<Record<"main" | "additional", readonly (readonly (readonly (readonly number[])[])[])[]>> = ${JSON.stringify(bands)};`,
+    `export const POTENTIAL_BANDS: Readonly<Record<PotentialTable, readonly (readonly (readonly (readonly number[])[])[])[]>> = ${JSON.stringify(bands)};`,
     `export const SOUL_POTENTIAL_TABLES: readonly (readonly (readonly number[])[])[] = ${JSON.stringify(soul)};`,
     "",
   ].join("\n");
