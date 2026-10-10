@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import {
+  CUBE_APPRAISE_BANDS,
   LINE_LIMITS,
   METHOD_RULES,
   POTENTIAL_GRADES,
@@ -147,7 +148,16 @@ export function rollLines(
   }
 }
 
-export function resetMeso(target: PotentialTarget, grade: PotentialGrade): number {
+export function cubeAppraiseMeso(level: number, insight = 0): number {
+  const band = CUBE_APPRAISE_BANDS.find(([min]) => level >= min);
+  if (!band) return 0;
+  const [, perLevelSquared, freeInsight] = band;
+  if (freeInsight !== null && insight >= freeInsight) return 0;
+  return Math.floor((perLevelSquared * level * level) / 100) * 100;
+}
+
+export function resetMeso(target: PotentialTarget, grade: PotentialGrade, insight = 0): number {
+  if (methodRule(target)?.meso === false) return cubeAppraiseMeso(target.level, insight);
   const g = gradeIndex(grade);
   if (target.kind === "soul") return SOUL_RESET_MESO[g];
   const band = RESET_MESO_BANDS.find(([min]) => target.level >= min) ?? RESET_MESO_BANDS[RESET_MESO_BANDS.length - 1];
@@ -220,6 +230,7 @@ export function resetPotential(
   rng: Rng,
   times = 1,
   miracle = false,
+  insight = 0,
 ): PotentialState | null {
   const from = state.current.grade;
   const rule = methodRule(target);
@@ -247,7 +258,7 @@ export function resetPotential(
     ledger: {
       resets: ledger.resets + times,
       upgrades: ledger.upgrades + upgrades,
-      meso: rule.meso ? ledger.meso + BigInt(resetMeso(target, from)) * BigInt(times) : ledger.meso,
+      meso: ledger.meso + BigInt(resetMeso(target, from, insight)) * BigInt(times),
       cubes: rule.meso
         ? ledger.cubes
         : { ...ledger.cubes, [target.method]: (ledger.cubes[target.method] ?? 0) + times },

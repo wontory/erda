@@ -32,6 +32,14 @@ export const RESET_MESO_BANDS: ReadonlyArray<readonly [minLevel: number, main: G
 
 export const SOUL_RESET_MESO: GradeMeso = [20_000_000, 40_000_000, 65_000_000, 88_000_000];
 
+export const CUBE_APPRAISE_BANDS: ReadonlyArray<
+  readonly [minLevel: number, perLevelSquared: number, freeInsight: number | null]
+> = [
+  [121, 20, null],
+  [71, 2.5, 90],
+  [31, 0.5, 60],
+];
+
 export const SOUL_STEPS = [1, 2, 3, 4] as const;
 
 export const POTENTIAL_PARTS = [
