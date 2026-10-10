@@ -6,6 +6,7 @@ import {
   autoStep,
   canAutoFrom,
   canUseMethod,
+  cubeAppraiseMeso,
   methodsOf,
   canStartAuto,
   meetsTarget,
@@ -120,6 +121,24 @@ describe("costs and odds", () => {
     expect(resetMeso({ ...WEAPON_200, kind: "soul" }, "epic")).toBe(40_000_000);
   });
 
+  it("charges the appraisal fee for cube resets", () => {
+    expect(cubeAppraiseMeso(30)).toBe(0);
+    expect(cubeAppraiseMeso(35)).toBe(600);
+    expect(cubeAppraiseMeso(90)).toBe(20_200);
+    expect(cubeAppraiseMeso(120)).toBe(36_000);
+    expect(cubeAppraiseMeso(130)).toBe(338_000);
+    expect(cubeAppraiseMeso(250)).toBe(1_250_000);
+    expect(cubeAppraiseMeso(70, 59)).toBe(2_400);
+    expect(cubeAppraiseMeso(70, 60)).toBe(0);
+    expect(cubeAppraiseMeso(120, 89)).toBe(36_000);
+    expect(cubeAppraiseMeso(120, 90)).toBe(0);
+    expect(cubeAppraiseMeso(121, 100)).toBe(292_800);
+    expect(resetMeso({ ...WEAPON_200, level: 100, method: "black" }, "epic", 100)).toBe(0);
+    expect(resetMeso({ ...WEAPON_200, level: 100 }, "epic", 100)).toBe(16_000_000);
+    expect(resetMeso({ ...WEAPON_200, method: "black" }, "legendary")).toBe(800_000);
+    expect(resetMeso({ ...WEAPON_200, kind: "additional", method: "white" }, "rare")).toBe(800_000);
+  });
+
   it("guarantees the upgrade on the ceiling attempt", () => {
     expect(upgradeOdds({ kind: "main", method: "meso" }, "rare", 0)).toEqual({
       ppm: 150_000,
@@ -192,11 +211,11 @@ describe("resetPotential", () => {
     });
   });
 
-  it("counts cubes instead of meso and keeps a pity counter per method", () => {
+  it("counts cubes with their appraisal fee and keeps a pity counter per method", () => {
     const black = { ...WEAPON_200, method: "black" } as const;
     const failed = resetPotential(resetPotential(start(), data, WEAPON_200, high)!, data, black, high)!;
     expect(failed.pity).toEqual({ meso: 1, black: 1 });
-    expect(failed.ledger).toEqual({ resets: 2, upgrades: 0, meso: 18_000_000n, cubes: { black: 1 } });
+    expect(failed.ledger).toEqual({ resets: 2, upgrades: 0, meso: 18_800_000n, cubes: { black: 1 } });
     const upgraded = resetPotential(failed, data, black, low)!;
     expect(upgraded.pity).toEqual({ black: 0 });
   });

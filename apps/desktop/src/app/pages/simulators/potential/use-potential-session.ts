@@ -61,10 +61,18 @@ interface Session {
 }
 
 type Action =
-  | { type: "reset"; kind: PotentialKind; method: PotentialMethod; times: number; miracle: boolean; seed: number }
+  | {
+      type: "reset";
+      kind: PotentialKind;
+      method: PotentialMethod;
+      times: number;
+      miracle: boolean;
+      insight: number;
+      seed: number;
+    }
   | { type: "choose"; kind: PotentialKind; choice: PotentialChoice }
   | { type: "reveal"; kind: PotentialKind; index: number }
-  | { type: "auto-step"; miracle: boolean; seed: number }
+  | { type: "auto-step"; miracle: boolean; insight: number; seed: number }
   | { type: "auto"; kind: PotentialKind; method: PotentialMethod; goal: PotentialGoal | null; times?: number }
   | { type: "restart"; settings: PotentialSettings; seed: number };
 
@@ -84,7 +92,8 @@ function makeReducer(data: PotentialData) {
       case "reset": {
         const state = session.states[action.kind];
         const target = targetOf(session.config, action.kind, action.method);
-        const next = state && resetPotential(state, data, target, seededRng(action.seed), action.times, action.miracle);
+        const rng = seededRng(action.seed);
+        const next = state && resetPotential(state, data, target, rng, action.times, action.miracle, action.insight);
         if (!next) return session;
         return {
           ...session,
@@ -120,7 +129,7 @@ function makeReducer(data: PotentialData) {
         let done = false;
         for (let i = 0; i < AUTO_BATCH && !done && count < AUTO_LIMIT; i++) {
           const times = tripleAllowed(target, state.current.grade, pityOf(state, method)) ? session.auto.times : 1;
-          const rolled = resetPotential(state, data, target, rng, times, action.miracle);
+          const rolled = resetPotential(state, data, target, rng, times, action.miracle, action.insight);
           if (!rolled) {
             done = true;
             break;
@@ -164,7 +173,12 @@ function makeReducer(data: PotentialData) {
   };
 }
 
-export function usePotentialSession(data: PotentialData, settings: PotentialSettings, wanted: PotentialKind) {
+export function usePotentialSession(
+  data: PotentialData,
+  settings: PotentialSettings,
+  wanted: PotentialKind,
+  insight: number,
+) {
   const reducer = useMemo(() => makeReducer(data), [data]);
   const [session, dispatch] = useReducer(reducer, null, () => build(data, settings, randomSeed()));
   const kind = supportsKind(wanted, session.config.part) ? wanted : "main";
@@ -172,8 +186,8 @@ export function usePotentialSession(data: PotentialData, settings: PotentialSett
 
   const miracle = settings.miracle;
   const reset = useCallback(
-    (times: number) => dispatch({ type: "reset", kind, method, times, miracle, seed: randomSeed() }),
-    [kind, method, miracle],
+    (times: number) => dispatch({ type: "reset", kind, method, times, miracle, insight, seed: randomSeed() }),
+    [kind, method, miracle, insight],
   );
   const choose = useCallback((choice: PotentialChoice) => dispatch({ type: "choose", kind, choice }), [kind]);
   const restart = useCallback(
@@ -191,9 +205,12 @@ export function usePotentialSession(data: PotentialData, settings: PotentialSett
   const autoCount = session.auto?.count ?? 0;
   useEffect(() => {
     if (!autoKind) return;
-    const id = setTimeout(() => dispatch({ type: "auto-step", miracle, seed: randomSeed() }), AUTO_INTERVAL_MS);
+    const id = setTimeout(
+      () => dispatch({ type: "auto-step", miracle, insight, seed: randomSeed() }),
+      AUTO_INTERVAL_MS,
+    );
     return () => clearTimeout(id);
-  }, [autoKind, autoCount, miracle]);
+  }, [autoKind, autoCount, miracle, insight]);
 
   return {
     kind,

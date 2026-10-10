@@ -46,6 +46,7 @@ import { LedgerModule } from "./ledger-module.tsx";
 import { OddsRow } from "./odds-row.tsx";
 import { RollCard } from "./roll-card.tsx";
 import { SettingsModule } from "./settings-module.tsx";
+import { useMainInsight } from "./use-main-insight.ts";
 import { usePotentialData } from "./use-potential-data.ts";
 import { AUTO_LIMIT, targetOf, usePotentialSession } from "./use-potential-session.ts";
 import { usePotentialSettings } from "./use-potential-settings.ts";
@@ -70,6 +71,11 @@ export function PotentialSimulator() {
   );
 }
 
+function costLabel(meso: boolean, cost: number): string {
+  if (meso) return formatMeso(BigInt(cost));
+  return cost > 0 ? `큐브 1개 + ${formatMeso(BigInt(cost))}` : "큐브 1개";
+}
+
 function draftOf(settings: PotentialSettings): ItemDraft {
   const start = {} as ItemDraft["start"];
   for (const k of POTENTIAL_KINDS) {
@@ -90,7 +96,8 @@ function PotentialScreen({
   const [dialog, setDialog] = useState<"item" | "info" | "auto" | null>(null);
   const reduced = useReducedMotion() ?? false;
   const [kindWanted, setKindWanted] = useState(settings.kind);
-  const session = usePotentialSession(data, settings, kindWanted);
+  const insight = useMainInsight();
+  const session = usePotentialSession(data, settings, kindWanted, insight);
   const { kind, method, config, state, last } = session;
   const target = useMemo(() => targetOf(config, kind, method), [config, kind, method]);
   const rule = methodRule(target);
@@ -233,7 +240,7 @@ function PotentialScreen({
                   odds={upgradeOdds(target, state.current.grade, pity, settings.miracle)}
                   topLabel={state.current.grade === "legendary" ? "최고 등급" : "큐브 최고 등급"}
                   pity={pity}
-                  cost={rule?.meso ? formatMeso(BigInt(resetMeso(target, state.current.grade))) : "큐브 1개"}
+                  cost={costLabel(rule?.meso ?? true, resetMeso(target, state.current.grade, insight))}
                 />
                 {usable ? null : (
                   <p className="absolute inset-0 m-0 flex items-center text-[12px] text-muted-foreground">
