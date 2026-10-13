@@ -7,9 +7,10 @@ type GameIconProps = {
   size: number;
   alt?: string;
   className?: string;
+  native?: boolean;
 };
 
-export function GameIcon({ src, size, alt = "", className }: GameIconProps) {
+export function GameIcon({ src, size, alt = "", className, native = false }: GameIconProps) {
   const image = useImageStatus(src);
   return (
     <span
@@ -20,8 +21,8 @@ export function GameIcon({ src, size, alt = "", className }: GameIconProps) {
         <img
           src={src}
           alt={alt}
-          width={size}
-          height={size}
+          width={native ? undefined : size}
+          height={native ? undefined : size}
           decoding="async"
           className={cn(
             "max-h-full max-w-full object-contain transition-opacity duration-150 ease-out [image-rendering:pixelated] motion-reduce:transition-none",
