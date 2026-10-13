@@ -18,7 +18,10 @@ const defaultFallback: ErrorFallback = (_error, reset) => (
 
 export function mountRoot(Root: ComponentType, fallback: ErrorFallback = defaultFallback) {
   startSystemTheme();
-  setSpriteFetcher((url) => invoke<ArrayBuffer>("nexon_character_look", { url }));
+  setSpriteFetcher(async (url) => {
+    const bytes = await invoke<ArrayBuffer | number[]>("nexon_character_look", { url });
+    return bytes instanceof ArrayBuffer ? bytes : new Uint8Array(bytes).buffer;
+  });
   void startPlatform();
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
